@@ -58,7 +58,7 @@ class WikiView {
             list += "</ul>";
             return `${title} ${list}`;
         }
-        let path = `${getConfiguration("path")["wiki"]}/${route.substring(0, route.lastIndexOf("/"))}/${indexItem.path}`;
+        let path = `${getConfiguration("base")["web_url"]}/${getConfiguration("path")["wiki"]}/${route.substring(0, route.lastIndexOf("/"))}/${indexItem.path}`;
         const response = await httpGet({
             url: path,
             parameters: {},
