@@ -539,7 +539,7 @@
                     color: "var(--on-surface-3)",
                 },
                 attributes: {
-                    href: `http://localhost:8000/#/${route}`.toLocaleLowerCase(),
+                    href: `${getConfiguration("base")["web_url"]}/#/${route}`.toLocaleLowerCase(),
                 },
             });
             return item;
