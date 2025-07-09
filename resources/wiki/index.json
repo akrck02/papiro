@@ -1,0 +1,28 @@
+{
+	"intro": {
+		"type": 2,
+		"path": "intro.md"
+	},
+	"characters": {
+		"type": 1,
+		"files": {
+			"anjhi-rashad": {
+				"type": 1,
+				"files": {
+					"location": {
+						"type": 2,
+						"path": "location.md"
+					},
+					"ambitions": {
+						"type": 2,
+						"path": "ambitions.md"
+					}
+				}
+			},
+			"eddie": {
+				"type": 2,
+				"path": "eddie.md"
+			}
+		}
+	}
+}

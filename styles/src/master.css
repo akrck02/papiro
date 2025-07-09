@@ -1,0 +1,59 @@
+@import url("./bubbleui-v3.0.0.css");
+@import url("./components/_import.css");
+@import url("./views/_import.css");
+
+:root {
+    --background: #e6e6e6;
+    --on-background: #353535;
+
+    --surface-1: #d9d9d9;
+    --on-surface-1: #444;
+
+    --surface-2: #cccccc;
+    --on-surface-2: #000000;
+
+    --surface-3: #bfbfbf;
+    --on-surface-3: #000000;
+
+    --surface-4: #b3b3b3;
+    --on-surface-4: #000000;
+
+    --surface-5: #a6a6a6;
+    --on-surface-5: #000000;
+
+    --surface-6: #999999;
+    --on-surface-6: #000000;
+
+    --text-color: #222222;
+}
+
+:root[data-theme="dark"] {
+    --surface-1: #262626;
+    --on-surface-1: #eaeaea;
+
+    --surface-2: #333333;
+    --on-surface-2: #e1e1e1;
+
+    --surface-3: #404040;
+    --on-surface-3: #dadada;
+
+    --surface-4: #4d4d4d;
+    --on-surface-4: #d1d1d1;
+
+    --surface-5: #595959;
+    --on-surface-5: #cacaca;
+
+    --surface-6: #666666;
+    --on-surface-6: #c1c1c1;
+
+    --background: #1a1a1a;
+    --on-background: #e1e1e1;
+
+    --text-color: #f0f0f0;
+}
+
+body,
+view {
+    transition: all 0.35s color none;
+    background: var(--background);
+}
