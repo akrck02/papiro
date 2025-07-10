@@ -1,5 +1,4 @@
-import TopBar from "../components/bar.js";
-import IndexMenu from "../components/menu.js";
+import MarkdownCanvas from "../components/markdown.js";
 import { BubbleUI } from "../lib/bubble.js";
 import { getConfiguration } from "../lib/configuration.js";
 import { uiComponent } from "../lib/dom.js";
@@ -17,37 +16,27 @@ class WikiView {
             type: Html.View,
             id: WikiView.VIEW_ID,
             classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
-        });
-        const topBar = TopBar.create();
-        view.appendChild(topBar);
-        const content = uiComponent({
-            type: Html.Div,
-            classes: [BubbleUI.BoxRow],
             styles: {
+                width: "100%",
+                maxWidth: "80rem",
                 height: "100%",
-                width: "100%",
             },
         });
-        parameters = getUrlParametersByBreakPoint(window.location.hash, "#").slice(2);
-        const index = await WikiService.getIndex();
-        const menu = IndexMenu.create(index);
-        content.appendChild(menu);
-        const route = parameters.join("/");
-        const document = await WikiView.getDocumentHTML(route, index);
-        const markdownCanvas = uiComponent({
-            classes: ["markdown"],
-            text: WikiService.render(document),
-            styles: {
-                width: "100%",
-            },
+        const route = getUrlParametersByBreakPoint(window.location.hash, "#")
+            .slice(2)
+            .join("/");
+        WikiView.getDocumentHTML(route, WikiService.index).then((doc) => {
+            const canvas = MarkdownCanvas.create(doc);
+            view.appendChild(canvas);
         });
-        content.appendChild(markdownCanvas);
-        view.appendChild(content);
         container.appendChild(view);
     }
     static async getDocumentHTML(route, index) {
-        if ("" == route.trim())
-            return "<h1>Index here</h1>";
+        if ("" == route.trim()) {
+            if (undefined == index["home"])
+                return "<h1>Index here</h1>";
+            route = "home";
+        }
         const indexItem = getIndexItemFromRoute(index, route);
         if (ItemType.Directory == indexItem.type) {
             let title = "# Index for " + route;

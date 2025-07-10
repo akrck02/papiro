@@ -1,14 +1,17 @@
 import { BubbleUI } from "../lib/bubble.js";
 import { getConfiguration } from "../lib/configuration.js";
-import { uiComponent } from "../lib/dom.js";
+import { setDomAttributes, uiComponent, } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
+import { getIcon } from "../lib/icons.js";
+import { ItemType } from "../model/index.item.js";
 export default class IndexMenu {
     static create(index) {
         const menu = uiComponent({
             type: Html.Div,
             styles: {
                 background: "var(--surface-2)",
-                width: "30rem",
+                width: "25rem",
+                minWidth: "25rem",
                 height: "100%",
                 padding: "1rem",
             },
@@ -21,6 +24,7 @@ export default class IndexMenu {
             styles: {
                 width: "100%",
                 margin: "0",
+                marginBottom: "1rem",
                 background: "var(--surface-3)",
             },
         });
@@ -37,8 +41,8 @@ export default class IndexMenu {
     }
     static createOption(route, key, value, parent, level = 0) {
         switch (value.type) {
-            case 1:
-                const item = this.indexButton(route, key, level);
+            case ItemType.Directory:
+                const item = this.indexButton(null, key, level);
                 const container = uiComponent({
                     classes: [BubbleUI.BoxColumn],
                 });
@@ -47,26 +51,38 @@ export default class IndexMenu {
                     container.appendChild(this.createOption(`${route}/${key}`.toLocaleLowerCase(), key, value.files[key], container, level + 1));
                 }
                 return container;
-            case 2:
+            case ItemType.File:
                 const itemHtml = this.indexButton(route, key, level);
                 return itemHtml;
         }
     }
     static indexButton(route, name, level) {
+        const isDirectory = null == route;
+        name = name.substring(0, 1).toUpperCase().concat(name.substring(1));
+        const text = isDirectory
+            ? `${getIcon("material", "expand", "1rem", "var(--on-surface-1)").outerHTML} &nbsp;${name}`
+            : `${getIcon("material", "tag", "1rem", "var(--on-surface-1)").outerHTML} &nbsp;${name}`;
         const item = uiComponent({
             type: Html.A,
-            text: `⤷ ${name}`,
+            classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter, "hover-primary"],
+            text: text,
             styles: {
-                paddingLeft: `${level}rem`,
-                paddingTop: "1rem",
-                cursor: "pointer",
+                paddingLeft: `${1 + level}rem`,
+                marginTop: "0.2rem",
+                paddingTop: ".8rem",
+                paddingBottom: ".8rem",
+                borderRadius: ".65rem",
                 fontSize: "1.25rem",
-                color: "var(--on-surface-3)",
+                color: "var(--on-surface-1)",
+                cursor: "pointer",
             },
-            attributes: {
-                href: `${getConfiguration("base")["web_url"]}/#/${route}`.toLocaleLowerCase(),
-            },
+            selectable: false,
         });
+        if (null != route) {
+            setDomAttributes(item, {
+                href: `${getConfiguration("base")["web_url"]}/#/${route}`.toLocaleLowerCase(),
+            });
+        }
         return item;
     }
 }

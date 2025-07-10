@@ -5,11 +5,12 @@ export default class WikiService {
     static render(markdown) {
         return Marked.parse(markdown);
     }
-    static async getIndex() {
+    static async loadIndex() {
         const response = await httpGet({
             url: `${getConfiguration("path")["wiki"]}/index.json`,
             parameters: {},
         });
-        return await response.json();
+        this.index = await response.json();
+        return this.index;
     }
 }

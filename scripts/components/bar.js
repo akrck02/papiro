@@ -11,15 +11,33 @@ export default class TopBar {
             type: Html.Div,
             classes: [BubbleUI.BoxRow, BubbleUI.BoxXBetween, BubbleUI.BoxYCenter],
             styles: {
-                padding: ".5rem 1rem ",
+                padding: ".5rem 1rem",
                 width: "100%",
                 height: "3rem",
                 background: "var(--surface-1)",
             },
         });
+        const logo = uiComponent({
+            type: Html.Img,
+            attributes: {
+                src: `${getConfiguration("path")["icons"]}/logo.svg`,
+            },
+            styles: {
+                height: "1.5rem",
+                marginRight: ".75rem",
+            },
+        });
         const navTitle = uiComponent({
-            type: Html.P,
-            text: getConfiguration("base")["app_name"],
+            type: Html.A,
+            text: logo.outerHTML + getConfiguration("base")["app_name"],
+            styles: {
+                fontSize: "1.25rem",
+                color: "var(--on-surface-3)",
+            },
+            attributes: {
+                href: getConfiguration("base")["web_url"],
+            },
+            classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
         });
         topBar.appendChild(navTitle);
         const iconBar = uiComponent({

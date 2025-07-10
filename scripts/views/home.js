@@ -1,4 +1,3 @@
-import TopBar from "../components/bar.js";
 import { BubbleUI } from "../lib/bubble.js";
 import { getConfiguration } from "../lib/configuration.js";
 import { uiComponent, } from "../lib/dom.js";
@@ -13,8 +12,6 @@ class HomeView {
             id: HomeView.VIEW_ID,
             classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
         });
-        const topBar = TopBar.create();
-        view.appendChild(topBar);
         const content = uiComponent({
             type: Html.Div,
             classes: [BubbleUI.BoxColumn, BubbleUI.BoxCenter],
@@ -23,12 +20,23 @@ class HomeView {
                 width: "100%",
             },
         });
+        const logo = uiComponent({
+            type: Html.Img,
+            attributes: {
+                src: `${getConfiguration("path")["icons"]}/logo.svg`,
+            },
+            styles: {
+                height: "6rem",
+                marginRight: ".75rem",
+            },
+        });
         const title = uiComponent({
             type: Html.H1,
-            text: getConfiguration("base")["app_name"],
+            text: getConfiguration("base")["app_name"] + logo.outerHTML,
             styles: {
                 fontSize: "6rem",
             },
+            classes: [BubbleUI.BoxRow, BubbleUI.BoxCenter],
         });
         content.appendChild(title);
         const subtitle = uiComponent({

@@ -2,6 +2,24 @@
     'use strict';
 
     /**
+     * This enum represents the Bubble UI css framework
+     */
+    var BubbleUI;
+    (function (BubbleUI) {
+        BubbleUI["BoxColumn"] = "box-column";
+        BubbleUI["BoxRow"] = "box-row";
+        BubbleUI["boxWrap"] = "box-warp";
+        BubbleUI["BoxCenter"] = "box-center";
+        BubbleUI["BoxXCenter"] = "box-x-center";
+        BubbleUI["BoxYCenter"] = "box-y-center";
+        BubbleUI["BoxXStart"] = "box-x-start";
+        BubbleUI["BoxXEnd"] = "box-x-end";
+        BubbleUI["BoxYStart"] = "box-y-start";
+        BubbleUI["BoxXBetween"] = "box-x-between";
+        BubbleUI["TextCenter"] = "text-center";
+    })(BubbleUI || (BubbleUI = {}));
+
+    /**
      * The id of the configuration used in the LocalStorage API
      * NOTE: Change this value with your app name.
      */
@@ -32,34 +50,6 @@
     function getConfiguration(id) {
         const configuration = JSON.parse(localStorage[configurationId]);
         return configuration[id];
-    }
-
-    const SMALL_DEVICE_WIDTH = 760;
-    const MEDIUM_DEVICE_WIDTH = 1024;
-    /**
-    * Get if the device is a small device
-    * @returns True if the device is a small device
-    */
-    function isSmallDevice() {
-        return window.matchMedia(`only screen and (max-width: ${SMALL_DEVICE_WIDTH}px)`).matches;
-    }
-    /**
-    * Get if the device is a medium device
-    * @returns True if the device is a medium device
-    */
-    function isMediumDevice() {
-        return window.matchMedia(`only screen and (min-width: ${SMALL_DEVICE_WIDTH}px) and (max-width: ${MEDIUM_DEVICE_WIDTH}px)`).matches;
-    }
-    /**
-    * Get if matches one of the mobile media queries
-    * @returns True if the device is a mobile device
-    */
-    function isMobile() {
-        return (navigator.userAgent.match(/Android/i) ||
-            navigator.userAgent.match(/BlackBerry/i) ||
-            navigator.userAgent.match(/iPhone|iPad|iPod/i) ||
-            navigator.userAgent.match(/Opera Mini/i) ||
-            navigator.userAgent.match(/IEMobile/i));
     }
 
     /** Create a DOM element */
@@ -119,24 +109,71 @@
         return element;
     }
 
-    class Display {
-        static checkType() {
-            if (isMobile() || isSmallDevice() || isMediumDevice()) {
-                setDomDataset(document.documentElement, {
-                    display: "mobile"
-                });
-                setConfiguration("display", "mobile");
-                return;
-            }
-            setDomDataset(document.documentElement, {
-                display: "desktop"
-            });
-            setConfiguration("display", "desktop");
-        }
-        static isMobile() {
-            return "mobile" == getConfiguration("display");
-        }
-    }
+    /**
+     * This enum contains the most common HTML tags
+     */
+    var Html;
+    (function (Html) {
+        Html["View"] = "view";
+        Html["Div"] = "div";
+        Html["Span"] = "span";
+        Html["Input"] = "input";
+        Html["Button"] = "button";
+        Html["Textarea"] = "textarea";
+        Html["Select"] = "select";
+        Html["Option"] = "option";
+        Html["Form"] = "form";
+        Html["Label"] = "label";
+        Html["Img"] = "img";
+        Html["A"] = "a";
+        Html["B"] = "b";
+        Html["Table"] = "table";
+        Html["Thead"] = "thead";
+        Html["Tbody"] = "tbody";
+        Html["Tr"] = "tr";
+        Html["Th"] = "th";
+        Html["Td"] = "td";
+        Html["I"] = "i";
+        Html["Ul"] = "ul";
+        Html["Li"] = "li";
+        Html["Nav"] = "nav";
+        Html["Header"] = "header";
+        Html["Footer"] = "footer";
+        Html["Section"] = "section";
+        Html["Article"] = "article";
+        Html["Aside"] = "aside";
+        Html["H1"] = "h1";
+        Html["H2"] = "h2";
+        Html["H3"] = "h3";
+        Html["H4"] = "h4";
+        Html["H5"] = "h5";
+        Html["H6"] = "h6";
+        Html["P"] = "p";
+        Html["Hr"] = "hr";
+        Html["Br"] = "br";
+        Html["Canvas"] = "canvas";
+        Html["Svg"] = "svg";
+        Html["Path"] = "path";
+        Html["Polygon"] = "polygon";
+        Html["Polyline"] = "polyline";
+        Html["Circle"] = "circle";
+        Html["Ellipse"] = "ellipse";
+        Html["Rect"] = "rect";
+        Html["Line"] = "line";
+        Html["Text"] = "text";
+        Html["Tspan"] = "tspan";
+        Html["G"] = "g";
+        Html["Mask"] = "mask";
+        Html["Pattern"] = "pattern";
+        Html["Defs"] = "defs";
+        Html["Symbol"] = "symbol";
+        Html["Use"] = "use";
+        Html["Clippath"] = "clipPath";
+        Html["Stop"] = "stop";
+        Html["LinearGradient"] = "linearGradient";
+        Html["RadialGradient"] = "radialGradient";
+        Html["Filter"] = "filter";
+    })(Html || (Html = {}));
 
     const icons = new Map();
     /**
@@ -168,6 +205,272 @@
             return undefined;
         const svg = `<svg height="${size}" width="${size}" viewBox="0 0 24 24" fill="${fill}">${content || ""}</svg>`;
         return uiComponent({ type: "div", text: svg });
+    }
+
+    function uuidv4() {
+        return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c => (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16));
+    }
+
+    const buffer = new Map();
+    /**
+     * Set a new signal
+     */
+    function setSignal() {
+        const id = uuidv4();
+        buffer.set(id, []);
+        return id;
+    }
+    /**
+     * Connect a function to a signal
+     * @param id The signal id
+     * @param handler The signal handler function
+     */
+    function connectToSignal(id, handler) {
+        if (false == buffer.has(id)) {
+            console.error(`Error connecting: The signal ${id} does not exist.`);
+            return;
+        }
+        buffer.get(id).push(handler);
+    }
+    /**
+     * Emit a signal with the given dat
+     */
+    async function emitSignal(id, data) {
+        if (false == buffer.has(id))
+            return;
+        const targets = buffer.get(id);
+        for (const target of targets) {
+            target(data);
+        }
+    }
+
+    const THEME_CHANGED_SIGNAL = setSignal();
+    class Theme {
+        static toggle() {
+            if (document.documentElement.dataset.theme == "dark") {
+                setDomDataset(document.documentElement, { theme: "light" });
+            }
+            else {
+                setDomDataset(document.documentElement, { theme: "dark" });
+            }
+            emitSignal(THEME_CHANGED_SIGNAL, {});
+        }
+        static isDark() {
+            return document.documentElement.dataset["theme"] == "dark";
+        }
+    }
+
+    class TopBar {
+        static create() {
+            const topBar = uiComponent({
+                type: Html.Div,
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxXBetween, BubbleUI.BoxYCenter],
+                styles: {
+                    padding: ".5rem 1rem",
+                    width: "100%",
+                    height: "3rem",
+                    background: "var(--surface-1)",
+                },
+            });
+            const logo = uiComponent({
+                type: Html.Img,
+                attributes: {
+                    src: `${getConfiguration("path")["icons"]}/logo.svg`,
+                },
+                styles: {
+                    height: "1.5rem",
+                    marginRight: ".75rem",
+                },
+            });
+            const navTitle = uiComponent({
+                type: Html.A,
+                text: logo.outerHTML + getConfiguration("base")["app_name"],
+                styles: {
+                    fontSize: "1.25rem",
+                    color: "var(--on-surface-3)",
+                },
+                attributes: {
+                    href: getConfiguration("base")["web_url"],
+                },
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
+            });
+            topBar.appendChild(navTitle);
+            const iconBar = uiComponent({
+                type: Html.Div,
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxXEnd],
+            });
+            topBar.appendChild(iconBar);
+            const themeIconButton = uiComponent({
+                styles: { cursor: "pointer" },
+            });
+            const themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode", "24px", "var(--on-surface-1)");
+            themeIcon.id = "theme-icon";
+            themeIconButton.appendChild(themeIcon);
+            iconBar.appendChild(themeIconButton);
+            connectToSignal(THEME_CHANGED_SIGNAL, async () => {
+                themeIconButton.innerHTML = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode", "24px", "var(--on-surface-1)")?.innerHTML;
+            });
+            setDomEvents(themeIconButton, {
+                click: (e) => Theme.toggle(),
+            });
+            return topBar;
+        }
+    }
+
+    var ItemType;
+    (function (ItemType) {
+        ItemType[ItemType["Directory"] = 1] = "Directory";
+        ItemType[ItemType["File"] = 2] = "File";
+    })(ItemType || (ItemType = {}));
+    function getIndexItemFromRoute(index, route) {
+        const params = decodeURI(route).split("/");
+        if (0 == params.length)
+            return;
+        console.log(params);
+        let key = params.shift();
+        let parent = index[key];
+        if (ItemType.File == parent.type)
+            return parent;
+        while (undefined != parent || ItemType.Directory == parent.type) {
+            key = params.shift();
+            const item = parent.files[key];
+            if (item == undefined)
+                return parent;
+            if (ItemType.File == item.type)
+                return item;
+            parent = item;
+        }
+        return;
+    }
+
+    class IndexMenu {
+        static create(index) {
+            const menu = uiComponent({
+                type: Html.Div,
+                styles: {
+                    background: "var(--surface-2)",
+                    width: "25rem",
+                    minWidth: "25rem",
+                    height: "100%",
+                    padding: "1rem",
+                },
+            });
+            const searchBar = uiComponent({
+                type: Html.Input,
+                attributes: {
+                    placeholder: "Search...",
+                },
+                styles: {
+                    width: "100%",
+                    margin: "0",
+                    marginBottom: "1rem",
+                    background: "var(--surface-3)",
+                },
+            });
+            menu.appendChild(searchBar);
+            const options = uiComponent({
+                type: Html.Div,
+                classes: [BubbleUI.BoxColumn],
+            });
+            menu.appendChild(options);
+            for (const key in index) {
+                options.appendChild(this.createOption(`${getConfiguration("views")["wiki"]}/${key}`.toLocaleLowerCase(), key, index[key], options));
+            }
+            return menu;
+        }
+        static createOption(route, key, value, parent, level = 0) {
+            switch (value.type) {
+                case ItemType.Directory:
+                    const item = this.indexButton(null, key, level);
+                    const container = uiComponent({
+                        classes: [BubbleUI.BoxColumn],
+                    });
+                    container.appendChild(item);
+                    for (const key in value.files) {
+                        container.appendChild(this.createOption(`${route}/${key}`.toLocaleLowerCase(), key, value.files[key], container, level + 1));
+                    }
+                    return container;
+                case ItemType.File:
+                    const itemHtml = this.indexButton(route, key, level);
+                    return itemHtml;
+            }
+        }
+        static indexButton(route, name, level) {
+            const isDirectory = null == route;
+            name = name.substring(0, 1).toUpperCase().concat(name.substring(1));
+            const text = isDirectory
+                ? `${getIcon("material", "expand", "1rem", "var(--on-surface-1)").outerHTML} &nbsp;${name}`
+                : `${getIcon("material", "tag", "1rem", "var(--on-surface-1)").outerHTML} &nbsp;${name}`;
+            const item = uiComponent({
+                type: Html.A,
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter, "hover-primary"],
+                text: text,
+                styles: {
+                    paddingLeft: `${1 + level}rem`,
+                    marginTop: "0.2rem",
+                    paddingTop: ".8rem",
+                    paddingBottom: ".8rem",
+                    borderRadius: ".65rem",
+                    fontSize: "1.25rem",
+                    color: "var(--on-surface-1)",
+                    cursor: "pointer",
+                },
+                selectable: false,
+            });
+            if (null != route) {
+                setDomAttributes(item, {
+                    href: `${getConfiguration("base")["web_url"]}/#/${route}`.toLocaleLowerCase(),
+                });
+            }
+            return item;
+        }
+    }
+
+    const SMALL_DEVICE_WIDTH = 760;
+    const MEDIUM_DEVICE_WIDTH = 1024;
+    /**
+    * Get if the device is a small device
+    * @returns True if the device is a small device
+    */
+    function isSmallDevice() {
+        return window.matchMedia(`only screen and (max-width: ${SMALL_DEVICE_WIDTH}px)`).matches;
+    }
+    /**
+    * Get if the device is a medium device
+    * @returns True if the device is a medium device
+    */
+    function isMediumDevice() {
+        return window.matchMedia(`only screen and (min-width: ${SMALL_DEVICE_WIDTH}px) and (max-width: ${MEDIUM_DEVICE_WIDTH}px)`).matches;
+    }
+    /**
+    * Get if matches one of the mobile media queries
+    * @returns True if the device is a mobile device
+    */
+    function isMobile() {
+        return (navigator.userAgent.match(/Android/i) ||
+            navigator.userAgent.match(/BlackBerry/i) ||
+            navigator.userAgent.match(/iPhone|iPad|iPod/i) ||
+            navigator.userAgent.match(/Opera Mini/i) ||
+            navigator.userAgent.match(/IEMobile/i));
+    }
+
+    class Display {
+        static checkType() {
+            if (isMobile() || isSmallDevice() || isMediumDevice()) {
+                setDomDataset(document.documentElement, {
+                    display: "mobile"
+                });
+                setConfiguration("display", "mobile");
+                return;
+            }
+            setDomDataset(document.documentElement, {
+                display: "desktop"
+            });
+            setConfiguration("display", "desktop");
+        }
+        static isMobile() {
+            return "mobile" == getConfiguration("display");
+        }
     }
 
     const paths = new Map();
@@ -236,314 +539,6 @@
         if (aLength < bLength)
             return 1;
         return -1;
-    }
-
-    /**
-     * This enum represents the Bubble UI css framework
-     */
-    var BubbleUI;
-    (function (BubbleUI) {
-        BubbleUI["BoxColumn"] = "box-column";
-        BubbleUI["BoxRow"] = "box-row";
-        BubbleUI["boxWrap"] = "box-warp";
-        BubbleUI["BoxCenter"] = "box-center";
-        BubbleUI["BoxXCenter"] = "box-x-center";
-        BubbleUI["BoxYCenter"] = "box-y-center";
-        BubbleUI["BoxXStart"] = "box-x-start";
-        BubbleUI["BoxXEnd"] = "box-x-end";
-        BubbleUI["BoxYStart"] = "box-y-start";
-        BubbleUI["BoxXBetween"] = "box-x-between";
-        BubbleUI["TextCenter"] = "text-center";
-    })(BubbleUI || (BubbleUI = {}));
-
-    /**
-     * This enum contains the most common HTML tags
-     */
-    var Html;
-    (function (Html) {
-        Html["View"] = "view";
-        Html["Div"] = "div";
-        Html["Span"] = "span";
-        Html["Input"] = "input";
-        Html["Button"] = "button";
-        Html["Textarea"] = "textarea";
-        Html["Select"] = "select";
-        Html["Option"] = "option";
-        Html["Form"] = "form";
-        Html["Label"] = "label";
-        Html["Img"] = "img";
-        Html["A"] = "a";
-        Html["B"] = "b";
-        Html["Table"] = "table";
-        Html["Thead"] = "thead";
-        Html["Tbody"] = "tbody";
-        Html["Tr"] = "tr";
-        Html["Th"] = "th";
-        Html["Td"] = "td";
-        Html["I"] = "i";
-        Html["Ul"] = "ul";
-        Html["Li"] = "li";
-        Html["Nav"] = "nav";
-        Html["Header"] = "header";
-        Html["Footer"] = "footer";
-        Html["Section"] = "section";
-        Html["Article"] = "article";
-        Html["Aside"] = "aside";
-        Html["H1"] = "h1";
-        Html["H2"] = "h2";
-        Html["H3"] = "h3";
-        Html["H4"] = "h4";
-        Html["H5"] = "h5";
-        Html["H6"] = "h6";
-        Html["P"] = "p";
-        Html["Hr"] = "hr";
-        Html["Br"] = "br";
-        Html["Canvas"] = "canvas";
-        Html["Svg"] = "svg";
-        Html["Path"] = "path";
-        Html["Polygon"] = "polygon";
-        Html["Polyline"] = "polyline";
-        Html["Circle"] = "circle";
-        Html["Ellipse"] = "ellipse";
-        Html["Rect"] = "rect";
-        Html["Line"] = "line";
-        Html["Text"] = "text";
-        Html["Tspan"] = "tspan";
-        Html["G"] = "g";
-        Html["Mask"] = "mask";
-        Html["Pattern"] = "pattern";
-        Html["Defs"] = "defs";
-        Html["Symbol"] = "symbol";
-        Html["Use"] = "use";
-        Html["Clippath"] = "clipPath";
-        Html["Stop"] = "stop";
-        Html["LinearGradient"] = "linearGradient";
-        Html["RadialGradient"] = "radialGradient";
-        Html["Filter"] = "filter";
-    })(Html || (Html = {}));
-
-    function uuidv4() {
-        return "10000000-1000-4000-8000-100000000000".replace(/[018]/g, c => (+c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> +c / 4).toString(16));
-    }
-
-    const buffer = new Map();
-    /**
-     * Set a new signal
-     */
-    function setSignal() {
-        const id = uuidv4();
-        buffer.set(id, []);
-        return id;
-    }
-    /**
-     * Connect a function to a signal
-     * @param id The signal id
-     * @param handler The signal handler function
-     */
-    function connectToSignal(id, handler) {
-        if (false == buffer.has(id)) {
-            console.error(`Error connecting: The signal ${id} does not exist.`);
-            return;
-        }
-        buffer.get(id).push(handler);
-    }
-    /**
-     * Emit a signal with the given dat
-     */
-    async function emitSignal(id, data) {
-        if (false == buffer.has(id))
-            return;
-        const targets = buffer.get(id);
-        for (const target of targets) {
-            target(data);
-        }
-    }
-
-    const THEME_CHANGED_SIGNAL = setSignal();
-    class Theme {
-        static toggle() {
-            if (document.documentElement.dataset.theme == "dark") {
-                setDomDataset(document.documentElement, { theme: "light" });
-            }
-            else {
-                setDomDataset(document.documentElement, { theme: "dark" });
-            }
-            emitSignal(THEME_CHANGED_SIGNAL, {});
-        }
-        static isDark() {
-            return document.documentElement.dataset["theme"] == "dark";
-        }
-    }
-
-    class TopBar {
-        static create() {
-            const topBar = uiComponent({
-                type: Html.Div,
-                classes: [BubbleUI.BoxRow, BubbleUI.BoxXBetween, BubbleUI.BoxYCenter],
-                styles: {
-                    padding: ".5rem 1rem ",
-                    width: "100%",
-                    height: "3rem",
-                    background: "var(--surface-1)",
-                },
-            });
-            const navTitle = uiComponent({
-                type: Html.P,
-                text: getConfiguration("base")["app_name"],
-            });
-            topBar.appendChild(navTitle);
-            const iconBar = uiComponent({
-                type: Html.Div,
-                classes: [BubbleUI.BoxRow, BubbleUI.BoxXEnd],
-            });
-            topBar.appendChild(iconBar);
-            const themeIconButton = uiComponent({
-                styles: { cursor: "pointer" },
-            });
-            const themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode", "24px", "var(--on-surface-1)");
-            themeIcon.id = "theme-icon";
-            themeIconButton.appendChild(themeIcon);
-            iconBar.appendChild(themeIconButton);
-            connectToSignal(THEME_CHANGED_SIGNAL, async () => {
-                themeIconButton.innerHTML = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode", "24px", "var(--on-surface-1)")?.innerHTML;
-            });
-            setDomEvents(themeIconButton, {
-                click: (e) => Theme.toggle(),
-            });
-            return topBar;
-        }
-    }
-
-    class HomeView {
-        /**
-         * Show home view
-         */
-        static async show(parameters, container) {
-            const view = uiComponent({
-                type: Html.View,
-                id: HomeView.VIEW_ID,
-                classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
-            });
-            const topBar = TopBar.create();
-            view.appendChild(topBar);
-            const content = uiComponent({
-                type: Html.Div,
-                classes: [BubbleUI.BoxColumn, BubbleUI.BoxCenter],
-                styles: {
-                    height: "100%",
-                    width: "100%",
-                },
-            });
-            const title = uiComponent({
-                type: Html.H1,
-                text: getConfiguration("base")["app_name"],
-                styles: {
-                    fontSize: "6rem",
-                },
-            });
-            content.appendChild(title);
-            const subtitle = uiComponent({
-                type: Html.H1,
-                text: "The simple markdown wiki.",
-                styles: {
-                    fontSize: "1.25rem",
-                    marginBottom: "4rem",
-                    color: "var(--on-surface-2)",
-                    opacity: ".65",
-                },
-            });
-            content.appendChild(subtitle);
-            const link = uiComponent({
-                type: Html.A,
-                text: "Explore 👀",
-                classes: [BubbleUI.BoxColumn, BubbleUI.BoxCenter],
-                attributes: {
-                    href: `${getConfiguration("base")["web_url"]}/#/wiki`,
-                },
-                styles: {
-                    background: "var(--surface-2)",
-                    padding: "1rem 2rem",
-                    borderRadius: "5rem",
-                    fontSize: "1.5rem",
-                    opacity: ".85",
-                    color: "var(--on-surface-2)",
-                },
-            });
-            content.appendChild(link);
-            view.appendChild(content);
-            container.appendChild(view);
-        }
-    }
-    // HTML ids and classes
-    HomeView.VIEW_ID = "home";
-
-    class IndexMenu {
-        static create(index) {
-            const menu = uiComponent({
-                type: Html.Div,
-                styles: {
-                    background: "var(--surface-2)",
-                    width: "30rem",
-                    height: "100%",
-                    padding: "1rem",
-                },
-            });
-            const searchBar = uiComponent({
-                type: Html.Input,
-                attributes: {
-                    placeholder: "Search...",
-                },
-                styles: {
-                    width: "100%",
-                    margin: "0",
-                    background: "var(--surface-3)",
-                },
-            });
-            menu.appendChild(searchBar);
-            const options = uiComponent({
-                type: Html.Div,
-                classes: [BubbleUI.BoxColumn],
-            });
-            menu.appendChild(options);
-            for (const key in index) {
-                options.appendChild(this.createOption(`${getConfiguration("views")["wiki"]}/${key}`.toLocaleLowerCase(), key, index[key], options));
-            }
-            return menu;
-        }
-        static createOption(route, key, value, parent, level = 0) {
-            switch (value.type) {
-                case 1:
-                    const item = this.indexButton(route, key, level);
-                    const container = uiComponent({
-                        classes: [BubbleUI.BoxColumn],
-                    });
-                    container.appendChild(item);
-                    for (const key in value.files) {
-                        container.appendChild(this.createOption(`${route}/${key}`.toLocaleLowerCase(), key, value.files[key], container, level + 1));
-                    }
-                    return container;
-                case 2:
-                    const itemHtml = this.indexButton(route, key, level);
-                    return itemHtml;
-            }
-        }
-        static indexButton(route, name, level) {
-            const item = uiComponent({
-                type: Html.A,
-                text: `⤷ ${name}`,
-                styles: {
-                    paddingLeft: `${level}rem`,
-                    paddingTop: "1rem",
-                    cursor: "pointer",
-                    fontSize: "1.25rem",
-                    color: "var(--on-surface-3)",
-                },
-                attributes: {
-                    href: `${getConfiguration("base")["web_url"]}/#/${route}`.toLocaleLowerCase(),
-                },
-            });
-            return item;
-        }
     }
 
     /**
@@ -720,51 +715,6 @@
             }
         }
         return fetch(request.url, options);
-    }
-
-    /**
-     * Get parameters of a url by breakpoint
-     * @param url url to get parameters from
-     * @param breakpoint breakpoint to get parameters from
-     * @description This method is useful for getting parameters of a url by breakpoint.
-     * @returns parameters of a url
-     * @example
-     *     const url = "https://www.website.org/search/user/1/page/2";
-     *     const breakpoint = "search";
-     *     const parameters = getParametersByBreakPoint(url, breakpoint);
-     *     console.log(parameters); // ["user","1","page","2"]
-     */
-    function getUrlParametersByBreakPoint(url, breakpoint) {
-        let params = url.split("/");
-        const index = params.indexOf(breakpoint);
-        if (-1 == index)
-            return [];
-        return params.slice(index, params.length);
-    }
-
-    var ItemType;
-    (function (ItemType) {
-        ItemType[ItemType["Directory"] = 1] = "Directory";
-        ItemType[ItemType["File"] = 2] = "File";
-    })(ItemType || (ItemType = {}));
-    function getIndexItemFromRoute(index, route) {
-        const params = route.split("/");
-        if (0 == params.length)
-            return;
-        let key = params.shift();
-        let parent = index[key];
-        if (ItemType.File == parent.type)
-            return parent;
-        while (undefined != parent || ItemType.Directory == parent.type) {
-            key = params.shift();
-            const item = parent.files[key];
-            if (item == undefined)
-                return parent;
-            if (ItemType.File == item.type)
-                return item;
-            parent = item;
-        }
-        return;
     }
 
     /*
@@ -2034,13 +1984,118 @@ ${body}</tbody>
         static render(markdown) {
             return Marked.parse(markdown);
         }
-        static async getIndex() {
+        static async loadIndex() {
             const response = await httpGet({
                 url: `${getConfiguration("path")["wiki"]}/index.json`,
                 parameters: {},
             });
-            return await response.json();
+            this.index = await response.json();
+            return this.index;
         }
+    }
+
+    class HomeView {
+        /**
+         * Show home view
+         */
+        static async show(parameters, container) {
+            const view = uiComponent({
+                type: Html.View,
+                id: HomeView.VIEW_ID,
+                classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
+            });
+            const content = uiComponent({
+                type: Html.Div,
+                classes: [BubbleUI.BoxColumn, BubbleUI.BoxCenter],
+                styles: {
+                    height: "100%",
+                    width: "100%",
+                },
+            });
+            const logo = uiComponent({
+                type: Html.Img,
+                attributes: {
+                    src: `${getConfiguration("path")["icons"]}/logo.svg`,
+                },
+                styles: {
+                    height: "6rem",
+                    marginRight: ".75rem",
+                },
+            });
+            const title = uiComponent({
+                type: Html.H1,
+                text: getConfiguration("base")["app_name"] + logo.outerHTML,
+                styles: {
+                    fontSize: "6rem",
+                },
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxCenter],
+            });
+            content.appendChild(title);
+            const subtitle = uiComponent({
+                type: Html.H1,
+                text: "The simple markdown wiki.",
+                styles: {
+                    fontSize: "1.25rem",
+                    marginBottom: "4rem",
+                    color: "var(--on-surface-2)",
+                    opacity: ".65",
+                },
+            });
+            content.appendChild(subtitle);
+            const link = uiComponent({
+                type: Html.A,
+                text: "Explore 👀",
+                classes: [BubbleUI.BoxColumn, BubbleUI.BoxCenter],
+                attributes: {
+                    href: `${getConfiguration("base")["web_url"]}/#/wiki`,
+                },
+                styles: {
+                    background: "var(--surface-2)",
+                    padding: "1rem 2rem",
+                    borderRadius: "5rem",
+                    fontSize: "1.5rem",
+                    opacity: ".85",
+                    color: "var(--on-surface-2)",
+                },
+            });
+            content.appendChild(link);
+            view.appendChild(content);
+            container.appendChild(view);
+        }
+    }
+    // HTML ids and classes
+    HomeView.VIEW_ID = "home";
+
+    class MarkdownCanvas {
+        static create(markdown) {
+            return uiComponent({
+                classes: ["markdown"],
+                text: WikiService.render(markdown),
+                styles: {
+                    width: "100%",
+                },
+            });
+        }
+    }
+
+    /**
+     * Get parameters of a url by breakpoint
+     * @param url url to get parameters from
+     * @param breakpoint breakpoint to get parameters from
+     * @description This method is useful for getting parameters of a url by breakpoint.
+     * @returns parameters of a url
+     * @example
+     *     const url = "https://www.website.org/search/user/1/page/2";
+     *     const breakpoint = "search";
+     *     const parameters = getParametersByBreakPoint(url, breakpoint);
+     *     console.log(parameters); // ["user","1","page","2"]
+     */
+    function getUrlParametersByBreakPoint(url, breakpoint) {
+        let params = url.split("/");
+        const index = params.indexOf(breakpoint);
+        if (-1 == index)
+            return [];
+        return params.slice(index, params.length);
     }
 
     class WikiView {
@@ -2052,37 +2107,27 @@ ${body}</tbody>
                 type: Html.View,
                 id: WikiView.VIEW_ID,
                 classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
-            });
-            const topBar = TopBar.create();
-            view.appendChild(topBar);
-            const content = uiComponent({
-                type: Html.Div,
-                classes: [BubbleUI.BoxRow],
                 styles: {
+                    width: "100%",
+                    maxWidth: "80rem",
                     height: "100%",
-                    width: "100%",
                 },
             });
-            parameters = getUrlParametersByBreakPoint(window.location.hash, "#").slice(2);
-            const index = await WikiService.getIndex();
-            const menu = IndexMenu.create(index);
-            content.appendChild(menu);
-            const route = parameters.join("/");
-            const document = await WikiView.getDocumentHTML(route, index);
-            const markdownCanvas = uiComponent({
-                classes: ["markdown"],
-                text: WikiService.render(document),
-                styles: {
-                    width: "100%",
-                },
+            const route = getUrlParametersByBreakPoint(window.location.hash, "#")
+                .slice(2)
+                .join("/");
+            WikiView.getDocumentHTML(route, WikiService.index).then((doc) => {
+                const canvas = MarkdownCanvas.create(doc);
+                view.appendChild(canvas);
             });
-            content.appendChild(markdownCanvas);
-            view.appendChild(content);
             container.appendChild(view);
         }
         static async getDocumentHTML(route, index) {
-            if ("" == route.trim())
-                return "<h1>Index here</h1>";
+            if ("" == route.trim()) {
+                if (undefined == index["home"])
+                    return "<h1>Index here</h1>";
+                route = "home";
+            }
             const indexItem = getIndexItemFromRoute(index, route);
             if (ItemType.Directory == indexItem.type) {
                 let title = "# Index for " + route;
@@ -2104,6 +2149,7 @@ ${body}</tbody>
     // HTML ids and classes
     WikiView.VIEW_ID = "home";
 
+    let documentContainer;
     /**
      * When the dynamic URL changes loads
      * the correspoding view from the URL
@@ -2119,17 +2165,51 @@ ${body}</tbody>
         Display.checkType();
         await loadIcons("material", `${getConfiguration("path")["icons"]}/materialicons.json`);
         await loadIcons("social", `${getConfiguration("path")["icons"]}/socialicons.json`);
+        // create top bar
+        const topBar = TopBar.create();
+        document.body.appendChild(topBar);
+        // load wiki index
+        await WikiService.loadIndex();
+        // content container
+        const content = uiComponent({
+            styles: {
+                width: "100%",
+                height: "calc(100% - 3rem)",
+            },
+            classes: [BubbleUI.BoxRow],
+            selectable: false,
+        });
+        // menu
+        const menu = IndexMenu.create(WikiService.index);
+        content.appendChild(menu);
+        // document container
+        documentContainer = uiComponent({
+            styles: {
+                width: "100%",
+                height: "100%",
+            },
+        });
+        content.appendChild(documentContainer);
+        document.body.appendChild(content);
         await start();
     };
     window.onresize = async function () {
         Display.checkType();
     };
-    /** Start the web app     */
-    async function start() {
+    /**
+     * Set routes
+     */
+    function setRoutes(parent) {
         setRoute("", HomeView.show);
         setRoute("/wiki", WikiView.show);
+        showRoute(window.location.hash.slice(1).toLowerCase(), parent);
         //setNotFoundRoute(HomeView.show);
-        showRoute(window.location.hash.slice(1).toLowerCase(), document.body);
+    }
+    /**
+     *  Start the web app
+     */
+    async function start() {
+        setRoutes(documentContainer);
     }
 
 })();

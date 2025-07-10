@@ -6,9 +6,10 @@ export var ItemType;
     ItemType[ItemType["File"] = 2] = "File";
 })(ItemType || (ItemType = {}));
 export function getIndexItemFromRoute(index, route) {
-    const params = route.split("/");
+    const params = decodeURI(route).split("/");
     if (0 == params.length)
         return;
+    console.log(params);
     let key = params.shift();
     let parent = index[key];
     if (ItemType.File == parent.type)
