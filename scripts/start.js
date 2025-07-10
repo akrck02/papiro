@@ -263,32 +263,19 @@
     class TopBar {
         static create() {
             const topBar = uiComponent({
-                type: Html.Div,
+                type: Html.Header,
+                id: TopBar.ID,
                 classes: [BubbleUI.BoxRow, BubbleUI.BoxXBetween, BubbleUI.BoxYCenter],
-                styles: {
-                    padding: ".5rem 1rem",
-                    width: "100%",
-                    height: "3rem",
-                    background: "var(--surface-1)",
-                },
             });
             const logo = uiComponent({
                 type: Html.Img,
-                attributes: {
-                    src: `${getConfiguration("path")["icons"]}/logo.svg`,
-                },
-                styles: {
-                    height: "1.5rem",
-                    marginRight: ".75rem",
-                },
+                id: TopBar.LOGO_ID,
+                attributes: { src: `${getConfiguration("path")["icons"]}/logo.svg` },
             });
             const navTitle = uiComponent({
                 type: Html.A,
+                id: TopBar.TITLE_ID,
                 text: logo.outerHTML + getConfiguration("base")["app_name"],
-                styles: {
-                    fontSize: "1.25rem",
-                    color: "var(--on-surface-3)",
-                },
                 attributes: {
                     href: `${getConfiguration("base")["web_url"]}/#/`,
                 },
@@ -301,14 +288,15 @@
             });
             topBar.appendChild(iconBar);
             const themeIconButton = uiComponent({
+                id: TopBar.THEME_ICON_ID,
                 styles: { cursor: "pointer" },
             });
-            const themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode", "24px", "var(--on-surface-1)");
-            themeIcon.id = "theme-icon";
+            let themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode");
             themeIconButton.appendChild(themeIcon);
             iconBar.appendChild(themeIconButton);
             connectToSignal(THEME_CHANGED_SIGNAL, async () => {
-                themeIconButton.innerHTML = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode", "24px", "var(--on-surface-1)")?.innerHTML;
+                themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode");
+                themeIconButton.innerHTML = themeIcon?.innerHTML;
             });
             setDomEvents(themeIconButton, {
                 click: (e) => Theme.toggle(),
@@ -316,6 +304,10 @@
             return topBar;
         }
     }
+    TopBar.ID = "top-bar";
+    TopBar.LOGO_ID = "logo";
+    TopBar.TITLE_ID = "title";
+    TopBar.THEME_ICON_ID = "theme-icon";
 
     var ItemType;
     (function (ItemType) {
@@ -326,7 +318,6 @@
         const params = decodeURI(route).split("/");
         if (0 == params.length)
             return;
-        console.log(params);
         let key = params.shift();
         let parent = index[key];
         if (ItemType.File == parent.type)
@@ -343,45 +334,56 @@
         return;
     }
 
+    class PathService {
+        static getWebUrl(appendix) {
+            return `${getConfiguration("base")["web_url"]}/${appendix}`.toLocaleLowerCase();
+        }
+        static getRoute(appendix) {
+            return this.getWebUrl(`/#/${appendix}`);
+        }
+        static getWikiViewRoute(appendix) {
+            return `${getConfiguration("views")["wiki"]}/${appendix}`.toLocaleLowerCase();
+        }
+        static getPascalCase(name) {
+            return name.substring(0, 1).toUpperCase().concat(name.substring(1));
+        }
+        static getFullWikiPath(subPath, appendix) {
+            return this.getWebUrl(`${getConfiguration("path")["wiki"]}/${subPath.substring(0, subPath.lastIndexOf("/"))}/${appendix}`);
+        }
+    }
+
     class IndexMenu {
         static create(index) {
+            // menu
             const menu = uiComponent({
                 type: Html.Div,
-                styles: {
-                    background: "var(--surface-2)",
-                    width: "25rem",
-                    minWidth: "25rem",
-                    height: "100%",
-                    padding: "1rem",
-                },
+                id: IndexMenu.ID,
             });
+            // search bar
             const searchBar = uiComponent({
                 type: Html.Input,
+                id: IndexMenu.SEARCHBAR_ID,
                 attributes: {
                     placeholder: "Search...",
                 },
-                styles: {
-                    width: "100%",
-                    margin: "0",
-                    marginBottom: "1rem",
-                    background: "var(--surface-3)",
-                },
             });
             menu.appendChild(searchBar);
+            // options
             const options = uiComponent({
                 type: Html.Div,
                 classes: [BubbleUI.BoxColumn],
             });
             menu.appendChild(options);
+            // create index options
             for (const key in index) {
-                options.appendChild(this.createOption(`${getConfiguration("views")["wiki"]}/${key}`.toLocaleLowerCase(), key, index[key], options));
+                options.appendChild(this.createOption(PathService.getWikiViewRoute(key), key, index[key], options));
             }
             return menu;
         }
         static createOption(route, key, value, parent, level = 0) {
             switch (value.type) {
                 case ItemType.Directory:
-                    const item = this.indexButton(null, key, level);
+                    const item = this.indexLink(null, key, level);
                     const container = uiComponent({
                         classes: [BubbleUI.BoxColumn],
                     });
@@ -391,40 +393,35 @@
                     }
                     return container;
                 case ItemType.File:
-                    const itemHtml = this.indexButton(route, key, level);
-                    return itemHtml;
+                    return this.indexLink(route, key, level);
             }
         }
-        static indexButton(route, name, level) {
+        static indexLink(route, name, level) {
             const isDirectory = null == route;
-            name = name.substring(0, 1).toUpperCase().concat(name.substring(1));
+            name = PathService.getPascalCase(name);
             const text = isDirectory
-                ? `${getIcon("material", "expand", "1rem", "var(--on-surface-1)").outerHTML} &nbsp;${name}`
-                : `${getIcon("material", "tag", "1rem", "var(--on-surface-1)").outerHTML} &nbsp;${name}`;
+                ? `${IndexMenu.getIndexLinkIcon("expand").outerHTML} &nbsp;${name}`
+                : `${IndexMenu.getIndexLinkIcon("tag").outerHTML} &nbsp;${name}`;
             const item = uiComponent({
                 type: Html.A,
+                id: IndexMenu.INDEX_LINK_ID,
                 classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter, "hover-primary"],
                 text: text,
-                styles: {
-                    paddingLeft: `${1 + level}rem`,
-                    marginTop: "0.2rem",
-                    paddingTop: ".8rem",
-                    paddingBottom: ".8rem",
-                    borderRadius: ".65rem",
-                    fontSize: "1.25rem",
-                    color: "var(--on-surface-1)",
-                    cursor: "pointer",
-                },
+                styles: { paddingLeft: `${1 + level}rem` },
                 selectable: false,
             });
             if (null != route) {
-                setDomAttributes(item, {
-                    href: `${getConfiguration("base")["web_url"]}/#/${route}`.toLocaleLowerCase(),
-                });
+                setDomAttributes(item, { href: PathService.getRoute(route) });
             }
             return item;
         }
+        static getIndexLinkIcon(icon) {
+            return getIcon("material", icon, "1rem", "var(--on-surface-1)");
+        }
     }
+    IndexMenu.ID = "index-menu";
+    IndexMenu.SEARCHBAR_ID = "searchbar";
+    IndexMenu.INDEX_LINK_ID = "index-link";
 
     const SMALL_DEVICE_WIDTH = 760;
     const MEDIUM_DEVICE_WIDTH = 1024;
@@ -1992,6 +1989,13 @@ ${body}</tbody>
             this.index = await response.json();
             return this.index;
         }
+        static async getDocumentHTML(path) {
+            const response = await httpGet({
+                url: path,
+                parameters: {},
+            });
+            return await response.text();
+        }
     }
 
     class HomeView {
@@ -2069,14 +2073,12 @@ ${body}</tbody>
     class MarkdownCanvas {
         static create(markdown) {
             return uiComponent({
-                classes: ["markdown"],
+                classes: [MarkdownCanvas.CLASS],
                 text: WikiService.render(markdown),
-                styles: {
-                    width: "100%",
-                },
             });
         }
     }
+    MarkdownCanvas.CLASS = "markdown";
 
     /**
      * Get parameters of a url by breakpoint
@@ -2107,11 +2109,6 @@ ${body}</tbody>
                 type: Html.View,
                 id: WikiView.VIEW_ID,
                 classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
-                styles: {
-                    width: "100%",
-                    maxWidth: "80rem",
-                    height: "100%",
-                },
             });
             const route = getUrlParametersByBreakPoint(window.location.hash, "#")
                 .slice(2)
@@ -2123,31 +2120,45 @@ ${body}</tbody>
             container.appendChild(view);
         }
         static async getDocumentHTML(route, index) {
+            // If it is the home
             if ("" == route.trim()) {
                 if (undefined == index["home"])
-                    return "<h1>Index here</h1>";
+                    return "";
                 route = "home";
             }
             const indexItem = getIndexItemFromRoute(index, route);
-            if (ItemType.Directory == indexItem.type) {
-                let title = "# Index for " + route;
-                let list = "<ul>";
-                for (const k in indexItem.files) {
-                    list += "<li>" + k + "</li>";
-                }
-                list += "</ul>";
-                return `${title} ${list}`;
-            }
-            let path = `${getConfiguration("base")["web_url"]}/${getConfiguration("path")["wiki"]}/${route.substring(0, route.lastIndexOf("/"))}/${indexItem.path}`;
-            const response = await httpGet({
-                url: path,
-                parameters: {},
+            // if it is a directory show a index
+            if (ItemType.Directory == indexItem.type)
+                return this.createIndex(route, indexItem);
+            // get file HTML
+            return WikiService.getDocumentHTML(PathService.getFullWikiPath(route, indexItem.path));
+        }
+        static createIndex(route, indexItem) {
+            const index = uiComponent({});
+            const title = uiComponent({
+                type: Html.H1,
+                text: `Index for ${route}`,
             });
-            return await response.text();
+            const list = uiComponent({ type: Html.Ul });
+            for (const key in indexItem.files) {
+                const listItem = uiComponent({ type: Html.Li });
+                const link = uiComponent({
+                    type: Html.A,
+                    text: key,
+                    attributes: {
+                        href: key,
+                    },
+                });
+                listItem.appendChild(link);
+                list.appendChild(listItem);
+            }
+            index.appendChild(title);
+            index.appendChild(list);
+            return index.outerHTML;
         }
     }
     // HTML ids and classes
-    WikiView.VIEW_ID = "home";
+    WikiView.VIEW_ID = "wiki";
 
     let documentContainer;
     /**

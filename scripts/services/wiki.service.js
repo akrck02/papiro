@@ -13,4 +13,11 @@ export default class WikiService {
         this.index = await response.json();
         return this.index;
     }
+    static async getDocumentHTML(path) {
+        const response = await httpGet({
+            url: path,
+            parameters: {},
+        });
+        return await response.text();
+    }
 }

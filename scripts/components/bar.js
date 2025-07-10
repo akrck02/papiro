@@ -5,35 +5,22 @@ import { Html } from "../lib/html.js";
 import { getIcon } from "../lib/icons.js";
 import { connectToSignal } from "../lib/signals.js";
 import { Theme, THEME_CHANGED_SIGNAL } from "../services/theme.js";
-export default class TopBar {
+class TopBar {
     static create() {
         const topBar = uiComponent({
-            type: Html.Div,
+            type: Html.Header,
+            id: TopBar.ID,
             classes: [BubbleUI.BoxRow, BubbleUI.BoxXBetween, BubbleUI.BoxYCenter],
-            styles: {
-                padding: ".5rem 1rem",
-                width: "100%",
-                height: "3rem",
-                background: "var(--surface-1)",
-            },
         });
         const logo = uiComponent({
             type: Html.Img,
-            attributes: {
-                src: `${getConfiguration("path")["icons"]}/logo.svg`,
-            },
-            styles: {
-                height: "1.5rem",
-                marginRight: ".75rem",
-            },
+            id: TopBar.LOGO_ID,
+            attributes: { src: `${getConfiguration("path")["icons"]}/logo.svg` },
         });
         const navTitle = uiComponent({
             type: Html.A,
+            id: TopBar.TITLE_ID,
             text: logo.outerHTML + getConfiguration("base")["app_name"],
-            styles: {
-                fontSize: "1.25rem",
-                color: "var(--on-surface-3)",
-            },
             attributes: {
                 href: `${getConfiguration("base")["web_url"]}/#/`,
             },
@@ -46,14 +33,15 @@ export default class TopBar {
         });
         topBar.appendChild(iconBar);
         const themeIconButton = uiComponent({
+            id: TopBar.THEME_ICON_ID,
             styles: { cursor: "pointer" },
         });
-        const themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode", "24px", "var(--on-surface-1)");
-        themeIcon.id = "theme-icon";
+        let themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode");
         themeIconButton.appendChild(themeIcon);
         iconBar.appendChild(themeIconButton);
         connectToSignal(THEME_CHANGED_SIGNAL, async () => {
-            themeIconButton.innerHTML = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode", "24px", "var(--on-surface-1)")?.innerHTML;
+            themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode");
+            themeIconButton.innerHTML = themeIcon?.innerHTML;
         });
         setDomEvents(themeIconButton, {
             click: (e) => Theme.toggle(),
@@ -61,3 +49,8 @@ export default class TopBar {
         return topBar;
     }
 }
+TopBar.ID = "top-bar";
+TopBar.LOGO_ID = "logo";
+TopBar.TITLE_ID = "title";
+TopBar.THEME_ICON_ID = "theme-icon";
+export default TopBar;

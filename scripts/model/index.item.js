@@ -9,7 +9,6 @@ export function getIndexItemFromRoute(index, route) {
     const params = decodeURI(route).split("/");
     if (0 == params.length)
         return;
-    console.log(params);
     let key = params.shift();
     let parent = index[key];
     if (ItemType.File == parent.type)

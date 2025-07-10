@@ -1,13 +1,12 @@
 import { uiComponent } from "../lib/dom.js";
 import WikiService from "../services/wiki.service.js";
-export default class MarkdownCanvas {
+class MarkdownCanvas {
     static create(markdown) {
         return uiComponent({
-            classes: ["markdown"],
+            classes: [MarkdownCanvas.CLASS],
             text: WikiService.render(markdown),
-            styles: {
-                width: "100%",
-            },
         });
     }
 }
+MarkdownCanvas.CLASS = "markdown";
+export default MarkdownCanvas;
