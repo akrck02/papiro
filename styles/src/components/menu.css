@@ -8,6 +8,7 @@ div#index-menu {
 
 :root[data-display="mobile"] div#index-menu {
 	position: fixed;
+	z-index: 9;
 	left: -100%;
 	transition: left var(--animation-medium) ease-in;
 }
