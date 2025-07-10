@@ -303,264 +303,6 @@
         }
     }
 
-    class IndexMenu {
-        static create(index) {
-            // menu
-            const menu = uiComponent({
-                type: Html.Div,
-                id: IndexMenu.ID,
-            });
-            connectToSignal(IndexMenu.MENU_TOGGLE_SIGNAL, async () => {
-                if (menu.classList.contains("show")) {
-                    menu.classList.remove("show");
-                }
-                else {
-                    menu.classList.add("show");
-                }
-            });
-            // search bar
-            const searchBar = uiComponent({
-                type: Html.Input,
-                id: IndexMenu.SEARCHBAR_ID,
-                attributes: {
-                    placeholder: "Search...",
-                },
-            });
-            menu.appendChild(searchBar);
-            // options
-            const options = uiComponent({
-                type: Html.Div,
-                classes: [BubbleUI.BoxColumn],
-            });
-            menu.appendChild(options);
-            // create index options
-            for (const key in index) {
-                options.appendChild(this.createOption(PathService.getWikiViewRoute(key), key, index[key], options));
-            }
-            return menu;
-        }
-        static createOption(route, key, value, parent, level = 0) {
-            switch (value.type) {
-                case ItemType.Directory:
-                    const item = this.indexLink(null, key, level);
-                    const container = uiComponent({
-                        classes: [BubbleUI.BoxColumn],
-                    });
-                    container.appendChild(item);
-                    for (const key in value.files) {
-                        container.appendChild(this.createOption(`${route}/${key}`.toLocaleLowerCase(), key, value.files[key], container, level + 1));
-                    }
-                    return container;
-                case ItemType.File:
-                    return this.indexLink(route, key, level);
-            }
-        }
-        static indexLink(route, name, level) {
-            const isDirectory = null == route;
-            name = PathService.getPascalCase(name);
-            const text = isDirectory
-                ? `${IndexMenu.getIndexLinkIcon("expand").outerHTML} &nbsp;${name}`
-                : `${IndexMenu.getIndexLinkIcon("tag").outerHTML} &nbsp;${name}`;
-            const item = uiComponent({
-                type: Html.A,
-                id: IndexMenu.INDEX_LINK_ID,
-                classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter, "hover-primary"],
-                text: text,
-                styles: { paddingLeft: `${1 + level}rem` },
-                selectable: false,
-            });
-            if (null != route) {
-                setDomAttributes(item, { href: PathService.getRoute(route) });
-            }
-            setDomEvents(item, {
-                click: () => {
-                    emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {});
-                },
-            });
-            return item;
-        }
-        static getIndexLinkIcon(icon) {
-            return getIcon("material", icon, "1rem", "var(--on-surface-1)");
-        }
-    }
-    IndexMenu.ID = "index-menu";
-    IndexMenu.SEARCHBAR_ID = "searchbar";
-    IndexMenu.INDEX_LINK_ID = "index-link";
-    IndexMenu.MENU_TOGGLE_SIGNAL = setSignal();
-
-    class TopBar {
-        static create() {
-            const topBar = uiComponent({
-                type: Html.Header,
-                id: TopBar.ID,
-                classes: [BubbleUI.BoxRow, BubbleUI.BoxXBetween, BubbleUI.BoxYCenter],
-            });
-            const logo = uiComponent({
-                type: Html.Img,
-                id: TopBar.LOGO_ID,
-                attributes: { src: `${getConfiguration("path")["icons"]}/logo.svg` },
-            });
-            const navTitle = uiComponent({
-                type: Html.A,
-                id: TopBar.TITLE_ID,
-                text: logo.outerHTML + getConfiguration("base")["app_name"],
-                attributes: {
-                    href: `${getConfiguration("base")["web_url"]}/#/`,
-                },
-                classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
-            });
-            topBar.appendChild(navTitle);
-            const iconBar = uiComponent({
-                type: Html.Div,
-                id: TopBar.ICON_BAR_ID,
-                classes: [BubbleUI.BoxRow, BubbleUI.BoxXEnd],
-            });
-            topBar.appendChild(iconBar);
-            const themeIconButton = uiComponent({
-                id: TopBar.THEME_ICON_ID,
-                styles: { cursor: "pointer" },
-            });
-            let themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode");
-            themeIconButton.appendChild(themeIcon);
-            iconBar.appendChild(themeIconButton);
-            connectToSignal(THEME_CHANGED_SIGNAL, async () => {
-                themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode");
-                themeIconButton.innerHTML = themeIcon?.innerHTML;
-            });
-            setDomEvents(themeIconButton, {
-                click: (e) => Theme.toggle(),
-            });
-            const showMenuIcon = getIcon("material", "menu_open");
-            showMenuIcon.id = TopBar.MENU_ICON_ID;
-            iconBar.appendChild(showMenuIcon);
-            setDomEvents(showMenuIcon, {
-                click: (e) => emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {}),
-            });
-            return topBar;
-        }
-    }
-    TopBar.ID = "top-bar";
-    TopBar.LOGO_ID = "logo";
-    TopBar.TITLE_ID = "title";
-    TopBar.ICON_BAR_ID = "icon-bar-id";
-    TopBar.THEME_ICON_ID = "theme-icon";
-    TopBar.MENU_ICON_ID = "menu-icon";
-
-    const SMALL_DEVICE_WIDTH = 760;
-    const MEDIUM_DEVICE_WIDTH = 1024;
-    /**
-    * Get if the device is a small device
-    * @returns True if the device is a small device
-    */
-    function isSmallDevice() {
-        return window.matchMedia(`only screen and (max-width: ${SMALL_DEVICE_WIDTH}px)`).matches;
-    }
-    /**
-    * Get if the device is a medium device
-    * @returns True if the device is a medium device
-    */
-    function isMediumDevice() {
-        return window.matchMedia(`only screen and (min-width: ${SMALL_DEVICE_WIDTH}px) and (max-width: ${MEDIUM_DEVICE_WIDTH}px)`).matches;
-    }
-    /**
-    * Get if matches one of the mobile media queries
-    * @returns True if the device is a mobile device
-    */
-    function isMobile() {
-        return (navigator.userAgent.match(/Android/i) ||
-            navigator.userAgent.match(/BlackBerry/i) ||
-            navigator.userAgent.match(/iPhone|iPad|iPod/i) ||
-            navigator.userAgent.match(/Opera Mini/i) ||
-            navigator.userAgent.match(/IEMobile/i));
-    }
-
-    class Display {
-        static checkType() {
-            if (isMobile() || isSmallDevice() || isMediumDevice()) {
-                setDomDataset(document.documentElement, {
-                    display: "mobile"
-                });
-                setConfiguration("display", "mobile");
-                return;
-            }
-            setDomDataset(document.documentElement, {
-                display: "desktop"
-            });
-            setConfiguration("display", "desktop");
-        }
-        static isMobile() {
-            return "mobile" == getConfiguration("display");
-        }
-    }
-
-    const paths = new Map();
-    let homeHandler = async (_p, c) => { c.innerHTML = "Home page."; };
-    let notFoundHandler = async (_p, c) => { c.innerHTML = "Page not found."; };
-    /**
-     * Register a new route.
-     * @param path The router path
-     * @param handler The route handler
-     */
-    function setRoute(path, handler) {
-        // If the path is empry return 
-        if (undefined == path)
-            return;
-        // If the path is blank or /, register home and return
-        path = path.trim();
-        // If the path is home
-        if ("/" == path || "" == path) {
-            homeHandler = handler;
-            return;
-        }
-        // If the path ends with / trim it
-        const indexOfSlash = path.indexOf("/");
-        if (-1 != indexOfSlash && "/" == path.substring(path.length - 1))
-            path = path.substring(0, path.length - 1);
-        // Replace all the variables with regex expressions to capture them later
-        const regexp = /\/(\$+)/g;
-        path = path.replaceAll(regexp, "/([^\/]+)");
-        paths.set(path, handler);
-        console.debug(`Set route ${path}`);
-    }
-    /**
-     * Show view for the given route.
-     * @param path The given path to search for
-     * @param container The container to display the views in
-     */
-    function showRoute(path, container) {
-        container.innerHTML = "";
-        // If it is the home route, show
-        if ("/" == path || "" == path) {
-            homeHandler([], container);
-            return;
-        }
-        // Else search matching route
-        const keys = Array.from(paths.keys()).sort(compareRouteLength);
-        for (const route of keys) {
-            // Check if route matches
-            const regexp = RegExp(route);
-            const params = path.match(regexp);
-            if (null != params && 0 != params.length) {
-                paths.get(route)(params.slice(1), container);
-                return;
-            }
-        }
-        // If no route found, show not found view.
-        notFoundHandler([], container);
-    }
-    /**
-     * Compare the length of two routes
-     */
-    function compareRouteLength(a, b) {
-        const aLength = a.split("/").length - 1;
-        const bLength = b.split("/").length - 1;
-        if (aLength == bLength)
-            return 0;
-        if (aLength < bLength)
-            return 1;
-        return -1;
-    }
-
     /**
      * This enum represents the available HTTP methods
      * @author akrck02
@@ -2000,6 +1742,26 @@ ${body}</tbody>
      */
     BlockLexer.rulesTables = null;
 
+    /**
+     * Get parameters of a url by breakpoint
+     * @param url url to get parameters from
+     * @param breakpoint breakpoint to get parameters from
+     * @description This method is useful for getting parameters of a url by breakpoint.
+     * @returns parameters of a url
+     * @example
+     *     const url = "https://www.website.org/search/user/1/page/2";
+     *     const breakpoint = "search";
+     *     const parameters = getParametersByBreakPoint(url, breakpoint);
+     *     console.log(parameters); // ["user","1","page","2"]
+     */
+    function getUrlParametersByBreakPoint(url, breakpoint) {
+        let params = url.split("/");
+        const index = params.indexOf(breakpoint);
+        if (-1 == index)
+            return [];
+        return params.slice(index, params.length);
+    }
+
     class WikiService {
         static render(markdown) {
             return Marked.parse(markdown);
@@ -2019,6 +1781,281 @@ ${body}</tbody>
             });
             return await response.text();
         }
+        static getCurrentRoute(sliceNum = 2) {
+            return decodeURI(getUrlParametersByBreakPoint(window.location.hash, "#")
+                .slice(sliceNum)
+                .join("/"));
+        }
+    }
+
+    class IndexMenu {
+        static create(index) {
+            // menu
+            const menu = uiComponent({
+                type: Html.Div,
+                id: IndexMenu.ID,
+            });
+            connectToSignal(IndexMenu.MENU_TOGGLE_SIGNAL, async () => {
+                if (menu.classList.contains("show")) {
+                    menu.classList.remove("show");
+                }
+                else {
+                    menu.classList.add("show");
+                }
+            });
+            // search bar
+            const searchBar = uiComponent({
+                type: Html.Input,
+                id: IndexMenu.SEARCHBAR_ID,
+                attributes: {
+                    placeholder: "Search...",
+                },
+            });
+            menu.appendChild(searchBar);
+            // options
+            const options = uiComponent({
+                type: Html.Div,
+                classes: [BubbleUI.BoxColumn],
+            });
+            menu.appendChild(options);
+            // create index options
+            for (const key in index) {
+                options.appendChild(this.createOption(PathService.getWikiViewRoute(key), key, index[key], options));
+            }
+            return menu;
+        }
+        static createOption(route, key, value, parent, level = 0) {
+            switch (value.type) {
+                case ItemType.Directory:
+                    const item = this.indexLink(null, key, level);
+                    const container = uiComponent({
+                        classes: [BubbleUI.BoxColumn],
+                    });
+                    container.appendChild(item);
+                    for (const key in value.files) {
+                        container.appendChild(this.createOption(`${route}/${key}`.toLocaleLowerCase(), key, value.files[key], container, level + 1));
+                    }
+                    return container;
+                case ItemType.File:
+                    return this.indexLink(route, key, level);
+            }
+        }
+        static indexLink(route, name, level) {
+            const isDirectory = null == route;
+            name = PathService.getPascalCase(name);
+            const selected = "wiki/" + WikiService.getCurrentRoute() == route;
+            const text = isDirectory
+                ? `${IndexMenu.getIndexLinkIcon("expand").outerHTML} &nbsp;${name}`
+                : `${IndexMenu.getIndexLinkIcon("tag").outerHTML} &nbsp;${name}`;
+            const item = uiComponent({
+                type: Html.A,
+                id: IndexMenu.INDEX_LINK_ID,
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter, "hover-primary"],
+                text: text,
+                styles: { paddingLeft: `${1 + level}rem` },
+                selectable: false,
+                data: {
+                    route: route,
+                },
+            });
+            if (selected) {
+                item.classList.add("selected");
+            }
+            if (null != route) {
+                setDomAttributes(item, { href: PathService.getRoute(route) });
+            }
+            setDomEvents(item, {
+                click: () => {
+                    emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {});
+                    const items = document.querySelectorAll("#" + IndexMenu.INDEX_LINK_ID);
+                    for (const it of items) {
+                        it.classList.remove("selected");
+                    }
+                    item.classList.add("selected");
+                },
+            });
+            return item;
+        }
+        static getIndexLinkIcon(icon) {
+            return getIcon("material", icon, "1rem", "var(--on-surface-1)");
+        }
+    }
+    IndexMenu.ID = "index-menu";
+    IndexMenu.SEARCHBAR_ID = "searchbar";
+    IndexMenu.INDEX_LINK_ID = "index-link";
+    IndexMenu.MENU_TOGGLE_SIGNAL = setSignal();
+
+    class TopBar {
+        static create() {
+            const topBar = uiComponent({
+                type: Html.Header,
+                id: TopBar.ID,
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxXBetween, BubbleUI.BoxYCenter],
+            });
+            const logo = uiComponent({
+                type: Html.Img,
+                id: TopBar.LOGO_ID,
+                attributes: { src: `${getConfiguration("path")["icons"]}/logo.svg` },
+            });
+            const navTitle = uiComponent({
+                type: Html.A,
+                id: TopBar.TITLE_ID,
+                text: logo.outerHTML + getConfiguration("base")["app_name"],
+                attributes: {
+                    href: `${getConfiguration("base")["web_url"]}/#/`,
+                },
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
+            });
+            topBar.appendChild(navTitle);
+            const iconBar = uiComponent({
+                type: Html.Div,
+                id: TopBar.ICON_BAR_ID,
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxXEnd],
+            });
+            topBar.appendChild(iconBar);
+            const themeIconButton = uiComponent({
+                id: TopBar.THEME_ICON_ID,
+                styles: { cursor: "pointer" },
+            });
+            let themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode");
+            themeIconButton.appendChild(themeIcon);
+            iconBar.appendChild(themeIconButton);
+            connectToSignal(THEME_CHANGED_SIGNAL, async () => {
+                themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode");
+                themeIconButton.innerHTML = themeIcon?.innerHTML;
+            });
+            setDomEvents(themeIconButton, {
+                click: (e) => Theme.toggle(),
+            });
+            const showMenuIcon = getIcon("material", "menu_open");
+            showMenuIcon.id = TopBar.MENU_ICON_ID;
+            iconBar.appendChild(showMenuIcon);
+            setDomEvents(showMenuIcon, {
+                click: (e) => emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {}),
+            });
+            return topBar;
+        }
+    }
+    TopBar.ID = "top-bar";
+    TopBar.LOGO_ID = "logo";
+    TopBar.TITLE_ID = "title";
+    TopBar.ICON_BAR_ID = "icon-bar-id";
+    TopBar.THEME_ICON_ID = "theme-icon";
+    TopBar.MENU_ICON_ID = "menu-icon";
+
+    const SMALL_DEVICE_WIDTH = 760;
+    const MEDIUM_DEVICE_WIDTH = 1024;
+    /**
+    * Get if the device is a small device
+    * @returns True if the device is a small device
+    */
+    function isSmallDevice() {
+        return window.matchMedia(`only screen and (max-width: ${SMALL_DEVICE_WIDTH}px)`).matches;
+    }
+    /**
+    * Get if the device is a medium device
+    * @returns True if the device is a medium device
+    */
+    function isMediumDevice() {
+        return window.matchMedia(`only screen and (min-width: ${SMALL_DEVICE_WIDTH}px) and (max-width: ${MEDIUM_DEVICE_WIDTH}px)`).matches;
+    }
+    /**
+    * Get if matches one of the mobile media queries
+    * @returns True if the device is a mobile device
+    */
+    function isMobile() {
+        return (navigator.userAgent.match(/Android/i) ||
+            navigator.userAgent.match(/BlackBerry/i) ||
+            navigator.userAgent.match(/iPhone|iPad|iPod/i) ||
+            navigator.userAgent.match(/Opera Mini/i) ||
+            navigator.userAgent.match(/IEMobile/i));
+    }
+
+    class Display {
+        static checkType() {
+            if (isMobile() || isSmallDevice() || isMediumDevice()) {
+                setDomDataset(document.documentElement, {
+                    display: "mobile"
+                });
+                setConfiguration("display", "mobile");
+                return;
+            }
+            setDomDataset(document.documentElement, {
+                display: "desktop"
+            });
+            setConfiguration("display", "desktop");
+        }
+        static isMobile() {
+            return "mobile" == getConfiguration("display");
+        }
+    }
+
+    const paths = new Map();
+    let homeHandler = async (_p, c) => { c.innerHTML = "Home page."; };
+    let notFoundHandler = async (_p, c) => { c.innerHTML = "Page not found."; };
+    /**
+     * Register a new route.
+     * @param path The router path
+     * @param handler The route handler
+     */
+    function setRoute(path, handler) {
+        // If the path is empry return 
+        if (undefined == path)
+            return;
+        // If the path is blank or /, register home and return
+        path = path.trim();
+        // If the path is home
+        if ("/" == path || "" == path) {
+            homeHandler = handler;
+            return;
+        }
+        // If the path ends with / trim it
+        const indexOfSlash = path.indexOf("/");
+        if (-1 != indexOfSlash && "/" == path.substring(path.length - 1))
+            path = path.substring(0, path.length - 1);
+        // Replace all the variables with regex expressions to capture them later
+        const regexp = /\/(\$+)/g;
+        path = path.replaceAll(regexp, "/([^\/]+)");
+        paths.set(path, handler);
+        console.debug(`Set route ${path}`);
+    }
+    /**
+     * Show view for the given route.
+     * @param path The given path to search for
+     * @param container The container to display the views in
+     */
+    function showRoute(path, container) {
+        container.innerHTML = "";
+        // If it is the home route, show
+        if ("/" == path || "" == path) {
+            homeHandler([], container);
+            return;
+        }
+        // Else search matching route
+        const keys = Array.from(paths.keys()).sort(compareRouteLength);
+        for (const route of keys) {
+            // Check if route matches
+            const regexp = RegExp(route);
+            const params = path.match(regexp);
+            if (null != params && 0 != params.length) {
+                paths.get(route)(params.slice(1), container);
+                return;
+            }
+        }
+        // If no route found, show not found view.
+        notFoundHandler([], container);
+    }
+    /**
+     * Compare the length of two routes
+     */
+    function compareRouteLength(a, b) {
+        const aLength = a.split("/").length - 1;
+        const bLength = b.split("/").length - 1;
+        if (aLength == bLength)
+            return 0;
+        if (aLength < bLength)
+            return 1;
+        return -1;
     }
 
     class HomeView {
@@ -2103,26 +2140,6 @@ ${body}</tbody>
     }
     MarkdownCanvas.CLASS = "markdown";
 
-    /**
-     * Get parameters of a url by breakpoint
-     * @param url url to get parameters from
-     * @param breakpoint breakpoint to get parameters from
-     * @description This method is useful for getting parameters of a url by breakpoint.
-     * @returns parameters of a url
-     * @example
-     *     const url = "https://www.website.org/search/user/1/page/2";
-     *     const breakpoint = "search";
-     *     const parameters = getParametersByBreakPoint(url, breakpoint);
-     *     console.log(parameters); // ["user","1","page","2"]
-     */
-    function getUrlParametersByBreakPoint(url, breakpoint) {
-        let params = url.split("/");
-        const index = params.indexOf(breakpoint);
-        if (-1 == index)
-            return [];
-        return params.slice(index, params.length);
-    }
-
     class WikiView {
         /**
          * Show home view
@@ -2133,10 +2150,7 @@ ${body}</tbody>
                 id: WikiView.VIEW_ID,
                 classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
             });
-            const route = getUrlParametersByBreakPoint(window.location.hash, "#")
-                .slice(2)
-                .join("/");
-            WikiView.getDocumentHTML(route, WikiService.index).then((doc) => {
+            WikiView.getDocumentHTML(WikiService.getCurrentRoute(), WikiService.index).then((doc) => {
                 const canvas = MarkdownCanvas.create(doc);
                 view.appendChild(canvas);
             });
