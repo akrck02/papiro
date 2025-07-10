@@ -7,57 +7,76 @@ import { connectToSignal } from "../lib/signals.js";
 import { Theme, THEME_CHANGED_SIGNAL } from "../services/theme.js";
 
 export default class TopBar {
-	static create(): HTMLElement {
-		const topBar = uiComponent({
-			type: Html.Div,
-			classes: [BubbleUI.BoxRow, BubbleUI.BoxXBetween, BubbleUI.BoxYCenter],
-			styles: {
-				padding: ".5rem 1rem ",
-				width: "100%",
-				height: "3rem",
-				background: "var(--surface-1)",
-			},
-		});
+  static create(): HTMLElement {
+    const topBar = uiComponent({
+      type: Html.Div,
+      classes: [BubbleUI.BoxRow, BubbleUI.BoxXBetween, BubbleUI.BoxYCenter],
+      styles: {
+        padding: ".5rem 1rem",
+        width: "100%",
+        height: "3rem",
+        background: "var(--surface-1)",
+      },
+    });
 
-		const navTitle = uiComponent({
-			type: Html.P,
-			text: getConfiguration("base")["app_name"],
-		});
+    const logo = uiComponent({
+      type: Html.Img,
+      attributes: {
+        src: `${getConfiguration("path")["icons"]}/logo.svg`,
+      },
+      styles: {
+        height: "1.5rem",
+        marginRight: ".75rem",
+      },
+    });
 
-		topBar.appendChild(navTitle);
+    const navTitle = uiComponent({
+      type: Html.A,
+      text: logo.outerHTML + getConfiguration("base")["app_name"],
+      styles: {
+        fontSize: "1.25rem",
+        color: "var(--on-surface-3)",
+      },
+      attributes: {
+        href: getConfiguration("base")["web_url"],
+      },
+      classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
+    });
 
-		const iconBar = uiComponent({
-			type: Html.Div,
-			classes: [BubbleUI.BoxRow, BubbleUI.BoxXEnd],
-		});
-		topBar.appendChild(iconBar);
+    topBar.appendChild(navTitle);
 
-		const themeIconButton = uiComponent({
-			styles: { cursor: "pointer" },
-		});
-		const themeIcon = getIcon(
-			"material",
-			Theme.isDark() ? "light_mode" : "dark_mode",
-			"24px",
-			"var(--on-surface-1)",
-		);
-		themeIcon.id = "theme-icon";
-		themeIconButton.appendChild(themeIcon);
-		iconBar.appendChild(themeIconButton);
+    const iconBar = uiComponent({
+      type: Html.Div,
+      classes: [BubbleUI.BoxRow, BubbleUI.BoxXEnd],
+    });
+    topBar.appendChild(iconBar);
 
-		connectToSignal(THEME_CHANGED_SIGNAL, async () => {
-			themeIconButton.innerHTML = getIcon(
-				"material",
-				Theme.isDark() ? "light_mode" : "dark_mode",
-				"24px",
-				"var(--on-surface-1)",
-			)?.innerHTML;
-		});
+    const themeIconButton = uiComponent({
+      styles: { cursor: "pointer" },
+    });
+    const themeIcon = getIcon(
+      "material",
+      Theme.isDark() ? "light_mode" : "dark_mode",
+      "24px",
+      "var(--on-surface-1)",
+    );
+    themeIcon.id = "theme-icon";
+    themeIconButton.appendChild(themeIcon);
+    iconBar.appendChild(themeIconButton);
 
-		setDomEvents(themeIconButton, {
-			click: (e) => Theme.toggle(),
-		});
+    connectToSignal(THEME_CHANGED_SIGNAL, async () => {
+      themeIconButton.innerHTML = getIcon(
+        "material",
+        Theme.isDark() ? "light_mode" : "dark_mode",
+        "24px",
+        "var(--on-surface-1)",
+      )?.innerHTML;
+    });
 
-		return topBar;
-	}
+    setDomEvents(themeIconButton, {
+      click: (e) => Theme.toggle(),
+    });
+
+    return topBar;
+  }
 }

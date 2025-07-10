@@ -4,15 +4,18 @@ import { Marked } from "../lib/markdown/markdown.js";
 import { Index } from "../model/index.item.js";
 
 export default class WikiService {
-	static render(markdown: string): string {
-		return Marked.parse(markdown);
-	}
+  static index: Index;
 
-	static async getIndex(): Promise<Index> {
-		const response = await httpGet({
-			url: `${getConfiguration("path")["wiki"]}/index.json`,
-			parameters: {},
-		});
-		return await response.json();
-	}
+  static render(markdown: string): string {
+    return Marked.parse(markdown);
+  }
+
+  static async loadIndex(): Promise<Index> {
+    const response = await httpGet({
+      url: `${getConfiguration("path")["wiki"]}/index.json`,
+      parameters: {},
+    });
+    this.index = await response.json();
+    return this.index;
+  }
 }

@@ -24,6 +24,7 @@
     border-radius: 0.35rem;
     font-family: var(--font-console);
     display: block;
+    line-height: 135%;
 }
 
 .markdown blockquote {
@@ -37,6 +38,7 @@
     font-style: italic;
     font-weight: 600;
     display: block;
+    line-height: 135%;
 }
 
 .markdown img {
@@ -50,6 +52,7 @@
     font-size: 1.25rem;
     margin: 0.75rem 1rem;
     line-height: 135%;
+    font-weight: 380;
 }
 
 .markdown hr {
@@ -69,7 +72,7 @@
     flex-direction: row;
     align-items: center;
     font-size: 1.25rem;
-    margin-top: 0.5rem;
+    margin-top: 0.7rem;
 }
 
 .markdown ol li {

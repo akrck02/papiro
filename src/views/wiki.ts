@@ -1,4 +1,5 @@
 import TopBar from "../components/bar.js";
+import MarkdownCanvas from "../components/markdown.js";
 import IndexMenu from "../components/menu.js";
 import { BubbleUI } from "../lib/bubble.js";
 import { getConfiguration } from "../lib/configuration.js";
@@ -6,80 +7,64 @@ import { uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
 import { httpGet } from "../lib/http.js";
 import { getUrlParametersByBreakPoint } from "../lib/paths.js";
+import { setSignal } from "../lib/signals.js";
 import { getIndexItemFromRoute, Index, ItemType } from "../model/index.item.js";
 import WikiService from "../services/wiki.service.js";
 
 export default class WikiView {
-	// HTML ids and classes
-	static readonly VIEW_ID = "home";
+  // HTML ids and classes
+  static readonly VIEW_ID = "home";
 
-	/**
-	 * Show home view
-	 */
-	static async show(parameters: string[], container: HTMLElement) {
-		const view = uiComponent({
-			type: Html.View,
-			id: WikiView.VIEW_ID,
-			classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
-		});
+  /**
+   * Show home view
+   */
+  static async show(parameters: string[], container: HTMLElement) {
+    const view = uiComponent({
+      type: Html.View,
+      id: WikiView.VIEW_ID,
+      classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
+      styles: {
+        width: "100%",
+        maxWidth: "80rem",
+        height: "100%",
+      },
+    });
 
-		const topBar = TopBar.create();
-		view.appendChild(topBar);
+    const route = getUrlParametersByBreakPoint(window.location.hash, "#")
+      .slice(2)
+      .join("/");
 
-		const content = uiComponent({
-			type: Html.Div,
-			classes: [BubbleUI.BoxRow],
-			styles: {
-				height: "100%",
-				width: "100%",
-			},
-		});
+    WikiView.getDocumentHTML(route, WikiService.index).then((doc) => {
+      const canvas = MarkdownCanvas.create(doc);
+      view.appendChild(canvas);
+    });
 
-		parameters = getUrlParametersByBreakPoint(window.location.hash, "#").slice(
-			2,
-		);
+    container.appendChild(view);
+  }
 
-		const index = await WikiService.getIndex();
-		const menu = IndexMenu.create(index);
-		content.appendChild(menu);
+  static async getDocumentHTML(route: string, index: Index): Promise<string> {
+    if ("" == route.trim()) {
+      if (undefined == index["home"]) return "<h1>Index here</h1>";
+      route = "home";
+    }
+    const indexItem = getIndexItemFromRoute(index, route);
 
-		const route = parameters.join("/");
-		const document = await WikiView.getDocumentHTML(route, index);
-		const markdownCanvas = uiComponent({
-			classes: ["markdown"],
-			text: WikiService.render(document),
-			styles: {
-				width: "100%",
-			},
-		});
+    if (ItemType.Directory == indexItem.type) {
+      let title = "# Index for " + route;
+      let list = "<ul>";
+      for (const k in indexItem.files) {
+        list += "<li>" + k + "</li>";
+      }
+      list += "</ul>";
 
-		content.appendChild(markdownCanvas);
-		view.appendChild(content);
-		container.appendChild(view);
-	}
+      return `${title} ${list}`;
+    }
 
-	static async getDocumentHTML(route: string, index: Index): Promise<string> {
-		if ("" == route.trim()) return "<h1>Index here</h1>";
-
-		const indexItem = getIndexItemFromRoute(index, route);
-
-		if (ItemType.Directory == indexItem.type) {
-			let title = "# Index for " + route;
-			let list = "<ul>";
-			for (const k in indexItem.files) {
-				list += "<li>" + k + "</li>";
-			}
-			list += "</ul>";
-
-			return `${title} ${list}`;
-		}
-
-		let path = `${getConfiguration("base")["web_url"]}/${getConfiguration("path")["wiki"]}/${route.substring(0, route.lastIndexOf("/"))}/${indexItem.path}`;
-
-		const response = await httpGet({
-			url: path,
-			parameters: {},
-		});
-		return await response.text();
-	}
+    let path = `${getConfiguration("base")["web_url"]}/${getConfiguration("path")["wiki"]}/${route.substring(0, route.lastIndexOf("/"))}/${indexItem.path}`;
+    const response = await httpGet({
+      url: path,
+      parameters: {},
+    });
+    return await response.text();
+  }
 }

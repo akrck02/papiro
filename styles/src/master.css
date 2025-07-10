@@ -54,6 +54,19 @@
 
 body,
 view {
-    transition: all 0.35s color none;
     background: var(--background);
+}
+
+* {
+    transition:
+        background var(--animation-fast) ease-in,
+        color var(--animation-fast) ease-in;
+}
+
+*.hover-primary:hover {
+    background: var(--surface-4);
+}
+
+*.hover-primary:hover svg {
+    fill: var(--on-surface-4);
 }
