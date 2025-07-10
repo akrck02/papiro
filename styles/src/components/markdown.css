@@ -7,7 +7,7 @@
 	overflow-y: auto;
 }
 
-:root[data-display] .markdown {
+:root[data-display="mobile"] .markdown {
 	padding: 2rem 0.75rem;
 }
 

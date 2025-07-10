@@ -1,16 +1,20 @@
+import { isSmallDevice } from "../lib/browser.js";
 import { BubbleUI } from "../lib/bubble.js";
 import { getConfiguration } from "../lib/configuration.js";
 import { setDomEvents, uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
 import { getIcon } from "../lib/icons.js";
-import { connectToSignal } from "../lib/signals.js";
+import { connectToSignal, emitSignal } from "../lib/signals.js";
 import { Theme, THEME_CHANGED_SIGNAL } from "../services/theme.js";
+import IndexMenu from "./menu.js";
 
 export default class TopBar {
 	static readonly ID = "top-bar";
 	static readonly LOGO_ID = "logo";
 	static readonly TITLE_ID = "title";
+	static readonly ICON_BAR_ID = "icon-bar-id";
 	static readonly THEME_ICON_ID = "theme-icon";
+	static readonly MENU_ICON_ID = "menu-icon";
 
 	static create(): HTMLElement {
 		const topBar = uiComponent({
@@ -39,6 +43,7 @@ export default class TopBar {
 
 		const iconBar = uiComponent({
 			type: Html.Div,
+			id: TopBar.ICON_BAR_ID,
 			classes: [BubbleUI.BoxRow, BubbleUI.BoxXEnd],
 		});
 		topBar.appendChild(iconBar);
@@ -65,6 +70,14 @@ export default class TopBar {
 
 		setDomEvents(themeIconButton, {
 			click: (e) => Theme.toggle(),
+		});
+
+		const showMenuIcon = getIcon("material", "menu_open");
+		showMenuIcon.id = TopBar.MENU_ICON_ID;
+		iconBar.appendChild(showMenuIcon);
+
+		setDomEvents(showMenuIcon, {
+			click: (e) => emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {}),
 		});
 
 		return topBar;

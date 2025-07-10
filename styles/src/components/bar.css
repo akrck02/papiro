@@ -21,7 +21,15 @@ header#top-bar img#logo {
 	margin-right: 0.75rem;
 }
 
-header#top-bar div#theme-icon svg {
+header#top-bar div#icon-bar-id div {
+	padding-left: 1rem;
+}
+
+header#top-bar div#icon-bar-id div svg {
 	fill: var(--on-surface-1);
 	width: 24px;
+}
+
+:root[data-display="desktop"] header#top-bar div#icon-bar-id div#menu-icon {
+	display: none;
 }

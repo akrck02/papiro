@@ -7,11 +7,13 @@ div#index-menu {
 }
 
 :root[data-display="mobile"] div#index-menu {
-	display: none;
+	position: fixed;
+	left: -100%;
+	transition: left var(--animation-medium) ease-in;
 }
 
 :root[data-display="mobile"] div#index-menu.show {
-	display: flex;
+	left: 0;
 }
 
 div#index-menu input#searchbar {
