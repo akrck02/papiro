@@ -3,70 +3,62 @@
 @import url("./views/_import.css");
 
 :root {
-    --background: #e6e6e6;
-    --on-background: #444444;
+	--background: #e6e6e6;
+	--on-background: #444444;
 
-    --surface-1: #d9d9d9;
-    --on-surface-1: #4a4a4a;
+	--surface-1: #d9d9d9;
+	--on-surface-1: #4a4a4a;
 
-    --surface-2: #cfcfcf;
-    --on-surface-2: #333333;
+	--surface-2: #cfcfcf;
+	--on-surface-2: #333333;
 
-    --surface-3: #bfbfbf;
-    --on-surface-3: #3a3a3a;
+	--surface-3: #bfbfbf;
+	--on-surface-3: #3a3a3a;
 
-    --surface-4: #b3b3b3;
-    --on-surface-4: #222222;
+	--surface-4: #b3b3b3;
+	--on-surface-4: #222222;
 
-    --surface-5: #a6a6a6;
-    --on-surface-5: #2a2a2a;
+	--surface-5: #a6a6a6;
+	--on-surface-5: #2a2a2a;
 
-    --surface-6: #999999;
-    --on-surface-6: #111111;
+	--surface-6: #999999;
+	--on-surface-6: #111111;
 
-    --text-color: #444444;
+	--text-color: #444444;
 }
 
 :root[data-theme="dark"] {
-    --surface-1: #262626;
-    --on-surface-1: #eaeaea;
+	--surface-1: #262626;
+	--on-surface-1: #eaeaea;
 
-    --surface-2: #333333;
-    --on-surface-2: #e1e1e1;
+	--surface-2: #333333;
+	--on-surface-2: #e1e1e1;
 
-    --surface-3: #404040;
-    --on-surface-3: #dadada;
+	--surface-3: #404040;
+	--on-surface-3: #dadada;
 
-    --surface-4: #4d4d4d;
-    --on-surface-4: #d1d1d1;
+	--surface-4: #4d4d4d;
+	--on-surface-4: #d1d1d1;
 
-    --surface-5: #595959;
-    --on-surface-5: #cacaca;
+	--surface-5: #595959;
+	--on-surface-5: #cacaca;
 
-    --surface-6: #666666;
-    --on-surface-6: #c1c1c1;
+	--surface-6: #666666;
+	--on-surface-6: #c1c1c1;
 
-    --background: #1a1a1a;
-    --on-background: #e1e1e1;
+	--background: #1a1a1a;
+	--on-background: #e1e1e1;
 
-    --text-color: #f0f0f0;
+	--text-color: #f0f0f0;
 }
 
 body,
 view {
-    background: var(--background);
+	background: var(--background);
 }
 
 * {
-    transition:
-        background var(--animation-fast) ease-in,
-        color var(--animation-fast) ease-in;
-}
-
-*.hover-primary:hover {
-    background: var(--surface-4);
-}
-
-*.hover-primary:hover svg {
-    fill: var(--on-surface-4);
+	transition:
+		background var(--animation-fast) ease-in,
+		color var(--animation-fast) ease-in;
 }

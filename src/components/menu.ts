@@ -1,131 +1,116 @@
 import { BubbleUI } from "../lib/bubble.js";
-import { getConfiguration } from "../lib/configuration.js";
-import {
-  setDomAttributes,
-  setDomEvents,
-  setDomStyles,
-  uiComponent,
-} from "../lib/dom.js";
+import { setDomAttributes, uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
 import { getIcon } from "../lib/icons.js";
 import { Index, IndexItem, ItemType } from "../model/index.item.js";
+import PathService from "../services/path.service.js";
 
 export default class IndexMenu {
-  static create(index: Index): HTMLElement {
-    const menu = uiComponent({
-      type: Html.Div,
-      styles: {
-        background: "var(--surface-2)",
-        width: "25rem",
-        minWidth: "25rem",
-        height: "100%",
-        padding: "1rem",
-      },
-    });
+	static readonly ID = "index-menu";
+	static readonly SEARCHBAR_ID = "searchbar";
+	static readonly INDEX_LINK_ID = "index-link";
 
-    const searchBar = uiComponent({
-      type: Html.Input,
-      attributes: {
-        placeholder: "Search...",
-      },
-      styles: {
-        width: "100%",
-        margin: "0",
-        marginBottom: "1rem",
-        background: "var(--surface-3)",
-      },
-    });
-    menu.appendChild(searchBar);
+	static create(index: Index): HTMLElement {
+		// menu
+		const menu = uiComponent({
+			type: Html.Div,
+			id: IndexMenu.ID,
+		});
 
-    const options = uiComponent({
-      type: Html.Div,
-      classes: [BubbleUI.BoxColumn],
-    });
-    menu.appendChild(options);
+		// search bar
+		const searchBar = uiComponent({
+			type: Html.Input,
+			id: IndexMenu.SEARCHBAR_ID,
+			attributes: {
+				placeholder: "Search...",
+			},
+		});
+		menu.appendChild(searchBar);
 
-    for (const key in index) {
-      options.appendChild(
-        this.createOption(
-          `${getConfiguration("views")["wiki"]}/${key}`.toLocaleLowerCase(),
-          key,
-          index[key],
-          options,
-        ),
-      );
-    }
+		// options
+		const options = uiComponent({
+			type: Html.Div,
+			classes: [BubbleUI.BoxColumn],
+		});
+		menu.appendChild(options);
 
-    return menu;
-  }
+		// create index options
+		for (const key in index) {
+			options.appendChild(
+				this.createOption(
+					PathService.getWikiViewRoute(key),
+					key,
+					index[key],
+					options,
+				),
+			);
+		}
 
-  private static createOption(
-    route: string,
-    key: string,
-    value: IndexItem,
-    parent: HTMLElement,
-    level: number = 0,
-  ): HTMLElement {
-    switch (value.type) {
-      case ItemType.Directory:
-        const item = this.indexButton(null, key, level);
-        const container = uiComponent({
-          classes: [BubbleUI.BoxColumn],
-        });
+		return menu;
+	}
 
-        container.appendChild(item);
-        for (const key in value.files) {
-          container.appendChild(
-            this.createOption(
-              `${route}/${key}`.toLocaleLowerCase(),
-              key,
-              value.files[key],
-              container,
-              level + 1,
-            ),
-          );
-        }
+	private static createOption(
+		route: string,
+		key: string,
+		value: IndexItem,
+		parent: HTMLElement,
+		level: number = 0,
+	): HTMLElement {
+		switch (value.type) {
+			case ItemType.Directory:
+				const item = this.indexLink(null, key, level);
+				const container = uiComponent({
+					classes: [BubbleUI.BoxColumn],
+				});
 
-        return container;
-      case ItemType.File:
-        const itemHtml = this.indexButton(route, key, level);
-        return itemHtml;
-    }
-  }
+				container.appendChild(item);
+				for (const key in value.files) {
+					container.appendChild(
+						this.createOption(
+							`${route}/${key}`.toLocaleLowerCase(),
+							key,
+							value.files[key],
+							container,
+							level + 1,
+						),
+					);
+				}
 
-  private static indexButton(
-    route: string,
-    name: string,
-    level: number,
-  ): HTMLElement {
-    const isDirectory = null == route;
+				return container;
+			case ItemType.File:
+				return this.indexLink(route, key, level);
+		}
+	}
 
-    name = name.substring(0, 1).toUpperCase().concat(name.substring(1));
-    const text = isDirectory
-      ? `${getIcon("material", "expand", "1rem", "var(--on-surface-1)").outerHTML} &nbsp;${name}`
-      : `${getIcon("material", "tag", "1rem", "var(--on-surface-1)").outerHTML} &nbsp;${name}`;
+	private static indexLink(
+		route: string,
+		name: string,
+		level: number,
+	): HTMLElement {
+		const isDirectory = null == route;
 
-    const item = uiComponent({
-      type: Html.A,
-      classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter, "hover-primary"],
-      text: text,
-      styles: {
-        paddingLeft: `${1 + level}rem`,
-        marginTop: "0.2rem",
-        paddingTop: ".8rem",
-        paddingBottom: ".8rem",
-        borderRadius: ".65rem",
-        fontSize: "1.25rem",
-        color: "var(--on-surface-1)",
-        cursor: "pointer",
-      },
-      selectable: false,
-    });
+		name = PathService.getPascalCase(name);
+		const text = isDirectory
+			? `${IndexMenu.getIndexLinkIcon("expand").outerHTML} &nbsp;${name}`
+			: `${IndexMenu.getIndexLinkIcon("tag").outerHTML} &nbsp;${name}`;
 
-    if (null != route) {
-      setDomAttributes(item, {
-        href: `${getConfiguration("base")["web_url"]}/#/${route}`.toLocaleLowerCase(),
-      });
-    }
+		const item = uiComponent({
+			type: Html.A,
+			id: IndexMenu.INDEX_LINK_ID,
+			classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter, "hover-primary"],
+			text: text,
+			styles: { paddingLeft: `${1 + level}rem` },
+			selectable: false,
+		});
 
-    return item;
-  }
+		if (null != route) {
+			setDomAttributes(item, { href: PathService.getRoute(route) });
+		}
+
+		return item;
+	}
+
+	private static getIndexLinkIcon(icon: string): HTMLElement {
+		return getIcon("material", icon, "1rem", "var(--on-surface-1)");
+	}
 }

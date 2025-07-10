@@ -1,9 +1,14 @@
 .markdown {
-    display: flex;
-    flex-direction: column;
-    padding: 2rem;
-    height: 100%;
-    overflow-y: auto;
+	display: flex;
+	flex-direction: column;
+	padding: 2rem;
+	height: 100%;
+	width: 100%;
+	overflow-y: auto;
+}
+
+:root[data-display] .markdown {
+	padding: 2rem 0.75rem;
 }
 
 .markdown h1,
@@ -12,89 +17,89 @@
 .markdown h4,
 .markdown h5,
 .markdown h6 {
-    margin-top: 2rem;
+	margin-top: 2rem;
 }
 
 .markdown code {
-    background-color: var(--surface-1);
-    color: var(--on-surface-1);
-    margin: 1rem;
-    padding: 1rem;
-    font-size: 1rem;
-    border-radius: 0.35rem;
-    font-family: var(--font-console);
-    display: block;
-    line-height: 135%;
+	background-color: var(--surface-1);
+	color: var(--on-surface-1);
+	margin: 1rem;
+	padding: 1rem;
+	font-size: 1rem;
+	border-radius: 0.35rem;
+	font-family: var(--font-console);
+	display: block;
+	line-height: 135%;
 }
 
 .markdown blockquote {
-    background-color: var(--surface-1);
-    color: var(--on-surface-1);
-    margin: 1rem;
-    padding: 1rem;
-    font-size: 1rem;
-    border-radius: 0.35rem;
-    font-family: var(--font-light);
-    font-style: italic;
-    font-weight: 600;
-    display: block;
-    line-height: 135%;
+	background-color: var(--surface-1);
+	color: var(--on-surface-1);
+	margin: 1rem;
+	padding: 1rem;
+	font-size: 1rem;
+	border-radius: 0.35rem;
+	font-family: var(--font-light);
+	font-style: italic;
+	font-weight: 600;
+	display: block;
+	line-height: 135%;
 }
 
 .markdown img {
-    width: 100%;
-    object-fit: cover;
-    margin: 1rem 0;
-    border-radius: 0.35rem;
+	width: 100%;
+	object-fit: cover;
+	margin: 1rem 0;
+	border-radius: 0.35rem;
 }
 
 .markdown p {
-    font-size: 1.25rem;
-    margin: 0.75rem 1rem;
-    line-height: 135%;
-    font-weight: 380;
+	font-size: 1.25rem;
+	margin: 0.75rem 1rem;
+	line-height: 135%;
+	font-weight: 380;
 }
 
 .markdown hr {
-    opacity: 0.035;
-    border: 0.1rem solid var(--on-surface-1);
-    width: 100%;
-    border-radius: 1rem;
+	opacity: 0.035;
+	border: 0.1rem solid var(--on-surface-1);
+	width: 100%;
+	border-radius: 1rem;
 }
 
 .markdown ul,
 .markdown ol {
-    padding: 1rem;
+	padding: 1rem;
 }
 
 .markdown ul li {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    font-size: 1.25rem;
-    margin-top: 0.7rem;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	font-size: 1.25rem;
+	margin-top: 0.7rem;
 }
 
 .markdown ol li {
-    align-items: center;
-    font-size: 1.25rem;
-    margin-top: 0.5rem;
-    margin-left: 1.5rem;
+	align-items: center;
+	font-size: 1.25rem;
+	margin-top: 0.5rem;
+	margin-left: 1.5rem;
 }
 
 .markdown ol li {
-    list-style: decimal !important;
+	list-style: decimal !important;
 }
 
 .markdown ul li::before {
-    --size: 0.5rem;
-    content: ".";
-    display: inline-block;
+	--size: 0.5rem;
+	content: ".";
+	display: inline-block;
 
-    width: var(--size);
-    height: var(--size);
-    margin-right: 1rem;
-    color: transparent;
-    border-radius: 0.35rem;
-    background: var(--on-surface-1);
+	width: var(--size);
+	height: var(--size);
+	margin-right: 1rem;
+	color: transparent;
+	border-radius: 0.35rem;
+	background: var(--on-surface-1);
 }

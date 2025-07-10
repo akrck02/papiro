@@ -1,0 +1,7 @@
+view#wiki {
+	width: 100%;
+	height: 100%;
+	max-width: 80rem;
+	overflow: auto;
+	font-size: 1.6rem;
+}

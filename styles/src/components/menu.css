@@ -1,0 +1,45 @@
+div#index-menu {
+	background: var(--surface-2);
+	width: 25rem;
+	min-width: 25rem;
+	height: 100%;
+	padding: 1rem;
+}
+
+:root[data-display="mobile"] div#index-menu {
+	display: none;
+}
+
+:root[data-display="mobile"] div#index-menu.show {
+	display: flex;
+}
+
+div#index-menu input#searchbar {
+	width: 100%;
+	margin: 0;
+	margin-bottom: 1rem;
+	background: var(--surface-3);
+}
+
+div#index-menu a#index-link {
+	margin-top: 0.2rem;
+	padding-top: 0.8rem;
+	padding-left: 0;
+	padding-bottom: 0.8rem;
+	border-radius: 0.65rem;
+	font-size: 1.25rem;
+	color: var(--on-surface-1);
+	cursor: pointer;
+}
+
+div#index-menu a#index-link:hover {
+	background: var(--surface-4);
+}
+
+div#index-menu a#index-link.selected {
+	background: var(--primary-color);
+}
+
+div#index-menu a#index-link:hover svg {
+	fill: var(--on-surface-4);
+}

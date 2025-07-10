@@ -1,70 +1,85 @@
-import TopBar from "../components/bar.js";
 import MarkdownCanvas from "../components/markdown.js";
-import IndexMenu from "../components/menu.js";
 import { BubbleUI } from "../lib/bubble.js";
-import { getConfiguration } from "../lib/configuration.js";
 import { uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
-import { httpGet } from "../lib/http.js";
 import { getUrlParametersByBreakPoint } from "../lib/paths.js";
-import { setSignal } from "../lib/signals.js";
-import { getIndexItemFromRoute, Index, ItemType } from "../model/index.item.js";
+import {
+	getIndexItemFromRoute,
+	Index,
+	IndexItem,
+	ItemType,
+} from "../model/index.item.js";
+import PathService from "../services/path.service.js";
 import WikiService from "../services/wiki.service.js";
 
 export default class WikiView {
-  // HTML ids and classes
-  static readonly VIEW_ID = "home";
+	// HTML ids and classes
+	static readonly VIEW_ID = "wiki";
 
-  /**
-   * Show home view
-   */
-  static async show(parameters: string[], container: HTMLElement) {
-    const view = uiComponent({
-      type: Html.View,
-      id: WikiView.VIEW_ID,
-      classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
-      styles: {
-        width: "100%",
-        maxWidth: "80rem",
-        height: "100%",
-      },
-    });
+	/**
+	 * Show home view
+	 */
+	static async show(parameters: string[], container: HTMLElement) {
+		const view = uiComponent({
+			type: Html.View,
+			id: WikiView.VIEW_ID,
+			classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
+		});
 
-    const route = getUrlParametersByBreakPoint(window.location.hash, "#")
-      .slice(2)
-      .join("/");
+		const route = getUrlParametersByBreakPoint(window.location.hash, "#")
+			.slice(2)
+			.join("/");
 
-    WikiView.getDocumentHTML(route, WikiService.index).then((doc) => {
-      const canvas = MarkdownCanvas.create(doc);
-      view.appendChild(canvas);
-    });
+		WikiView.getDocumentHTML(route, WikiService.index).then((doc) => {
+			const canvas = MarkdownCanvas.create(doc);
+			view.appendChild(canvas);
+		});
 
-    container.appendChild(view);
-  }
+		container.appendChild(view);
+	}
 
-  static async getDocumentHTML(route: string, index: Index): Promise<string> {
-    if ("" == route.trim()) {
-      if (undefined == index["home"]) return "<h1>Index here</h1>";
-      route = "home";
-    }
-    const indexItem = getIndexItemFromRoute(index, route);
+	static async getDocumentHTML(route: string, index: Index): Promise<string> {
+		// If it is the home
+		if ("" == route.trim()) {
+			if (undefined == index["home"]) return "";
+			route = "home";
+		}
+		const indexItem = getIndexItemFromRoute(index, route);
 
-    if (ItemType.Directory == indexItem.type) {
-      let title = "# Index for " + route;
-      let list = "<ul>";
-      for (const k in indexItem.files) {
-        list += "<li>" + k + "</li>";
-      }
-      list += "</ul>";
+		// if it is a directory show a index
+		if (ItemType.Directory == indexItem.type)
+			return this.createIndex(route, indexItem);
 
-      return `${title} ${list}`;
-    }
+		// get file HTML
+		return WikiService.getDocumentHTML(
+			PathService.getFullWikiPath(route, indexItem.path),
+		);
+	}
 
-    let path = `${getConfiguration("base")["web_url"]}/${getConfiguration("path")["wiki"]}/${route.substring(0, route.lastIndexOf("/"))}/${indexItem.path}`;
-    const response = await httpGet({
-      url: path,
-      parameters: {},
-    });
-    return await response.text();
-  }
+	private static createIndex(route: string, indexItem: IndexItem) {
+		const index = uiComponent({});
+		const title = uiComponent({
+			type: Html.H1,
+			text: `Index for ${route}`,
+		});
+
+		const list = uiComponent({ type: Html.Ul });
+		for (const key in indexItem.files) {
+			const listItem = uiComponent({ type: Html.Li });
+
+			const link = uiComponent({
+				type: Html.A,
+				text: key,
+				attributes: {
+					href: key,
+				},
+			});
+			listItem.appendChild(link);
+			list.appendChild(listItem);
+		}
+
+		index.appendChild(title);
+		index.appendChild(list);
+		return index.outerHTML;
+	}
 }
