@@ -290,7 +290,7 @@
                     color: "var(--on-surface-3)",
                 },
                 attributes: {
-                    href: getConfiguration("base")["web_url"],
+                    href: `${getConfiguration("base")["web_url"]}/#/`,
                 },
                 classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
             });
