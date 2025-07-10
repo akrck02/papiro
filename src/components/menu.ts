@@ -5,6 +5,7 @@ import { getIcon } from "../lib/icons.js";
 import { connectToSignal, emitSignal, setSignal } from "../lib/signals.js";
 import { Index, IndexItem, ItemType } from "../model/index.item.js";
 import PathService from "../services/path.service.js";
+import WikiService from "../services/wiki.service.js";
 
 export default class IndexMenu {
 	static readonly ID = "index-menu";
@@ -100,6 +101,7 @@ export default class IndexMenu {
 		const isDirectory = null == route;
 
 		name = PathService.getPascalCase(name);
+		const selected = "wiki/" + WikiService.getCurrentRoute() == route;
 		const text = isDirectory
 			? `${IndexMenu.getIndexLinkIcon("expand").outerHTML} &nbsp;${name}`
 			: `${IndexMenu.getIndexLinkIcon("tag").outerHTML} &nbsp;${name}`;
@@ -111,7 +113,14 @@ export default class IndexMenu {
 			text: text,
 			styles: { paddingLeft: `${1 + level}rem` },
 			selectable: false,
+			data: {
+				route: route,
+			},
 		});
+
+		if (selected) {
+			item.classList.add("selected");
+		}
 
 		if (null != route) {
 			setDomAttributes(item, { href: PathService.getRoute(route) });
@@ -120,6 +129,12 @@ export default class IndexMenu {
 		setDomEvents(item, {
 			click: () => {
 				emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {});
+				const items = document.querySelectorAll("#" + IndexMenu.INDEX_LINK_ID);
+				for (const it of items) {
+					it.classList.remove("selected");
+				}
+
+				item.classList.add("selected");
 			},
 		});
 

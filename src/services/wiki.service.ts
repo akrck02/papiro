@@ -1,6 +1,7 @@
 import { getConfiguration } from "../lib/configuration.js";
 import { httpGet } from "../lib/http.js";
 import { Marked } from "../lib/markdown/markdown.js";
+import { getUrlParametersByBreakPoint } from "../lib/paths.js";
 import { Index } from "../model/index.item.js";
 
 export default class WikiService {
@@ -25,5 +26,13 @@ export default class WikiService {
 			parameters: {},
 		});
 		return await response.text();
+	}
+
+	static getCurrentRoute(sliceNum = 2): string {
+		return decodeURI(
+			getUrlParametersByBreakPoint(window.location.hash, "#")
+				.slice(sliceNum)
+				.join("/"),
+		);
 	}
 }

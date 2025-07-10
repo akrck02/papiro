@@ -2,7 +2,6 @@ import MarkdownCanvas from "../components/markdown.js";
 import { BubbleUI } from "../lib/bubble.js";
 import { uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
-import { getUrlParametersByBreakPoint } from "../lib/paths.js";
 import {
 	getIndexItemFromRoute,
 	Index,
@@ -26,11 +25,10 @@ export default class WikiView {
 			classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
 		});
 
-		const route = getUrlParametersByBreakPoint(window.location.hash, "#")
-			.slice(2)
-			.join("/");
-
-		WikiView.getDocumentHTML(route, WikiService.index).then((doc) => {
+		WikiView.getDocumentHTML(
+			WikiService.getCurrentRoute(),
+			WikiService.index,
+		).then((doc) => {
 			const canvas = MarkdownCanvas.create(doc);
 			view.appendChild(canvas);
 		});
