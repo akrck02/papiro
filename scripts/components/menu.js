@@ -1,7 +1,8 @@
 import { BubbleUI } from "../lib/bubble.js";
-import { setDomAttributes, uiComponent } from "../lib/dom.js";
+import { setDomAttributes, setDomEvents, uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
 import { getIcon } from "../lib/icons.js";
+import { connectToSignal, emitSignal, setSignal } from "../lib/signals.js";
 import { ItemType } from "../model/index.item.js";
 import PathService from "../services/path.service.js";
 class IndexMenu {
@@ -10,6 +11,14 @@ class IndexMenu {
         const menu = uiComponent({
             type: Html.Div,
             id: IndexMenu.ID,
+        });
+        connectToSignal(IndexMenu.MENU_TOGGLE_SIGNAL, async () => {
+            if (menu.classList.contains("show")) {
+                menu.classList.remove("show");
+            }
+            else {
+                menu.classList.add("show");
+            }
         });
         // search bar
         const searchBar = uiComponent({
@@ -65,6 +74,11 @@ class IndexMenu {
         if (null != route) {
             setDomAttributes(item, { href: PathService.getRoute(route) });
         }
+        setDomEvents(item, {
+            click: () => {
+                emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {});
+            },
+        });
         return item;
     }
     static getIndexLinkIcon(icon) {
@@ -74,4 +88,5 @@ class IndexMenu {
 IndexMenu.ID = "index-menu";
 IndexMenu.SEARCHBAR_ID = "searchbar";
 IndexMenu.INDEX_LINK_ID = "index-link";
+IndexMenu.MENU_TOGGLE_SIGNAL = setSignal();
 export default IndexMenu;
