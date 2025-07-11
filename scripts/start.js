@@ -290,7 +290,7 @@
             return `${getConfiguration("base")["web_url"]}/${appendix}`.toLocaleLowerCase();
         }
         static getRoute(appendix) {
-            return this.getWebUrl(`/#/${appendix}`);
+            return this.getWebUrl(`#/${appendix}`);
         }
         static getWikiViewRoute(appendix) {
             return `${getConfiguration("views")["wiki"]}/${appendix}`.toLocaleLowerCase();
