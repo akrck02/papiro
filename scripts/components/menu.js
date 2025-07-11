@@ -1,4 +1,5 @@
 import { BubbleUI } from "../lib/bubble.js";
+import { getConfiguration } from "../lib/configuration.js";
 import { setDomAttributes, setDomEvents, uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
 import { getIcon } from "../lib/icons.js";
@@ -11,7 +12,7 @@ class IndexMenu {
         // menu
         const menu = uiComponent({
             type: Html.Div,
-            id: IndexMenu.ID,
+            id: this.ID,
         });
         connectToSignal(IndexMenu.MENU_TOGGLE_SIGNAL, async () => {
             if (menu.classList.contains("show")) {
@@ -21,15 +22,13 @@ class IndexMenu {
                 menu.classList.add("show");
             }
         });
-        // search bar
-        // const searchBar = uiComponent({
-        //   type: Html.Input,
-        //   id: IndexMenu.SEARCHBAR_ID,
-        //   attributes: {
-        //     placeholder: "Search...",
-        //   },
-        // });
-        // menu.appendChild(searchBar);
+        const title = uiComponent({
+            type: Html.H1,
+            id: this.TITLE_ID,
+            text: getConfiguration("base")["app_name"],
+            styles: {},
+        });
+        menu.appendChild(title);
         // options
         const options = uiComponent({
             type: Html.Div,
@@ -38,11 +37,11 @@ class IndexMenu {
         menu.appendChild(options);
         // create index options
         for (const key in index) {
-            options.appendChild(this.createOption(PathService.getWikiViewRoute(key), key, index[key], options));
+            options.appendChild(this.createOption(PathService.getWikiViewRoute(key), key, index[key]));
         }
         return menu;
     }
-    static createOption(route, key, value, parent, level = 0) {
+    static createOption(route, key, value, level = 0) {
         switch (value.type) {
             case ItemType.Directory:
                 const item = this.indexLink(null, key, level);
@@ -51,7 +50,7 @@ class IndexMenu {
                 });
                 container.appendChild(item);
                 for (const key in value.files) {
-                    container.appendChild(this.createOption(`${route}/${key}`.toLocaleLowerCase(), key, value.files[key], container, level + 1));
+                    container.appendChild(this.createOption(`${route}/${key}`.toLocaleLowerCase(), key, value.files[key], level + 1));
                 }
                 return container;
             case ItemType.File:
@@ -62,10 +61,10 @@ class IndexMenu {
         const isDirectory = null == route;
         name = PathService.getPascalCase(name);
         const selected = "wiki/" + WikiService.getCurrentRoute() == route;
-        const text = name;
+        const text = PathService.decodeCustomUrl(name);
         const item = uiComponent({
             type: Html.A,
-            id: IndexMenu.INDEX_LINK_ID,
+            id: this.INDEX_LINK_ID,
             classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter, "hover-primary"],
             text: text,
             styles: { paddingLeft: `${2 + level}rem` },
@@ -82,8 +81,8 @@ class IndexMenu {
         }
         setDomEvents(item, {
             click: () => {
-                emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {});
-                const items = document.querySelectorAll("#" + IndexMenu.INDEX_LINK_ID);
+                emitSignal(this.MENU_TOGGLE_SIGNAL, {});
+                const items = document.querySelectorAll("#" + this.INDEX_LINK_ID);
                 for (const it of items) {
                     it.classList.remove("selected");
                 }
@@ -97,7 +96,7 @@ class IndexMenu {
     }
 }
 IndexMenu.ID = "index-menu";
-IndexMenu.SEARCHBAR_ID = "searchbar";
+IndexMenu.TITLE_ID = "title";
 IndexMenu.INDEX_LINK_ID = "index-link";
 IndexMenu.MENU_TOGGLE_SIGNAL = setSignal();
 export default IndexMenu;

@@ -32,7 +32,6 @@
         const loadedConfiguration = await fetch(path).then((res) => res.json());
         if (null != localStorage[configurationId]) {
             JSON.stringify(loadedConfiguration);
-            debugger;
             for (const key in loadedConfiguration) {
                 setConfiguration(key, loadedConfiguration[key]);
             }
@@ -302,19 +301,25 @@
 
     class PathService {
         static getWebUrl(appendix) {
-            return `${getConfiguration("base")["web_url"]}/${appendix}`.toLocaleLowerCase();
+            return this.encodeCustomUrl(`${getConfiguration("base")["web_url"]}/${appendix}`.toLocaleLowerCase());
         }
         static getRoute(appendix) {
             return this.getWebUrl(`#/${appendix}`);
         }
-        static getWikiViewRoute(appendix) {
-            return `${getConfiguration("views")["wiki"]}/${appendix}`.toLocaleLowerCase();
+        static getWikiViewRoute(appendix, useHash = false) {
+            return this.encodeCustomUrl(`${useHash ? "/#/" : ""}${getConfiguration("views")["wiki"]}/${appendix}`.toLocaleLowerCase());
         }
         static getPascalCase(name) {
             return name.substring(0, 1).toUpperCase().concat(name.substring(1));
         }
         static getFullWikiPath(subPath, appendix) {
-            return this.getWebUrl(`${getConfiguration("path")["wiki"]}/${subPath.substring(0, subPath.lastIndexOf("/"))}/${appendix}`);
+            return this.encodeCustomUrl(this.getWebUrl(`${getConfiguration("path")["wiki"]}/${subPath.substring(0, subPath.lastIndexOf("/"))}/${appendix}`));
+        }
+        static encodeCustomUrl(url) {
+            return url?.replaceAll(" ", "-") ?? "";
+        }
+        static decodeCustomUrl(url) {
+            return url?.replaceAll("-", " ") ?? "";
         }
     }
 
@@ -1808,7 +1813,7 @@ ${body}</tbody>
             // menu
             const menu = uiComponent({
                 type: Html.Div,
-                id: IndexMenu.ID,
+                id: this.ID,
             });
             connectToSignal(IndexMenu.MENU_TOGGLE_SIGNAL, async () => {
                 if (menu.classList.contains("show")) {
@@ -1818,15 +1823,13 @@ ${body}</tbody>
                     menu.classList.add("show");
                 }
             });
-            // search bar
-            // const searchBar = uiComponent({
-            //   type: Html.Input,
-            //   id: IndexMenu.SEARCHBAR_ID,
-            //   attributes: {
-            //     placeholder: "Search...",
-            //   },
-            // });
-            // menu.appendChild(searchBar);
+            const title = uiComponent({
+                type: Html.H1,
+                id: this.TITLE_ID,
+                text: getConfiguration("base")["app_name"],
+                styles: {},
+            });
+            menu.appendChild(title);
             // options
             const options = uiComponent({
                 type: Html.Div,
@@ -1835,11 +1838,11 @@ ${body}</tbody>
             menu.appendChild(options);
             // create index options
             for (const key in index) {
-                options.appendChild(this.createOption(PathService.getWikiViewRoute(key), key, index[key], options));
+                options.appendChild(this.createOption(PathService.getWikiViewRoute(key), key, index[key]));
             }
             return menu;
         }
-        static createOption(route, key, value, parent, level = 0) {
+        static createOption(route, key, value, level = 0) {
             switch (value.type) {
                 case ItemType.Directory:
                     const item = this.indexLink(null, key, level);
@@ -1848,7 +1851,7 @@ ${body}</tbody>
                     });
                     container.appendChild(item);
                     for (const key in value.files) {
-                        container.appendChild(this.createOption(`${route}/${key}`.toLocaleLowerCase(), key, value.files[key], container, level + 1));
+                        container.appendChild(this.createOption(`${route}/${key}`.toLocaleLowerCase(), key, value.files[key], level + 1));
                     }
                     return container;
                 case ItemType.File:
@@ -1858,10 +1861,10 @@ ${body}</tbody>
         static indexLink(route, name, level) {
             name = PathService.getPascalCase(name);
             const selected = "wiki/" + WikiService.getCurrentRoute() == route;
-            const text = name;
+            const text = PathService.decodeCustomUrl(name);
             const item = uiComponent({
                 type: Html.A,
-                id: IndexMenu.INDEX_LINK_ID,
+                id: this.INDEX_LINK_ID,
                 classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter, "hover-primary"],
                 text: text,
                 styles: { paddingLeft: `${2 + level}rem` },
@@ -1878,8 +1881,8 @@ ${body}</tbody>
             }
             setDomEvents(item, {
                 click: () => {
-                    emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {});
-                    const items = document.querySelectorAll("#" + IndexMenu.INDEX_LINK_ID);
+                    emitSignal(this.MENU_TOGGLE_SIGNAL, {});
+                    const items = document.querySelectorAll("#" + this.INDEX_LINK_ID);
                     for (const it of items) {
                         it.classList.remove("selected");
                     }
@@ -1893,7 +1896,7 @@ ${body}</tbody>
         }
     }
     IndexMenu.ID = "index-menu";
-    IndexMenu.SEARCHBAR_ID = "searchbar";
+    IndexMenu.TITLE_ID = "title";
     IndexMenu.INDEX_LINK_ID = "index-link";
     IndexMenu.MENU_TOGGLE_SIGNAL = setSignal();
 
@@ -2129,6 +2132,51 @@ ${body}</tbody>
     HomeView.SUBTITLE_ID = "subtitle";
     HomeView.EXPLORE_LINK_ID = "explore";
 
+    class Breadcrumb {
+        static create(route, index) {
+            const breadcrumb = uiComponent({
+                type: Html.Div,
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
+                styles: {
+                    width: "100%",
+                    height: "3rem",
+                    padding: "0rem 1rem",
+                    fontSize: "1rem",
+                    background: "",
+                    borderBottom: ".1rem solid var(--surface-2)",
+                },
+            });
+            const sections = route.split("/");
+            let currentRoute = "";
+            for (let i = 0; i < sections.length; i++) {
+                const isNotLastSection = i < sections.length - 1;
+                currentRoute += sections[i];
+                const sectionLink = uiComponent({
+                    type: Html.A,
+                    text: PathService.decodeCustomUrl(sections[i]),
+                    attributes: {
+                        href: PathService.getWikiViewRoute(currentRoute, true),
+                    },
+                    styles: {
+                        margin: "1rem",
+                        color: isNotLastSection
+                            ? "var(--on-surface)"
+                            : "var(--primary-color)",
+                        cursor: "pointer",
+                    },
+                });
+                breadcrumb.appendChild(sectionLink);
+                if (isNotLastSection) {
+                    const icon = getIcon("material", "next");
+                    icon.classList.add(BubbleUI.BoxColumn, BubbleUI.BoxCenter);
+                    breadcrumb.appendChild(icon);
+                    currentRoute += "/";
+                }
+            }
+            return breadcrumb;
+        }
+    }
+
     class MarkdownCanvas {
         static create(markdown) {
             return uiComponent({
@@ -2149,7 +2197,10 @@ ${body}</tbody>
                 id: WikiView.VIEW_ID,
                 classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
             });
-            WikiView.getDocumentHTML(WikiService.getCurrentRoute(), WikiService.index).then((doc) => {
+            const route = WikiService.getCurrentRoute();
+            const breadcrumb = Breadcrumb.create(route, WikiService.index);
+            view.appendChild(breadcrumb);
+            WikiView.getDocumentHTML(route, WikiService.index).then((doc) => {
                 const canvas = MarkdownCanvas.create(doc);
                 view.appendChild(canvas);
             });
@@ -2176,16 +2227,16 @@ ${body}</tbody>
             const index = uiComponent({});
             const title = uiComponent({
                 type: Html.H1,
-                text: `Index for ${route}`,
+                text: `${route}`,
             });
             const list = uiComponent({ type: Html.Ul });
             for (const key in indexItem.files) {
                 const listItem = uiComponent({ type: Html.Li });
                 const link = uiComponent({
                     type: Html.A,
-                    text: key,
+                    text: PathService.decodeCustomUrl(PathService.getPascalCase(key)),
                     attributes: {
-                        href: key,
+                        href: PathService.getWikiViewRoute(`${route}/${key}`, true),
                     },
                 });
                 listItem.appendChild(link);
@@ -2215,7 +2266,6 @@ ${body}</tbody>
         Display.checkType();
         // load configuration
         const isDarkTheme = getConfiguration("theme") == "dark";
-        debugger;
         if (isDarkTheme) {
             Theme.setDark();
         }

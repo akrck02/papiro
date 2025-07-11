@@ -13,7 +13,6 @@ export async function loadConfiguration(path) {
     const loadedConfiguration = await fetch(path).then((res) => res.json());
     if (null != localStorage[configurationId]) {
         const loaded = JSON.stringify(loadedConfiguration);
-        debugger;
         for (const key in loadedConfiguration) {
             setConfiguration(key, loadedConfiguration[key]);
         }

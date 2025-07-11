@@ -1,3 +1,4 @@
+import Breadcrumb from "../components/breadcrumb.js";
 import MarkdownCanvas from "../components/markdown.js";
 import { BubbleUI } from "../lib/bubble.js";
 import { uiComponent } from "../lib/dom.js";
@@ -15,7 +16,10 @@ class WikiView {
             id: WikiView.VIEW_ID,
             classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
         });
-        WikiView.getDocumentHTML(WikiService.getCurrentRoute(), WikiService.index).then((doc) => {
+        const route = WikiService.getCurrentRoute();
+        const breadcrumb = Breadcrumb.create(route, WikiService.index);
+        view.appendChild(breadcrumb);
+        WikiView.getDocumentHTML(route, WikiService.index).then((doc) => {
             const canvas = MarkdownCanvas.create(doc);
             view.appendChild(canvas);
         });
@@ -42,16 +46,16 @@ class WikiView {
         const index = uiComponent({});
         const title = uiComponent({
             type: Html.H1,
-            text: `Index for ${route}`,
+            text: `${route}`,
         });
         const list = uiComponent({ type: Html.Ul });
         for (const key in indexItem.files) {
             const listItem = uiComponent({ type: Html.Li });
             const link = uiComponent({
                 type: Html.A,
-                text: key,
+                text: PathService.decodeCustomUrl(PathService.getPascalCase(key)),
                 attributes: {
-                    href: key,
+                    href: PathService.getWikiViewRoute(`${route}/${key}`, true),
                 },
             });
             listItem.appendChild(link);
