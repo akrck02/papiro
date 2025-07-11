@@ -11,11 +11,21 @@ div#index-menu {
 	z-index: 9;
 	right: 100%;
 	width: 100%;
-	transition: right var(--animation-medium) ease-in;
+	transition: right var(--animation-fast) ease-in;
 }
 
 :root[data-display="mobile"] div#index-menu.show {
 	right: 0;
+}
+
+div#index-menu h1#title {
+	display: none;
+	padding-bottom: 1rem;
+	border-bottom: 0.05rem solid var(--surface-3);
+}
+
+:root[data-display="mobile"] div#index-menu h1#title {
+	display: block;
 }
 
 div#index-menu input#searchbar {

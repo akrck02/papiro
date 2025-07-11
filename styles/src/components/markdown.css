@@ -1,14 +1,13 @@
 .markdown {
 	display: flex;
 	flex-direction: column;
-	padding: 2rem;
-	height: 100%;
+	padding: 2rem 2rem;
 	width: 100%;
-	overflow-y: auto;
+	max-width: 75rem;
 }
 
 :root[data-display="mobile"] .markdown {
-	padding: 2rem 0.75rem;
+	padding: 1rem 0.75rem;
 }
 
 .markdown h1,
@@ -135,6 +134,7 @@
 	background: var(--on-surface-1);
 }
 
-:root[data-display="mobile"] a {
+:root[data-display="mobile"] .markdown a {
 	font-size: 1rem;
+	line-height: 135%;
 }

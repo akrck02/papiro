@@ -1,9 +1,13 @@
 view#wiki {
-    width: 100%;
-    height: 100%;
-    max-width: 75rem;
-    overflow: auto;
-    font-size: 1.6rem;
-    transition: opacity var(--animation-medium);
-    opacity: 0;
+	width: 100%;
+	height: 100%;
+	/* max-width: 75rem; */
+	overflow: auto;
+	font-size: 1.6rem;
+	transition: opacity var(--animation-medium);
+	opacity: 0;
+}
+
+:root[data-display="mobile"] view#wiki {
+	height: calc(100%);
 }

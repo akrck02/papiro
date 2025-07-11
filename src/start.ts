@@ -35,7 +35,6 @@ window.onload = async function () {
 
 	// load configuration
 	const isDarkTheme = getConfiguration("theme") == "dark";
-	debugger;
 	if (isDarkTheme) {
 		Theme.setDark();
 	} else {
