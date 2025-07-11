@@ -51,4 +51,7 @@ jobs:
         uses: tsickert/discord-webhook@v7.0.0
         with:
           webhook-url: ${{ secrets.WEBHOOK_URL }}
-          content: "a new papirus version is released!"
+          embed-description: |
+            New version of papiro was deployed 🚀
+
+            https://akrck02.org/papiro
