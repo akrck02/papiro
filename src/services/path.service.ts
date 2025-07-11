@@ -11,9 +11,9 @@ export default class PathService {
 		return this.getWebUrl(`#/${appendix}`);
 	}
 
-	static getWikiViewRoute(appendix: string, useHash = false): string {
+	static getWikiViewRoute(appendix: string, full = false): string {
 		return this.encodeCustomUrl(
-			`${useHash ? "/#/" : ""}${getConfiguration("views")["wiki"]}/${appendix}`.toLocaleLowerCase(),
+			`${full ? getConfiguration("base")["web_url"] + "/#/" : ""}${getConfiguration("views")["wiki"]}/${appendix}`.toLocaleLowerCase(),
 		);
 	}
 
