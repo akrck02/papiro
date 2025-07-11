@@ -23,14 +23,23 @@
      * The id of the configuration used in the LocalStorage API
      * NOTE: Change this value with your app name.
      */
-    const configurationId = "skyleriearts-website-config";
+    let configurationId = "papiro-config";
     /**
      * Load a JSON file as the configuration of the app
      * @param path The file path
      */
     async function loadConfiguration(path) {
         const loadedConfiguration = await fetch(path).then((res) => res.json());
-        localStorage[configurationId] = JSON.stringify(loadedConfiguration);
+        if (null != localStorage[configurationId]) {
+            JSON.stringify(loadedConfiguration);
+            debugger;
+            for (const key in loadedConfiguration) {
+                setConfiguration(key, loadedConfiguration[key]);
+            }
+        }
+        else {
+            localStorage[configurationId] = JSON.stringify(loadedConfiguration);
+        }
     }
     /**
      * Set a configuration parameter
@@ -247,13 +256,19 @@
     const THEME_CHANGED_SIGNAL = setSignal();
     class Theme {
         static toggle() {
-            if (document.documentElement.dataset.theme == "dark") {
-                setDomDataset(document.documentElement, { theme: "light" });
-            }
-            else {
-                setDomDataset(document.documentElement, { theme: "dark" });
-            }
+            if (document.documentElement.dataset.theme == "dark")
+                this.setLight();
+            else
+                this.setDark();
             emitSignal(THEME_CHANGED_SIGNAL, {});
+        }
+        static setDark() {
+            setDomDataset(document.documentElement, { theme: "dark" });
+            setConfiguration("theme", "dark");
+        }
+        static setLight() {
+            setDomDataset(document.documentElement, { theme: "light" });
+            setConfiguration("theme", "light");
         }
         static isDark() {
             return document.documentElement.dataset["theme"] == "dark";
@@ -2198,8 +2213,16 @@ ${body}</tbody>
         await loadConfiguration("gtdf.config.json");
         document.title = getConfiguration("base")["app_name"];
         Display.checkType();
-        await loadIcons("material", `${getConfiguration("path")["icons"]}/materialicons.json`);
-        await loadIcons("social", `${getConfiguration("path")["icons"]}/socialicons.json`);
+        // load configuration
+        const isDarkTheme = getConfiguration("theme") == "dark";
+        debugger;
+        if (isDarkTheme) {
+            Theme.setDark();
+        }
+        else {
+            Theme.setLight();
+        }
+        await getIcons();
         // create top bar
         const topBar = TopBar.create();
         document.body.appendChild(topBar);
@@ -2231,6 +2254,12 @@ ${body}</tbody>
     window.onresize = async function () {
         Display.checkType();
     };
+    /**
+     * Get app icons
+     */
+    async function getIcons() {
+        await loadIcons("material", `${getConfiguration("path")["icons"]}/materialicons.json`);
+    }
     /**
      * Set routes
      */

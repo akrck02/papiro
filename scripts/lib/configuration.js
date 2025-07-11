@@ -3,7 +3,7 @@ const DEFAULT_CONFIGURATION_ID = "gtd";
  * The id of the configuration used in the LocalStorage API
  * NOTE: Change this value with your app name.
  */
-const configurationId = "skyleriearts-website-config";
+let configurationId = "papiro-config";
 /**
  * Load a JSON file as the configuration of the app
  * @param path The file path
@@ -11,7 +11,16 @@ const configurationId = "skyleriearts-website-config";
 export async function loadConfiguration(path) {
     assertIdHasBeenChanged();
     const loadedConfiguration = await fetch(path).then((res) => res.json());
-    localStorage[configurationId] = JSON.stringify(loadedConfiguration);
+    if (null != localStorage[configurationId]) {
+        const loaded = JSON.stringify(loadedConfiguration);
+        debugger;
+        for (const key in loadedConfiguration) {
+            setConfiguration(key, loadedConfiguration[key]);
+        }
+    }
+    else {
+        localStorage[configurationId] = JSON.stringify(loadedConfiguration);
+    }
 }
 /**
  * Set a configuration parameter
@@ -38,3 +47,6 @@ export function getConfiguration(id) {
  * Assert that the id has been changed
  */
 function assertIdHasBeenChanged() { }
+export function setConfigurationId(id) {
+    configurationId = id;
+}
