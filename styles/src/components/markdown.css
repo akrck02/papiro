@@ -66,8 +66,11 @@
 .markdown blockquote {
 	font-family: var(--font-light);
 	font-style: italic;
-	font-weight: 600;
 	display: block;
+}
+
+.markdown blockquote p {
+	font-weight: bolder;
 }
 
 .markdown img {

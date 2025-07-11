@@ -1,12 +1,17 @@
 import TopBar from "./components/bar.js";
 import IndexMenu from "./components/menu.js";
 import { BubbleUI } from "./lib/bubble.js";
-import { getConfiguration, loadConfiguration } from "./lib/configuration.js";
+import {
+	getConfiguration,
+	loadConfiguration,
+	setConfigurationId,
+} from "./lib/configuration.js";
 import { Display } from "./lib/display.js";
 import { uiComponent } from "./lib/dom.js";
 import { loadIcons } from "./lib/icons.js";
 import { getUrlParametersByBreakPoint } from "./lib/paths.js";
 import { setNotFoundRoute, setRoute, showRoute } from "./lib/router.js";
+import { Theme } from "./services/theme.js";
 import WikiService from "./services/wiki.service.js";
 import HomeView from "./views/home.js";
 import WikiView from "./views/wiki.js";
@@ -24,71 +29,81 @@ window.addEventListener("hashchange", start);
  * the app state to show
  */
 window.onload = async function () {
-  await loadConfiguration("gtdf.config.json");
-  document.title = getConfiguration("base")["app_name"];
-  Display.checkType();
+	await loadConfiguration("gtdf.config.json");
+	document.title = getConfiguration("base")["app_name"];
+	Display.checkType();
 
-  await loadIcons(
-    "material",
-    `${getConfiguration("path")["icons"]}/materialicons.json`,
-  );
-  await loadIcons(
-    "social",
-    `${getConfiguration("path")["icons"]}/socialicons.json`,
-  );
+	// load configuration
+	const isDarkTheme = getConfiguration("theme") == "dark";
+	debugger;
+	if (isDarkTheme) {
+		Theme.setDark();
+	} else {
+		Theme.setLight();
+	}
 
-  // create top bar
-  const topBar = TopBar.create();
-  document.body.appendChild(topBar);
+	await getIcons();
 
-  // load wiki index
-  await WikiService.loadIndex();
+	// create top bar
+	const topBar = TopBar.create();
+	document.body.appendChild(topBar);
 
-  // content container
-  const content = uiComponent({
-    styles: {
-      width: "100%",
-      height: "calc(100% - 3rem)",
-    },
-    classes: [BubbleUI.BoxRow],
-    selectable: false,
-  });
+	// load wiki index
+	await WikiService.loadIndex();
 
-  // menu
-  const menu = IndexMenu.create(WikiService.index);
-  content.appendChild(menu);
+	// content container
+	const content = uiComponent({
+		styles: {
+			width: "100%",
+			height: "calc(100% - 3rem)",
+		},
+		classes: [BubbleUI.BoxRow],
+		selectable: false,
+	});
 
-  // document container
-  documentContainer = uiComponent({
-    styles: {
-      width: "100%",
-      height: "100%",
-    },
-  });
-  content.appendChild(documentContainer);
+	// menu
+	const menu = IndexMenu.create(WikiService.index);
+	content.appendChild(menu);
 
-  document.body.appendChild(content);
-
-  await start();
+	// document container
+	documentContainer = uiComponent({
+		styles: {
+			width: "100%",
+			height: "100%",
+		},
+	});
+	content.appendChild(documentContainer);
+	document.body.appendChild(content);
+	await start();
 };
 
 window.onresize = async function () {
-  Display.checkType();
+	Display.checkType();
 };
+
+/**
+ * Get app icons
+ */
+async function getIcons() {
+	await loadIcons(
+		"material",
+		`${getConfiguration("path")["icons"]}/materialicons.json`,
+	);
+}
 
 /**
  * Set routes
  */
 function setRoutes(parent: HTMLElement) {
-  setRoute("", HomeView.show);
-  setRoute("/wiki", WikiView.show);
-  showRoute(window.location.hash.slice(1).toLowerCase(), parent);
-  //setNotFoundRoute(HomeView.show);
+	setRoute("", HomeView.show);
+	setRoute("/wiki", WikiView.show);
+	showRoute(window.location.hash.slice(1).toLowerCase(), parent);
+	//setNotFoundRoute(HomeView.show);
 }
 
 /**
  *  Start the web app
  */
 async function start() {
-  setRoutes(documentContainer);
+	setRoutes(documentContainer);
 }
