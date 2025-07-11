@@ -4,7 +4,7 @@
     "app_version": "v1.0.0",
     "enviroment": "development",
     "author": "akrck02",
-    "web_url": "http://slimbook-executive-16:8000"
+    "web_url": "https://akrck02.org/papiro"
   },
   "path": {
     "url": "./",
