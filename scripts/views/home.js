@@ -25,45 +25,27 @@ class HomeView {
             attributes: {
                 src: `${getConfiguration("path")["icons"]}/logo.svg`,
             },
-            styles: {
-                height: "6rem",
-                marginRight: ".75rem",
-            },
         });
         const title = uiComponent({
             type: Html.H1,
+            id: HomeView.TITLE_ID,
             text: getConfiguration("base")["app_name"] + logo.outerHTML,
-            styles: {
-                fontSize: "6rem",
-            },
             classes: [BubbleUI.BoxRow, BubbleUI.BoxCenter],
         });
         content.appendChild(title);
         const subtitle = uiComponent({
-            type: Html.H1,
+            type: Html.H2,
+            id: HomeView.SUBTITLE_ID,
             text: "The simple markdown wiki.",
-            styles: {
-                fontSize: "1.25rem",
-                marginBottom: "4rem",
-                color: "var(--on-surface-2)",
-                opacity: ".65",
-            },
         });
         content.appendChild(subtitle);
         const link = uiComponent({
             type: Html.A,
+            id: HomeView.EXPLORE_LINK_ID,
             text: "Explore 👀",
             classes: [BubbleUI.BoxColumn, BubbleUI.BoxCenter],
             attributes: {
                 href: `${getConfiguration("base")["web_url"]}/#/wiki`,
-            },
-            styles: {
-                background: "var(--surface-2)",
-                padding: "1rem 2rem",
-                borderRadius: "5rem",
-                fontSize: "1.5rem",
-                opacity: ".85",
-                color: "var(--on-surface-2)",
             },
         });
         content.appendChild(link);
@@ -73,4 +55,7 @@ class HomeView {
 }
 // HTML ids and classes
 HomeView.VIEW_ID = "home";
+HomeView.TITLE_ID = "title";
+HomeView.SUBTITLE_ID = "subtitle";
+HomeView.EXPLORE_LINK_ID = "explore";
 export default HomeView;
