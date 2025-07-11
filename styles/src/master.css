@@ -60,6 +60,15 @@ view {
     background: var(--background);
 }
 
+:root[data-display="mobile"] body {
+    display: flex;
+    flex-direction: column;
+}
+
+:root[data-display="mobile"] body {
+    flex-direction: column-reverse;
+}
+
 * {
     transition:
         background var(--animation-fast) ease-in,
