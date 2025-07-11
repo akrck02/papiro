@@ -20,6 +20,9 @@ class WikiView {
             view.appendChild(canvas);
         });
         container.appendChild(view);
+        setTimeout(() => {
+            view.style.opacity = "1";
+        }, 100);
     }
     static async getDocumentHTML(route, index) {
         // If it is the home

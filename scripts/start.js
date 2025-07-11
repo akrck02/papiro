@@ -1804,14 +1804,14 @@ ${body}</tbody>
                 }
             });
             // search bar
-            const searchBar = uiComponent({
-                type: Html.Input,
-                id: IndexMenu.SEARCHBAR_ID,
-                attributes: {
-                    placeholder: "Search...",
-                },
-            });
-            menu.appendChild(searchBar);
+            // const searchBar = uiComponent({
+            //   type: Html.Input,
+            //   id: IndexMenu.SEARCHBAR_ID,
+            //   attributes: {
+            //     placeholder: "Search...",
+            //   },
+            // });
+            // menu.appendChild(searchBar);
             // options
             const options = uiComponent({
                 type: Html.Div,
@@ -1841,18 +1841,15 @@ ${body}</tbody>
             }
         }
         static indexLink(route, name, level) {
-            const isDirectory = null == route;
             name = PathService.getPascalCase(name);
             const selected = "wiki/" + WikiService.getCurrentRoute() == route;
-            const text = isDirectory
-                ? `${IndexMenu.getIndexLinkIcon("expand").outerHTML} &nbsp;${name}`
-                : `${IndexMenu.getIndexLinkIcon("tag").outerHTML} &nbsp;${name}`;
+            const text = name;
             const item = uiComponent({
                 type: Html.A,
                 id: IndexMenu.INDEX_LINK_ID,
                 classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter, "hover-primary"],
                 text: text,
-                styles: { paddingLeft: `${1 + level}rem` },
+                styles: { paddingLeft: `${2 + level}rem` },
                 selectable: false,
                 data: {
                     route: route,
@@ -1930,6 +1927,8 @@ ${body}</tbody>
             const showMenuIcon = getIcon("material", "menu_open");
             showMenuIcon.id = TopBar.MENU_ICON_ID;
             iconBar.appendChild(showMenuIcon);
+            const searchIcon = getIcon("material", "search");
+            iconBar.appendChild(searchIcon);
             setDomEvents(showMenuIcon, {
                 click: (e) => emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {}),
             });
@@ -2155,6 +2154,9 @@ ${body}</tbody>
                 view.appendChild(canvas);
             });
             container.appendChild(view);
+            setTimeout(() => {
+                view.style.opacity = "1";
+            }, 100);
         }
         static async getDocumentHTML(route, index) {
             // If it is the home

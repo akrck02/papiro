@@ -51,6 +51,8 @@ class TopBar {
         const showMenuIcon = getIcon("material", "menu_open");
         showMenuIcon.id = TopBar.MENU_ICON_ID;
         iconBar.appendChild(showMenuIcon);
+        const searchIcon = getIcon("material", "search");
+        iconBar.appendChild(searchIcon);
         setDomEvents(showMenuIcon, {
             click: (e) => emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {}),
         });
