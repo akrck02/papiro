@@ -6,8 +6,8 @@ export default class PathService {
     static getRoute(appendix) {
         return this.getWebUrl(`#/${appendix}`);
     }
-    static getWikiViewRoute(appendix, useHash = false) {
-        return this.encodeCustomUrl(`${useHash ? "/#/" : ""}${getConfiguration("views")["wiki"]}/${appendix}`.toLocaleLowerCase());
+    static getWikiViewRoute(appendix, full = false) {
+        return this.encodeCustomUrl(`${full ? getConfiguration("base")["web_url"] + "/#/" : ""}${getConfiguration("views")["wiki"]}/${appendix}`.toLocaleLowerCase());
     }
     static getPascalCase(name) {
         return name.substring(0, 1).toUpperCase().concat(name.substring(1));
