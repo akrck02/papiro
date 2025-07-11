@@ -52,6 +52,6 @@ jobs:
         with:
           webhook-url: ${{ secrets.WEBHOOK_URL }}
           embed-description: |
-            New version of papiro was deployed 🚀
+            New version of ${{ github.event.repository.name }} docs was deployed 🚀
 
             https://akrck02.org/papiro
