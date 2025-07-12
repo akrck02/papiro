@@ -18,10 +18,6 @@ div#breadcrumb a.br-section {
 	border-radius: 0.35rem;
 }
 
-div#breadcrumb a.br-section:focus {
-	border: 0.15rem solid var(--primary-color);
-}
-
 div#breadcrumb a.br-section.current {
 	color: var(--primary-color);
 }

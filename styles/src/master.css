@@ -75,7 +75,7 @@ view {
 	transition: none;
 }
 
-a:focus {
+a:focus:not(:hover) {
 	border-radius: 0.35rem;
 	border: 0.15rem solid var(--primary-color);
 }
