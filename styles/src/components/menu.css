@@ -71,6 +71,9 @@ div#index-menu a#index-link.selected::after {
 	background: var(--primary-color);
 	color: var(--primary-color);
 }
+div#index-menu a#index-link:focus {
+	border: none;
+}
 
 div#index-menu a#index-link:not(.selected):hover::after,
 div#index-menu a#index-link:not(.selected):focus::after {
