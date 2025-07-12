@@ -59,6 +59,10 @@
         const configuration = JSON.parse(localStorage[configurationId]);
         return configuration[id];
     }
+    function isConfigurationActive(id) {
+        debugger;
+        return getConfiguration(id) == true;
+    }
 
     /** Create a DOM element */
     function uiComponent(properties) {
@@ -264,6 +268,8 @@
         AppConfigurations["GithubRepository"] = "github_repository";
         AppConfigurations["WebUrl"] = "web_url";
         AppConfigurations["Path"] = "path";
+        AppConfigurations["ShowFooter"] = "show_footer";
+        AppConfigurations["ShowBreadCrumb"] = "show_breadcrumb";
     })(AppConfigurations || (AppConfigurations = {}));
     var PathConfigurations;
     (function (PathConfigurations) {
@@ -2231,29 +2237,28 @@ ${body}</tbody>
         static create() {
             const footer = uiComponent({
                 type: Html.Footer,
+                id: this.ID,
                 classes: [BubbleUI.BoxRow, BubbleUI.BoxCenter],
-                styles: {
-                    marginTop: "2rem",
-                    padding: "1rem 2rem 6rem 2rem",
-                    width: "100%",
-                    borderTop: "0.1rem solid var(--surface-2)",
-                    maxWidth: "75rem",
+            });
+            const githubRepositoryLink = uiComponent({
+                type: Html.A,
+                text: getConfiguration(AppConfigurations.CoreName),
+                attributes: {
+                    href: getConfiguration(AppConfigurations.GithubRepository),
                 },
             });
             const text = uiComponent({
                 type: Html.P,
+                id: this.TEXT_ID,
                 classes: [BubbleUI.TextCenter],
-                text: `Powered by ${getConfiguration(AppConfigurations.CoreName)} ${getConfiguration(AppConfigurations.CoreVersion)}, made with 🩵 by ${getConfiguration(AppConfigurations.Author)}`,
-                styles: {
-                    fontSize: "1rem",
-                    fontHeight: "135%",
-                    color: "var(--surface-6)",
-                },
+                text: `Powered by ${githubRepositoryLink.outerHTML} ${getConfiguration(AppConfigurations.CoreVersion)}, made with 🩵 by ${getConfiguration(AppConfigurations.Author)}`,
             });
             footer.appendChild(text);
             return footer;
         }
     }
+    Footer.ID = "footer";
+    Footer.TEXT_ID = "text";
 
     class MarkdownCanvas {
         static create(markdown) {
@@ -2276,11 +2281,14 @@ ${body}</tbody>
                 classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
             });
             const route = WikiService.getCurrentRoute();
-            const breadcrumb = Breadcrumb.create(route, WikiService.index);
-            view.appendChild(breadcrumb);
+            if (isConfigurationActive(AppConfigurations.ShowBreadCrumb)) {
+                const breadcrumb = Breadcrumb.create(route, WikiService.index);
+                view.appendChild(breadcrumb);
+            }
             WikiView.getDocumentHTML(route, WikiService.index).then((doc) => {
                 view.appendChild(MarkdownCanvas.create(doc));
-                view.appendChild(Footer.create());
+                if (isConfigurationActive(AppConfigurations.ShowFooter))
+                    view.appendChild(Footer.create());
             });
             container.appendChild(view);
             setTimeout(() => {

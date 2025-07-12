@@ -42,6 +42,10 @@ export function getConfiguration(id) {
     const configuration = JSON.parse(localStorage[configurationId]);
     return configuration[id];
 }
+export function isConfigurationActive(id) {
+    debugger;
+    return getConfiguration(id) == true;
+}
 /**
  * Assert that the id has been changed
  */
