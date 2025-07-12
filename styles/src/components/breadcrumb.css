@@ -14,6 +14,12 @@ div#breadcrumb a.br-section {
 	margin: 1rem;
 	color: var(--on-surface);
 	cursor: pointer;
+	padding: 0.3rem;
+	border-radius: 0.35rem;
+}
+
+div#breadcrumb a.br-section:focus {
+	border: 0.15rem solid var(--primary-color);
 }
 
 div#breadcrumb a.br-section.current {

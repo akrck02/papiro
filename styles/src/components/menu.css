@@ -72,7 +72,8 @@ div#index-menu a#index-link.selected::after {
 	color: var(--primary-color);
 }
 
-div#index-menu a#index-link:not(.selected):hover::after {
+div#index-menu a#index-link:not(.selected):hover::after,
+div#index-menu a#index-link:not(.selected):focus::after {
 	background: var(--primary-color);
 	color: var(--primary-color);
 	opacity: 0.5;
