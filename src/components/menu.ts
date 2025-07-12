@@ -4,6 +4,8 @@ import { setDomAttributes, setDomEvents, uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
 import { getIcon } from "../lib/icons.js";
 import { connectToSignal, emitSignal, setSignal } from "../lib/signals.js";
+import { AppConfigurations } from "../model/enum/configurations.js";
+import { IconBundle } from "../model/enum/icons.js";
 import { Index, IndexItem, ItemType } from "../model/index.item.js";
 import PathService from "../services/path.service.js";
 import WikiService from "../services/wiki.service.js";
@@ -15,40 +17,32 @@ export default class IndexMenu {
 	static readonly MENU_TOGGLE_SIGNAL = setSignal();
 
 	static create(index: Index): HTMLElement {
-		// menu
 		const menu = uiComponent({
 			type: Html.Div,
 			id: this.ID,
 		});
 
 		connectToSignal(IndexMenu.MENU_TOGGLE_SIGNAL, async () => {
-			if (menu.classList.contains("show")) {
-				menu.classList.remove("show");
-			} else {
-				menu.classList.add("show");
-			}
+			if (menu.classList.contains("show")) menu.classList.remove("show");
+			else menu.classList.add("show");
 		});
 
 		const title = uiComponent({
 			type: Html.H1,
 			id: this.TITLE_ID,
-			text: getConfiguration("base")["app_name"],
+			text: getConfiguration(AppConfigurations.AppName),
 			styles: {},
 		});
 		menu.appendChild(title);
 
-		// options
 		const options = uiComponent({
 			type: Html.Div,
 			classes: [BubbleUI.BoxColumn],
 		});
 		menu.appendChild(options);
 
-		// create index options
 		for (const key in index) {
-			options.appendChild(
-				this.createOption(PathService.getWikiViewRoute(key), key, index[key]),
-			);
+			options.appendChild(this.createOption(key, key, index[key]));
 		}
 
 		return menu;
@@ -113,7 +107,9 @@ export default class IndexMenu {
 		}
 
 		if (null != route) {
-			setDomAttributes(item, { href: PathService.getRoute(route) });
+			setDomAttributes(item, {
+				href: PathService.getWikiViewRoute(route),
+			});
 		}
 
 		setDomEvents(item, {
@@ -129,9 +125,5 @@ export default class IndexMenu {
 		});
 
 		return item;
-	}
-
-	private static getIndexLinkIcon(icon: string): HTMLElement {
-		return getIcon("material", icon, "1rem", "var(--on-surface-1)");
 	}
 }

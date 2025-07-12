@@ -11,6 +11,8 @@ import { uiComponent } from "./lib/dom.js";
 import { loadIcons } from "./lib/icons.js";
 import { getUrlParametersByBreakPoint } from "./lib/paths.js";
 import { setNotFoundRoute, setRoute, showRoute } from "./lib/router.js";
+import { AppConfigurations } from "./model/enum/configurations.js";
+import { IconBundle } from "./model/enum/icons.js";
 import { Theme } from "./services/theme.js";
 import WikiService from "./services/wiki.service.js";
 import HomeView from "./views/home.js";
@@ -30,7 +32,7 @@ window.addEventListener("hashchange", start);
  */
 window.onload = async function () {
 	await loadConfiguration("gtdf.config.json");
-	document.title = getConfiguration("base")["app_name"];
+	document.title = getConfiguration(AppConfigurations.AppName);
 	Display.checkType();
 
 	// load configuration
@@ -85,7 +87,7 @@ window.onresize = async function () {
  */
 async function getIcons() {
 	await loadIcons(
-		"material",
+		IconBundle.Material,
 		`${getConfiguration("path")["icons"]}/materialicons.json`,
 	);
 }

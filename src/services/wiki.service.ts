@@ -2,7 +2,12 @@ import { getConfiguration } from "../lib/configuration.js";
 import { httpGet } from "../lib/http.js";
 import { Marked } from "../lib/markdown/markdown.js";
 import { getUrlParametersByBreakPoint } from "../lib/paths.js";
+import {
+	AppConfigurations,
+	PathConfigurations,
+} from "../model/enum/configurations.js";
 import { Index } from "../model/index.item.js";
+import PathService from "./path.service.js";
 
 export default class WikiService {
 	static index: Index;
@@ -12,8 +17,9 @@ export default class WikiService {
 	}
 
 	static async loadIndex(): Promise<Index> {
+		const route = PathService.getFullWikiResourcePath("index.json");
 		const response = await httpGet({
-			url: `${getConfiguration("path")["wiki"]}/index.json`,
+			url: route,
 			parameters: {},
 		});
 		this.index = await response.json();

@@ -1,4 +1,5 @@
 import Breadcrumb from "../components/breadcrumb.js";
+import Footer from "../components/footer.js";
 import MarkdownCanvas from "../components/markdown.js";
 import { BubbleUI } from "../lib/bubble.js";
 import { uiComponent } from "../lib/dom.js";
@@ -31,8 +32,8 @@ export default class WikiView {
 		view.appendChild(breadcrumb);
 
 		WikiView.getDocumentHTML(route, WikiService.index).then((doc) => {
-			const canvas = MarkdownCanvas.create(doc);
-			view.appendChild(canvas);
+			view.appendChild(MarkdownCanvas.create(doc));
+			view.appendChild(Footer.create());
 		});
 
 		container.appendChild(view);
@@ -53,9 +54,13 @@ export default class WikiView {
 		if (ItemType.Directory == indexItem.type)
 			return this.createIndex(route, indexItem);
 
+		const routeWithoutLastSection = PathService.getUrlWithoutLastSection(route);
+
 		// get file HTML
 		return WikiService.getDocumentHTML(
-			PathService.getFullWikiPath(route, indexItem.path),
+			PathService.getFullWikiResourcePath(
+				PathService.createUrl([routeWithoutLastSection, indexItem.path]),
+			),
 		);
 	}
 
@@ -74,7 +79,9 @@ export default class WikiView {
 				type: Html.A,
 				text: PathService.decodeCustomUrl(PathService.getPascalCase(key)),
 				attributes: {
-					href: PathService.getWikiViewRoute(`${route}/${key}`, true),
+					href: PathService.getWikiViewRoute(
+						PathService.createUrl([route, key]),
+					),
 				},
 			});
 			listItem.appendChild(link);

@@ -1,0 +1,26 @@
+div#breadcrumb {
+	width: 100%;
+	height: 3rem;
+	padding: 0rem 1rem;
+	font-size: 1rem;
+	border-bottom: 0.1rem solid var(--surface-2);
+}
+
+div#breadcrumb.hide {
+	display: none;
+}
+
+div#breadcrumb a.br-section {
+	margin: 1rem;
+	color: var(--on-surface);
+	cursor: pointer;
+}
+
+div#breadcrumb a.br-section.current {
+	color: var(--primary-color);
+}
+
+div#breadcrumb div.br-section-next-icon svg {
+	width: 24px;
+	fill: var(--text-color);
+}

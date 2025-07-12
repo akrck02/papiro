@@ -1,25 +1,16 @@
 {
-	"base": {
-		"app_name": "Papiro",
-		"app_version": "v1.0.0",
-		"enviroment": "development",
-		"author": "akrck02",
-		"web_url": "https://akrck02.org/papiro"
-	},
+	"app_name": "Papiro",
+	"app_version": "v1.0.0",
+	"core_name": "Papiro",
+	"core_version": "v1.0.0",
+	"author": "akrck02",
+	"github_repository": "https://github.com/akrck02/papiro",
+	"web_url": "https://akrck02.org/papiro",
 	"path": {
-		"url": "./",
 		"resources": "resources",
 		"language": "resources/i18n",
 		"images": "resources/images",
 		"icons": "resources/icons",
 		"wiki": "resources/wiki"
-	},
-	"views": {
-		"url": "/#",
-		"home": "home",
-		"wiki": "wiki",
-		"error": "error",
-		"blank": "blank"
-	},
-	"api": {}
+	}
 }

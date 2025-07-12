@@ -72,6 +72,10 @@
 	font-weight: bolder;
 }
 
+:root[data-display="mobile"] .markdown blockquote p {
+	font-weight: 380;
+}
+
 .markdown img {
 	width: 100%;
 	object-fit: cover;
