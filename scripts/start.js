@@ -60,7 +60,6 @@
         return configuration[id];
     }
     function isConfigurationActive(id) {
-        debugger;
         return getConfiguration(id) == true;
     }
 
@@ -379,6 +378,271 @@
     PathService.URL_SPACE_SEPARATOR = "-";
     PathService.URL_HASH = "#";
     PathService.WIKI_PATH = "wiki";
+
+    class IndexMenu {
+        static create(index) {
+            const menu = uiComponent({
+                type: Html.Div,
+                id: this.ID,
+            });
+            connectToSignal(IndexMenu.MENU_TOGGLE_SIGNAL, async () => {
+                if (menu.classList.contains("show"))
+                    menu.classList.remove("show");
+                else
+                    menu.classList.add("show");
+            });
+            const title = uiComponent({
+                type: Html.H1,
+                id: this.TITLE_ID,
+                text: getConfiguration(AppConfigurations.AppName),
+                styles: {},
+            });
+            menu.appendChild(title);
+            const options = uiComponent({
+                type: Html.Div,
+                classes: [BubbleUI.BoxColumn],
+            });
+            menu.appendChild(options);
+            for (const key in index) {
+                options.appendChild(this.createOption(key, key, index[key]));
+            }
+            return menu;
+        }
+        static createOption(route, key, value, level = 0) {
+            switch (value.type) {
+                case ItemType.Directory:
+                    const item = this.indexLink(route, key, level);
+                    const container = uiComponent({
+                        classes: [BubbleUI.BoxColumn],
+                    });
+                    container.appendChild(item);
+                    for (const key in value.files) {
+                        container.appendChild(this.createOption(`${route}/${key}`.toLocaleLowerCase(), key, value.files[key], level + 1));
+                    }
+                    return container;
+                case ItemType.File:
+                    return this.indexLink(route, key, level);
+            }
+        }
+        static indexLink(route, name, level) {
+            name = PathService.getPascalCase(name);
+            const text = PathService.decodeCustomUrl(name);
+            const item = uiComponent({
+                type: Html.A,
+                id: this.INDEX_LINK_ID,
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter, "hover-primary"],
+                text: text,
+                styles: { paddingLeft: `${2 + level}rem` },
+                selectable: false,
+                data: {
+                    route: route,
+                },
+            });
+            if (null != route) {
+                setDomAttributes(item, {
+                    href: PathService.getWikiViewRoute(route),
+                });
+            }
+            setDomEvents(item, {
+                click: () => {
+                    emitSignal(this.MENU_TOGGLE_SIGNAL, {});
+                    document.querySelectorAll("#" + this.INDEX_LINK_ID);
+                },
+            });
+            return item;
+        }
+        static setSelectedRoute() {
+            document.querySelectorAll(`#${this.INDEX_LINK_ID}`).forEach((link) => {
+                const htmlLink = link;
+                if (document.URL == htmlLink.href)
+                    link.classList.add(this.LINK_SELECTED_CLASS);
+                else
+                    link.classList.remove(this.LINK_SELECTED_CLASS);
+            });
+        }
+    }
+    IndexMenu.ID = "index-menu";
+    IndexMenu.TITLE_ID = "title";
+    IndexMenu.INDEX_LINK_ID = "index-link";
+    IndexMenu.LINK_SELECTED_CLASS = "selected";
+    IndexMenu.MENU_TOGGLE_SIGNAL = setSignal();
+
+    class TopBar {
+        static create() {
+            const topBar = uiComponent({
+                type: Html.Header,
+                id: TopBar.ID,
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxXBetween, BubbleUI.BoxYCenter],
+            });
+            const logo = uiComponent({
+                type: Html.Img,
+                id: TopBar.LOGO_ID,
+                attributes: {
+                    src: `${getConfiguration(AppConfigurations.Path)[PathConfigurations.Icons]}/logo.svg`,
+                },
+            });
+            const navTitle = uiComponent({
+                type: Html.A,
+                id: TopBar.TITLE_ID,
+                text: logo.outerHTML + getConfiguration(AppConfigurations.AppName),
+                attributes: {
+                    href: `${getConfiguration(AppConfigurations.WebUrl)}/#/`,
+                },
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
+            });
+            topBar.appendChild(navTitle);
+            const iconBar = uiComponent({
+                type: Html.Div,
+                id: TopBar.ICON_BAR_ID,
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxXEnd],
+            });
+            topBar.appendChild(iconBar);
+            const themeIconButton = uiComponent({
+                id: TopBar.THEME_ICON_ID,
+                styles: { cursor: "pointer" },
+            });
+            let themeIcon = getIcon(IconBundle.Material, Theme.isDark() ? MaterialIcons.LightMode : MaterialIcons.DarkMode);
+            themeIconButton.appendChild(themeIcon);
+            iconBar.appendChild(themeIconButton);
+            connectToSignal(THEME_CHANGED_SIGNAL, async () => {
+                themeIcon = getIcon(IconBundle.Material, Theme.isDark() ? MaterialIcons.LightMode : MaterialIcons.DarkMode);
+                themeIconButton.innerHTML = themeIcon?.innerHTML;
+            });
+            setDomEvents(themeIconButton, {
+                click: (e) => Theme.toggle(),
+            });
+            const showMenuIcon = getIcon(IconBundle.Material, MaterialIcons.MenuOpen);
+            showMenuIcon.id = TopBar.MENU_ICON_ID;
+            iconBar.appendChild(showMenuIcon);
+            const searchIcon = getIcon(IconBundle.Material, MaterialIcons.Search);
+            iconBar.appendChild(searchIcon);
+            setDomEvents(showMenuIcon, {
+                click: (e) => emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {}),
+            });
+            return topBar;
+        }
+    }
+    TopBar.ID = "top-bar";
+    TopBar.LOGO_ID = "logo";
+    TopBar.TITLE_ID = "title";
+    TopBar.ICON_BAR_ID = "icon-bar-id";
+    TopBar.THEME_ICON_ID = "theme-icon";
+    TopBar.MENU_ICON_ID = "menu-icon";
+
+    const SMALL_DEVICE_WIDTH = 760;
+    const MEDIUM_DEVICE_WIDTH = 1024;
+    /**
+    * Get if the device is a small device
+    * @returns True if the device is a small device
+    */
+    function isSmallDevice() {
+        return window.matchMedia(`only screen and (max-width: ${SMALL_DEVICE_WIDTH}px)`).matches;
+    }
+    /**
+    * Get if the device is a medium device
+    * @returns True if the device is a medium device
+    */
+    function isMediumDevice() {
+        return window.matchMedia(`only screen and (min-width: ${SMALL_DEVICE_WIDTH}px) and (max-width: ${MEDIUM_DEVICE_WIDTH}px)`).matches;
+    }
+    /**
+    * Get if matches one of the mobile media queries
+    * @returns True if the device is a mobile device
+    */
+    function isMobile() {
+        return (navigator.userAgent.match(/Android/i) ||
+            navigator.userAgent.match(/BlackBerry/i) ||
+            navigator.userAgent.match(/iPhone|iPad|iPod/i) ||
+            navigator.userAgent.match(/Opera Mini/i) ||
+            navigator.userAgent.match(/IEMobile/i));
+    }
+
+    class Display {
+        static checkType() {
+            if (isMobile() || isSmallDevice() || isMediumDevice()) {
+                setDomDataset(document.documentElement, {
+                    display: "mobile"
+                });
+                setConfiguration("display", "mobile");
+                return;
+            }
+            setDomDataset(document.documentElement, {
+                display: "desktop"
+            });
+            setConfiguration("display", "desktop");
+        }
+        static isMobile() {
+            return "mobile" == getConfiguration("display");
+        }
+    }
+
+    const paths = new Map();
+    let homeHandler = async (_p, c) => { c.innerHTML = "Home page."; };
+    let notFoundHandler = async (_p, c) => { c.innerHTML = "Page not found."; };
+    /**
+     * Register a new route.
+     * @param path The router path
+     * @param handler The route handler
+     */
+    function setRoute(path, handler) {
+        // If the path is empry return 
+        if (undefined == path)
+            return;
+        // If the path is blank or /, register home and return
+        path = path.trim();
+        // If the path is home
+        if ("/" == path || "" == path) {
+            homeHandler = handler;
+            return;
+        }
+        // If the path ends with / trim it
+        const indexOfSlash = path.indexOf("/");
+        if (-1 != indexOfSlash && "/" == path.substring(path.length - 1))
+            path = path.substring(0, path.length - 1);
+        // Replace all the variables with regex expressions to capture them later
+        const regexp = /\/(\$+)/g;
+        path = path.replaceAll(regexp, "/([^\/]+)");
+        paths.set(path, handler);
+        console.debug(`Set route ${path}`);
+    }
+    /**
+     * Show view for the given route.
+     * @param path The given path to search for
+     * @param container The container to display the views in
+     */
+    function showRoute(path, container) {
+        container.innerHTML = "";
+        // If it is the home route, show
+        if ("/" == path || "" == path) {
+            homeHandler([], container);
+            return;
+        }
+        // Else search matching route
+        const keys = Array.from(paths.keys()).sort(compareRouteLength);
+        for (const route of keys) {
+            // Check if route matches
+            const regexp = RegExp(route);
+            const params = path.match(regexp);
+            if (null != params && 0 != params.length) {
+                paths.get(route)(params.slice(1), container);
+                return;
+            }
+        }
+        // If no route found, show not found view.
+        notFoundHandler([], container);
+    }
+    /**
+     * Compare the length of two routes
+     */
+    function compareRouteLength(a, b) {
+        const aLength = a.split("/").length - 1;
+        const bLength = b.split("/").length - 1;
+        if (aLength == bLength)
+            return 0;
+        if (aLength < bLength)
+            return 1;
+        return -1;
+    }
 
     /**
      * This enum represents the available HTTP methods
@@ -1866,269 +2130,6 @@ ${body}</tbody>
         }
     }
 
-    class IndexMenu {
-        static create(index) {
-            const menu = uiComponent({
-                type: Html.Div,
-                id: this.ID,
-            });
-            connectToSignal(IndexMenu.MENU_TOGGLE_SIGNAL, async () => {
-                if (menu.classList.contains("show"))
-                    menu.classList.remove("show");
-                else
-                    menu.classList.add("show");
-            });
-            const title = uiComponent({
-                type: Html.H1,
-                id: this.TITLE_ID,
-                text: getConfiguration(AppConfigurations.AppName),
-                styles: {},
-            });
-            menu.appendChild(title);
-            const options = uiComponent({
-                type: Html.Div,
-                classes: [BubbleUI.BoxColumn],
-            });
-            menu.appendChild(options);
-            for (const key in index) {
-                options.appendChild(this.createOption(key, key, index[key]));
-            }
-            return menu;
-        }
-        static createOption(route, key, value, level = 0) {
-            switch (value.type) {
-                case ItemType.Directory:
-                    const item = this.indexLink(null, key, level);
-                    const container = uiComponent({
-                        classes: [BubbleUI.BoxColumn],
-                    });
-                    container.appendChild(item);
-                    for (const key in value.files) {
-                        container.appendChild(this.createOption(`${route}/${key}`.toLocaleLowerCase(), key, value.files[key], level + 1));
-                    }
-                    return container;
-                case ItemType.File:
-                    return this.indexLink(route, key, level);
-            }
-        }
-        static indexLink(route, name, level) {
-            name = PathService.getPascalCase(name);
-            const selected = "wiki/" + WikiService.getCurrentRoute() == route;
-            const text = PathService.decodeCustomUrl(name);
-            const item = uiComponent({
-                type: Html.A,
-                id: this.INDEX_LINK_ID,
-                classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter, "hover-primary"],
-                text: text,
-                styles: { paddingLeft: `${2 + level}rem` },
-                selectable: false,
-                data: {
-                    route: route,
-                },
-            });
-            if (selected) {
-                item.classList.add("selected");
-            }
-            if (null != route) {
-                setDomAttributes(item, {
-                    href: PathService.getWikiViewRoute(route),
-                });
-            }
-            setDomEvents(item, {
-                click: () => {
-                    emitSignal(this.MENU_TOGGLE_SIGNAL, {});
-                    const items = document.querySelectorAll("#" + this.INDEX_LINK_ID);
-                    for (const it of items) {
-                        it.classList.remove("selected");
-                    }
-                    item.classList.add("selected");
-                },
-            });
-            return item;
-        }
-    }
-    IndexMenu.ID = "index-menu";
-    IndexMenu.TITLE_ID = "title";
-    IndexMenu.INDEX_LINK_ID = "index-link";
-    IndexMenu.MENU_TOGGLE_SIGNAL = setSignal();
-
-    class TopBar {
-        static create() {
-            const topBar = uiComponent({
-                type: Html.Header,
-                id: TopBar.ID,
-                classes: [BubbleUI.BoxRow, BubbleUI.BoxXBetween, BubbleUI.BoxYCenter],
-            });
-            const logo = uiComponent({
-                type: Html.Img,
-                id: TopBar.LOGO_ID,
-                attributes: {
-                    src: `${getConfiguration(AppConfigurations.Path)[PathConfigurations.Icons]}/logo.svg`,
-                },
-            });
-            const navTitle = uiComponent({
-                type: Html.A,
-                id: TopBar.TITLE_ID,
-                text: logo.outerHTML + getConfiguration(AppConfigurations.AppName),
-                attributes: {
-                    href: `${getConfiguration(AppConfigurations.WebUrl)}/#/`,
-                },
-                classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
-            });
-            topBar.appendChild(navTitle);
-            const iconBar = uiComponent({
-                type: Html.Div,
-                id: TopBar.ICON_BAR_ID,
-                classes: [BubbleUI.BoxRow, BubbleUI.BoxXEnd],
-            });
-            topBar.appendChild(iconBar);
-            const themeIconButton = uiComponent({
-                id: TopBar.THEME_ICON_ID,
-                styles: { cursor: "pointer" },
-            });
-            let themeIcon = getIcon(IconBundle.Material, Theme.isDark() ? MaterialIcons.LightMode : MaterialIcons.DarkMode);
-            themeIconButton.appendChild(themeIcon);
-            iconBar.appendChild(themeIconButton);
-            connectToSignal(THEME_CHANGED_SIGNAL, async () => {
-                themeIcon = getIcon(IconBundle.Material, Theme.isDark() ? MaterialIcons.LightMode : MaterialIcons.DarkMode);
-                themeIconButton.innerHTML = themeIcon?.innerHTML;
-            });
-            setDomEvents(themeIconButton, {
-                click: (e) => Theme.toggle(),
-            });
-            const showMenuIcon = getIcon(IconBundle.Material, MaterialIcons.MenuOpen);
-            showMenuIcon.id = TopBar.MENU_ICON_ID;
-            iconBar.appendChild(showMenuIcon);
-            const searchIcon = getIcon(IconBundle.Material, MaterialIcons.Search);
-            iconBar.appendChild(searchIcon);
-            setDomEvents(showMenuIcon, {
-                click: (e) => emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {}),
-            });
-            return topBar;
-        }
-    }
-    TopBar.ID = "top-bar";
-    TopBar.LOGO_ID = "logo";
-    TopBar.TITLE_ID = "title";
-    TopBar.ICON_BAR_ID = "icon-bar-id";
-    TopBar.THEME_ICON_ID = "theme-icon";
-    TopBar.MENU_ICON_ID = "menu-icon";
-
-    const SMALL_DEVICE_WIDTH = 760;
-    const MEDIUM_DEVICE_WIDTH = 1024;
-    /**
-    * Get if the device is a small device
-    * @returns True if the device is a small device
-    */
-    function isSmallDevice() {
-        return window.matchMedia(`only screen and (max-width: ${SMALL_DEVICE_WIDTH}px)`).matches;
-    }
-    /**
-    * Get if the device is a medium device
-    * @returns True if the device is a medium device
-    */
-    function isMediumDevice() {
-        return window.matchMedia(`only screen and (min-width: ${SMALL_DEVICE_WIDTH}px) and (max-width: ${MEDIUM_DEVICE_WIDTH}px)`).matches;
-    }
-    /**
-    * Get if matches one of the mobile media queries
-    * @returns True if the device is a mobile device
-    */
-    function isMobile() {
-        return (navigator.userAgent.match(/Android/i) ||
-            navigator.userAgent.match(/BlackBerry/i) ||
-            navigator.userAgent.match(/iPhone|iPad|iPod/i) ||
-            navigator.userAgent.match(/Opera Mini/i) ||
-            navigator.userAgent.match(/IEMobile/i));
-    }
-
-    class Display {
-        static checkType() {
-            if (isMobile() || isSmallDevice() || isMediumDevice()) {
-                setDomDataset(document.documentElement, {
-                    display: "mobile"
-                });
-                setConfiguration("display", "mobile");
-                return;
-            }
-            setDomDataset(document.documentElement, {
-                display: "desktop"
-            });
-            setConfiguration("display", "desktop");
-        }
-        static isMobile() {
-            return "mobile" == getConfiguration("display");
-        }
-    }
-
-    const paths = new Map();
-    let homeHandler = async (_p, c) => { c.innerHTML = "Home page."; };
-    let notFoundHandler = async (_p, c) => { c.innerHTML = "Page not found."; };
-    /**
-     * Register a new route.
-     * @param path The router path
-     * @param handler The route handler
-     */
-    function setRoute(path, handler) {
-        // If the path is empry return 
-        if (undefined == path)
-            return;
-        // If the path is blank or /, register home and return
-        path = path.trim();
-        // If the path is home
-        if ("/" == path || "" == path) {
-            homeHandler = handler;
-            return;
-        }
-        // If the path ends with / trim it
-        const indexOfSlash = path.indexOf("/");
-        if (-1 != indexOfSlash && "/" == path.substring(path.length - 1))
-            path = path.substring(0, path.length - 1);
-        // Replace all the variables with regex expressions to capture them later
-        const regexp = /\/(\$+)/g;
-        path = path.replaceAll(regexp, "/([^\/]+)");
-        paths.set(path, handler);
-        console.debug(`Set route ${path}`);
-    }
-    /**
-     * Show view for the given route.
-     * @param path The given path to search for
-     * @param container The container to display the views in
-     */
-    function showRoute(path, container) {
-        container.innerHTML = "";
-        // If it is the home route, show
-        if ("/" == path || "" == path) {
-            homeHandler([], container);
-            return;
-        }
-        // Else search matching route
-        const keys = Array.from(paths.keys()).sort(compareRouteLength);
-        for (const route of keys) {
-            // Check if route matches
-            const regexp = RegExp(route);
-            const params = path.match(regexp);
-            if (null != params && 0 != params.length) {
-                paths.get(route)(params.slice(1), container);
-                return;
-            }
-        }
-        // If no route found, show not found view.
-        notFoundHandler([], container);
-    }
-    /**
-     * Compare the length of two routes
-     */
-    function compareRouteLength(a, b) {
-        const aLength = a.split("/").length - 1;
-        const bLength = b.split("/").length - 1;
-        if (aLength == bLength)
-            return 0;
-        if (aLength < bLength)
-            return 1;
-        return -1;
-    }
-
     class HomeView {
         /**
          * Show home view
@@ -2411,6 +2412,7 @@ ${body}</tbody>
      */
     async function start() {
         setRoutes(documentContainer);
+        IndexMenu.setSelectedRoute();
     }
 
 })();

@@ -43,7 +43,6 @@ export function getConfiguration(id) {
     return configuration[id];
 }
 export function isConfigurationActive(id) {
-    debugger;
     return getConfiguration(id) == true;
 }
 /**

@@ -6,7 +6,6 @@ import { connectToSignal, emitSignal, setSignal } from "../lib/signals.js";
 import { AppConfigurations } from "../model/enum/configurations.js";
 import { ItemType } from "../model/index.item.js";
 import PathService from "../services/path.service.js";
-import WikiService from "../services/wiki.service.js";
 class IndexMenu {
     static create(index) {
         const menu = uiComponent({
@@ -39,7 +38,7 @@ class IndexMenu {
     static createOption(route, key, value, level = 0) {
         switch (value.type) {
             case ItemType.Directory:
-                const item = this.indexLink(null, key, level);
+                const item = this.indexLink(route, key, level);
                 const container = uiComponent({
                     classes: [BubbleUI.BoxColumn],
                 });
@@ -53,9 +52,7 @@ class IndexMenu {
         }
     }
     static indexLink(route, name, level) {
-        const isDirectory = null == route;
         name = PathService.getPascalCase(name);
-        const selected = "wiki/" + WikiService.getCurrentRoute() == route;
         const text = PathService.decodeCustomUrl(name);
         const item = uiComponent({
             type: Html.A,
@@ -68,9 +65,6 @@ class IndexMenu {
                 route: route,
             },
         });
-        if (selected) {
-            item.classList.add("selected");
-        }
         if (null != route) {
             setDomAttributes(item, {
                 href: PathService.getWikiViewRoute(route),
@@ -80,17 +74,23 @@ class IndexMenu {
             click: () => {
                 emitSignal(this.MENU_TOGGLE_SIGNAL, {});
                 const items = document.querySelectorAll("#" + this.INDEX_LINK_ID);
-                for (const it of items) {
-                    it.classList.remove("selected");
-                }
-                item.classList.add("selected");
             },
         });
         return item;
+    }
+    static setSelectedRoute() {
+        document.querySelectorAll(`#${this.INDEX_LINK_ID}`).forEach((link) => {
+            const htmlLink = link;
+            if (document.URL == htmlLink.href)
+                link.classList.add(this.LINK_SELECTED_CLASS);
+            else
+                link.classList.remove(this.LINK_SELECTED_CLASS);
+        });
     }
 }
 IndexMenu.ID = "index-menu";
 IndexMenu.TITLE_ID = "title";
 IndexMenu.INDEX_LINK_ID = "index-link";
+IndexMenu.LINK_SELECTED_CLASS = "selected";
 IndexMenu.MENU_TOGGLE_SIGNAL = setSignal();
 export default IndexMenu;
