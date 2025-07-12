@@ -47,6 +47,11 @@ export function getConfiguration(id: string) {
 	return configuration[id];
 }
 
+export function isConfigurationActive(id: string) {
+	debugger;
+	return getConfiguration(id) == true;
+}
+
 /**
  * Assert that the id has been changed
  */

@@ -2,8 +2,13 @@ import Breadcrumb from "../components/breadcrumb.js";
 import Footer from "../components/footer.js";
 import MarkdownCanvas from "../components/markdown.js";
 import { BubbleUI } from "../lib/bubble.js";
+import {
+	getConfiguration,
+	isConfigurationActive,
+} from "../lib/configuration.js";
 import { uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
+import { AppConfigurations } from "../model/enum/configurations.js";
 import {
 	getIndexItemFromRoute,
 	Index,
@@ -28,12 +33,17 @@ export default class WikiView {
 		});
 
 		const route = WikiService.getCurrentRoute();
-		const breadcrumb = Breadcrumb.create(route, WikiService.index);
-		view.appendChild(breadcrumb);
+
+		if (isConfigurationActive(AppConfigurations.ShowBreadCrumb)) {
+			const breadcrumb = Breadcrumb.create(route, WikiService.index);
+			view.appendChild(breadcrumb);
+		}
 
 		WikiView.getDocumentHTML(route, WikiService.index).then((doc) => {
 			view.appendChild(MarkdownCanvas.create(doc));
-			view.appendChild(Footer.create());
+
+			if (isConfigurationActive(AppConfigurations.ShowFooter))
+				view.appendChild(Footer.create());
 		});
 
 		container.appendChild(view);
