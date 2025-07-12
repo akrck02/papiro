@@ -62,7 +62,7 @@ class WikiView {
                 type: Html.A,
                 text: PathService.decodeCustomUrl(PathService.getPascalCase(key)),
                 attributes: {
-                    href: PathService.getWikiViewRoute(PathService.createUrl([route, key])),
+                    href: PathService.createUrl([route, key]),
                 },
             });
             listItem.appendChild(link);
