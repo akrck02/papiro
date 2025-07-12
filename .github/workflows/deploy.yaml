@@ -46,20 +46,3 @@ jobs:
         with:
           branch: gh-pages # The branch the action should deploy to.
           folder: . # The folder the action should deploy.
-
-      - name: get url # then we get the url of the github pages site
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run:
-          | # we use the gh cli to get the url and save it in an environment variable
-          url=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq '.html_url')
-          echo "url=$url" >> $GITHUB_ENV
-
-      - name: Discord Webhook Action
-        uses: tsickert/discord-webhook@v7.0.0
-        with:
-          webhook-url: ${{ secrets.WEBHOOK_URL }}
-          embed-description: |
-            New version of ${{ github.event.repository.name }} docs was deployed 🚀
-
-            ${{ env.url }}
