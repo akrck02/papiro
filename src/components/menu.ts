@@ -14,6 +14,7 @@ export default class IndexMenu {
 	static readonly ID = "index-menu";
 	static readonly TITLE_ID = "title";
 	static readonly INDEX_LINK_ID = "index-link";
+	static readonly LINK_SELECTED_CLASS = "selected";
 	static readonly MENU_TOGGLE_SIGNAL = setSignal();
 
 	static create(index: Index): HTMLElement {
@@ -56,7 +57,7 @@ export default class IndexMenu {
 	): HTMLElement {
 		switch (value.type) {
 			case ItemType.Directory:
-				const item = this.indexLink(null, key, level);
+				const item = this.indexLink(route, key, level);
 				const container = uiComponent({
 					classes: [BubbleUI.BoxColumn],
 				});
@@ -84,10 +85,7 @@ export default class IndexMenu {
 		name: string,
 		level: number,
 	): HTMLElement {
-		const isDirectory = null == route;
-
 		name = PathService.getPascalCase(name);
-		const selected = "wiki/" + WikiService.getCurrentRoute() == route;
 		const text = PathService.decodeCustomUrl(name);
 
 		const item = uiComponent({
@@ -102,10 +100,6 @@ export default class IndexMenu {
 			},
 		});
 
-		if (selected) {
-			item.classList.add("selected");
-		}
-
 		if (null != route) {
 			setDomAttributes(item, {
 				href: PathService.getWikiViewRoute(route),
@@ -116,14 +110,18 @@ export default class IndexMenu {
 			click: () => {
 				emitSignal(this.MENU_TOGGLE_SIGNAL, {});
 				const items = document.querySelectorAll("#" + this.INDEX_LINK_ID);
-				for (const it of items) {
-					it.classList.remove("selected");
-				}
-
-				item.classList.add("selected");
 			},
 		});
 
 		return item;
+	}
+
+	static setSelectedRoute() {
+		document.querySelectorAll(`#${this.INDEX_LINK_ID}`).forEach((link) => {
+			const htmlLink = link as HTMLAnchorElement;
+			if (document.URL == htmlLink.href)
+				link.classList.add(this.LINK_SELECTED_CLASS);
+			else link.classList.remove(this.LINK_SELECTED_CLASS);
+		});
 	}
 }

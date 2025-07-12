@@ -18,7 +18,7 @@ import WikiService from "./services/wiki.service.js";
 import HomeView from "./views/home.js";
 import WikiView from "./views/wiki.js";
 
-let documentContainer;
+let documentContainer: HTMLElement;
 
 /**
  * When the dynamic URL changes loads
@@ -107,4 +107,5 @@ function setRoutes(parent: HTMLElement) {
  */
 async function start() {
 	setRoutes(documentContainer);
+	IndexMenu.setSelectedRoute();
 }
