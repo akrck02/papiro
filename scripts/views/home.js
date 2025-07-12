@@ -2,6 +2,8 @@ import { BubbleUI } from "../lib/bubble.js";
 import { getConfiguration } from "../lib/configuration.js";
 import { uiComponent, } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
+import { AppConfigurations } from "../model/enum/configurations.js";
+import PathService from "../services/path.service.js";
 class HomeView {
     /**
      * Show home view
@@ -29,7 +31,7 @@ class HomeView {
         const title = uiComponent({
             type: Html.H1,
             id: HomeView.TITLE_ID,
-            text: getConfiguration("base")["app_name"] + logo.outerHTML,
+            text: getConfiguration(AppConfigurations.AppName) + logo.outerHTML,
             classes: [BubbleUI.BoxRow, BubbleUI.BoxCenter],
         });
         content.appendChild(title);
@@ -45,7 +47,7 @@ class HomeView {
             text: "Explore 👀",
             classes: [BubbleUI.BoxColumn, BubbleUI.BoxCenter],
             attributes: {
-                href: `${getConfiguration("base")["web_url"]}/#/wiki`,
+                href: PathService.getWikiViewRoute(""),
             },
         });
         content.appendChild(link);

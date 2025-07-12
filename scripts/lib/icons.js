@@ -9,7 +9,9 @@ const icons = new Map();
  * @param path The path to search the collection for
  */
 export async function loadIcons(id, path) {
-    const collection = await fetch(path).then(res => res.json()).catch(console.error);
+    const collection = await fetch(path)
+        .then((res) => res.json())
+        .catch(console.error);
     icons.set(id, collection);
 }
 /**

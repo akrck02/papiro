@@ -4,6 +4,8 @@ import { setDomEvents, uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
 import { getIcon } from "../lib/icons.js";
 import { connectToSignal, emitSignal } from "../lib/signals.js";
+import { AppConfigurations, PathConfigurations, } from "../model/enum/configurations.js";
+import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
 import { Theme, THEME_CHANGED_SIGNAL } from "../services/theme.js";
 import IndexMenu from "./menu.js";
 class TopBar {
@@ -16,14 +18,16 @@ class TopBar {
         const logo = uiComponent({
             type: Html.Img,
             id: TopBar.LOGO_ID,
-            attributes: { src: `${getConfiguration("path")["icons"]}/logo.svg` },
+            attributes: {
+                src: `${getConfiguration(AppConfigurations.Path)[PathConfigurations.Icons]}/logo.svg`,
+            },
         });
         const navTitle = uiComponent({
             type: Html.A,
             id: TopBar.TITLE_ID,
-            text: logo.outerHTML + getConfiguration("base")["app_name"],
+            text: logo.outerHTML + getConfiguration(AppConfigurations.AppName),
             attributes: {
-                href: `${getConfiguration("base")["web_url"]}/#/`,
+                href: `${getConfiguration(AppConfigurations.WebUrl)}/#/`,
             },
             classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
         });
@@ -38,20 +42,20 @@ class TopBar {
             id: TopBar.THEME_ICON_ID,
             styles: { cursor: "pointer" },
         });
-        let themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode");
+        let themeIcon = getIcon(IconBundle.Material, Theme.isDark() ? MaterialIcons.LightMode : MaterialIcons.DarkMode);
         themeIconButton.appendChild(themeIcon);
         iconBar.appendChild(themeIconButton);
         connectToSignal(THEME_CHANGED_SIGNAL, async () => {
-            themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode");
+            themeIcon = getIcon(IconBundle.Material, Theme.isDark() ? MaterialIcons.LightMode : MaterialIcons.DarkMode);
             themeIconButton.innerHTML = themeIcon?.innerHTML;
         });
         setDomEvents(themeIconButton, {
             click: (e) => Theme.toggle(),
         });
-        const showMenuIcon = getIcon("material", "menu_open");
+        const showMenuIcon = getIcon(IconBundle.Material, MaterialIcons.MenuOpen);
         showMenuIcon.id = TopBar.MENU_ICON_ID;
         iconBar.appendChild(showMenuIcon);
-        const searchIcon = getIcon("material", "search");
+        const searchIcon = getIcon(IconBundle.Material, MaterialIcons.Search);
         iconBar.appendChild(searchIcon);
         setDomEvents(showMenuIcon, {
             click: (e) => emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {}),

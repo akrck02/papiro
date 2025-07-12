@@ -193,7 +193,9 @@
      * @param path The path to search the collection for
      */
     async function loadIcons(id, path) {
-        const collection = await fetch(path).then(res => res.json()).catch(console.error);
+        const collection = await fetch(path)
+            .then((res) => res.json())
+            .catch(console.error);
         icons.set(id, collection);
     }
     /**
@@ -252,6 +254,45 @@
         }
     }
 
+    var AppConfigurations;
+    (function (AppConfigurations) {
+        AppConfigurations["AppName"] = "app_name";
+        AppConfigurations["AppVersion"] = "app_version";
+        AppConfigurations["CoreName"] = "core_name";
+        AppConfigurations["CoreVersion"] = "core_version";
+        AppConfigurations["Author"] = "author";
+        AppConfigurations["GithubRepository"] = "github_repository";
+        AppConfigurations["WebUrl"] = "web_url";
+        AppConfigurations["Path"] = "path";
+    })(AppConfigurations || (AppConfigurations = {}));
+    var PathConfigurations;
+    (function (PathConfigurations) {
+        PathConfigurations["Resources"] = "Resources";
+        PathConfigurations["Language"] = "language";
+        PathConfigurations["Images"] = "images";
+        PathConfigurations["Icons"] = "icons";
+        PathConfigurations["Wiki"] = "wiki";
+    })(PathConfigurations || (PathConfigurations = {}));
+
+    var IconBundle;
+    (function (IconBundle) {
+        IconBundle["Material"] = "material";
+    })(IconBundle || (IconBundle = {}));
+    var MaterialIcons;
+    (function (MaterialIcons) {
+        MaterialIcons["Back"] = "back";
+        MaterialIcons["Next"] = "next";
+        MaterialIcons["Expand"] = "expand";
+        MaterialIcons["ExpandLess"] = "expand_less";
+        MaterialIcons["Download"] = "download";
+        MaterialIcons["Search"] = "search";
+        MaterialIcons["Terminal"] = "terminal";
+        MaterialIcons["LightMode"] = "light_mode";
+        MaterialIcons["DarkMode"] = "dark_mode";
+        MaterialIcons["ContentCopy"] = "content_copy";
+        MaterialIcons["MenuOpen"] = "menu_open";
+    })(MaterialIcons || (MaterialIcons = {}));
+
     const THEME_CHANGED_SIGNAL = setSignal();
     class Theme {
         static toggle() {
@@ -300,28 +341,38 @@
     }
 
     class PathService {
-        static getWebUrl(appendix) {
-            return this.encodeCustomUrl(`${getConfiguration("base")["web_url"]}/${appendix}`.toLocaleLowerCase());
-        }
-        static getRoute(appendix) {
-            return this.getWebUrl(`#/${appendix}`);
-        }
-        static getWikiViewRoute(appendix, full = false) {
-            return this.encodeCustomUrl(`${full ? getConfiguration("base")["web_url"] + "/#/" : ""}${getConfiguration("views")["wiki"]}/${appendix}`.toLocaleLowerCase());
-        }
         static getPascalCase(name) {
             return name.substring(0, 1).toUpperCase().concat(name.substring(1));
         }
-        static getFullWikiPath(subPath, appendix) {
-            return this.encodeCustomUrl(this.getWebUrl(`${getConfiguration("path")["wiki"]}/${subPath.substring(0, subPath.lastIndexOf("/"))}/${appendix}`));
+        static getUrlWithoutLastSection(url) {
+            return url.substring(0, url.lastIndexOf(this.URL_SEPARATOR));
+        }
+        static getWebUrl(appendix) {
+            const webUrl = getConfiguration(AppConfigurations.WebUrl);
+            return this.encodeCustomUrl(`${webUrl}/${appendix}`);
+        }
+        static getWikiViewRoute(appendix) {
+            const webUrl = getConfiguration(AppConfigurations.WebUrl);
+            return this.encodeCustomUrl(this.createUrl([webUrl, this.URL_HASH, this.WIKI_PATH, appendix]));
+        }
+        static getFullWikiResourcePath(appendix) {
+            const wikiPath = getConfiguration(AppConfigurations.Path)[PathConfigurations.Wiki];
+            return this.encodeCustomUrl(this.getWebUrl(this.createUrl([wikiPath, appendix])));
+        }
+        static createUrl(items) {
+            return items.filter((i) => "" != i.trim()).join(this.URL_SEPARATOR);
         }
         static encodeCustomUrl(url) {
-            return url?.replaceAll(" ", "-") ?? "";
+            return (url?.replaceAll(" ", this.URL_SPACE_SEPARATOR).toLocaleLowerCase() ?? "");
         }
         static decodeCustomUrl(url) {
-            return url?.replaceAll("-", " ") ?? "";
+            return (url?.replaceAll(this.URL_SPACE_SEPARATOR, " ").toLocaleLowerCase() ?? "");
         }
     }
+    PathService.URL_SEPARATOR = "/";
+    PathService.URL_SPACE_SEPARATOR = "-";
+    PathService.URL_HASH = "#";
+    PathService.WIKI_PATH = "wiki";
 
     /**
      * This enum represents the available HTTP methods
@@ -1787,8 +1838,9 @@ ${body}</tbody>
             return Marked.parse(markdown);
         }
         static async loadIndex() {
+            const route = PathService.getFullWikiResourcePath("index.json");
             const response = await httpGet({
-                url: `${getConfiguration("path")["wiki"]}/index.json`,
+                url: route,
                 parameters: {},
             });
             this.index = await response.json();
@@ -1810,35 +1862,30 @@ ${body}</tbody>
 
     class IndexMenu {
         static create(index) {
-            // menu
             const menu = uiComponent({
                 type: Html.Div,
                 id: this.ID,
             });
             connectToSignal(IndexMenu.MENU_TOGGLE_SIGNAL, async () => {
-                if (menu.classList.contains("show")) {
+                if (menu.classList.contains("show"))
                     menu.classList.remove("show");
-                }
-                else {
+                else
                     menu.classList.add("show");
-                }
             });
             const title = uiComponent({
                 type: Html.H1,
                 id: this.TITLE_ID,
-                text: getConfiguration("base")["app_name"],
+                text: getConfiguration(AppConfigurations.AppName),
                 styles: {},
             });
             menu.appendChild(title);
-            // options
             const options = uiComponent({
                 type: Html.Div,
                 classes: [BubbleUI.BoxColumn],
             });
             menu.appendChild(options);
-            // create index options
             for (const key in index) {
-                options.appendChild(this.createOption(PathService.getWikiViewRoute(key), key, index[key]));
+                options.appendChild(this.createOption(key, key, index[key]));
             }
             return menu;
         }
@@ -1877,7 +1924,9 @@ ${body}</tbody>
                 item.classList.add("selected");
             }
             if (null != route) {
-                setDomAttributes(item, { href: PathService.getRoute(route) });
+                setDomAttributes(item, {
+                    href: PathService.getWikiViewRoute(route),
+                });
             }
             setDomEvents(item, {
                 click: () => {
@@ -1890,9 +1939,6 @@ ${body}</tbody>
                 },
             });
             return item;
-        }
-        static getIndexLinkIcon(icon) {
-            return getIcon("material", icon, "1rem", "var(--on-surface-1)");
         }
     }
     IndexMenu.ID = "index-menu";
@@ -1910,14 +1956,16 @@ ${body}</tbody>
             const logo = uiComponent({
                 type: Html.Img,
                 id: TopBar.LOGO_ID,
-                attributes: { src: `${getConfiguration("path")["icons"]}/logo.svg` },
+                attributes: {
+                    src: `${getConfiguration(AppConfigurations.Path)[PathConfigurations.Icons]}/logo.svg`,
+                },
             });
             const navTitle = uiComponent({
                 type: Html.A,
                 id: TopBar.TITLE_ID,
-                text: logo.outerHTML + getConfiguration("base")["app_name"],
+                text: logo.outerHTML + getConfiguration(AppConfigurations.AppName),
                 attributes: {
-                    href: `${getConfiguration("base")["web_url"]}/#/`,
+                    href: `${getConfiguration(AppConfigurations.WebUrl)}/#/`,
                 },
                 classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
             });
@@ -1932,20 +1980,20 @@ ${body}</tbody>
                 id: TopBar.THEME_ICON_ID,
                 styles: { cursor: "pointer" },
             });
-            let themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode");
+            let themeIcon = getIcon(IconBundle.Material, Theme.isDark() ? MaterialIcons.LightMode : MaterialIcons.DarkMode);
             themeIconButton.appendChild(themeIcon);
             iconBar.appendChild(themeIconButton);
             connectToSignal(THEME_CHANGED_SIGNAL, async () => {
-                themeIcon = getIcon("material", Theme.isDark() ? "light_mode" : "dark_mode");
+                themeIcon = getIcon(IconBundle.Material, Theme.isDark() ? MaterialIcons.LightMode : MaterialIcons.DarkMode);
                 themeIconButton.innerHTML = themeIcon?.innerHTML;
             });
             setDomEvents(themeIconButton, {
                 click: (e) => Theme.toggle(),
             });
-            const showMenuIcon = getIcon("material", "menu_open");
+            const showMenuIcon = getIcon(IconBundle.Material, MaterialIcons.MenuOpen);
             showMenuIcon.id = TopBar.MENU_ICON_ID;
             iconBar.appendChild(showMenuIcon);
-            const searchIcon = getIcon("material", "search");
+            const searchIcon = getIcon(IconBundle.Material, MaterialIcons.Search);
             iconBar.appendChild(searchIcon);
             setDomEvents(showMenuIcon, {
                 click: (e) => emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {}),
@@ -2102,7 +2150,7 @@ ${body}</tbody>
             const title = uiComponent({
                 type: Html.H1,
                 id: HomeView.TITLE_ID,
-                text: getConfiguration("base")["app_name"] + logo.outerHTML,
+                text: getConfiguration(AppConfigurations.AppName) + logo.outerHTML,
                 classes: [BubbleUI.BoxRow, BubbleUI.BoxCenter],
             });
             content.appendChild(title);
@@ -2118,7 +2166,7 @@ ${body}</tbody>
                 text: "Explore 👀",
                 classes: [BubbleUI.BoxColumn, BubbleUI.BoxCenter],
                 attributes: {
-                    href: `${getConfiguration("base")["web_url"]}/#/wiki`,
+                    href: PathService.getWikiViewRoute(""),
                 },
             });
             content.appendChild(link);
@@ -2136,44 +2184,74 @@ ${body}</tbody>
         static create(route, index) {
             const breadcrumb = uiComponent({
                 type: Html.Div,
+                id: this.ID,
                 classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
-                styles: {
-                    width: "100%",
-                    height: "3rem",
-                    padding: "0rem 1rem",
-                    fontSize: "1rem",
-                    background: "",
-                    borderBottom: ".1rem solid var(--surface-2)",
-                },
             });
             const sections = route.split("/");
+            if (2 > sections.length) {
+                breadcrumb.classList.add("hide");
+                return breadcrumb;
+            }
             let currentRoute = "";
             for (let i = 0; i < sections.length; i++) {
                 const isNotLastSection = i < sections.length - 1;
                 currentRoute += sections[i];
-                const sectionLink = uiComponent({
-                    type: Html.A,
-                    text: PathService.decodeCustomUrl(sections[i]),
-                    attributes: {
-                        href: PathService.getWikiViewRoute(currentRoute, true),
-                    },
-                    styles: {
-                        margin: "1rem",
-                        color: isNotLastSection
-                            ? "var(--on-surface)"
-                            : "var(--primary-color)",
-                        cursor: "pointer",
-                    },
-                });
-                breadcrumb.appendChild(sectionLink);
-                if (isNotLastSection) {
-                    const icon = getIcon("material", "next");
-                    icon.classList.add(BubbleUI.BoxColumn, BubbleUI.BoxCenter);
-                    breadcrumb.appendChild(icon);
+                this.addSection(sections[i], currentRoute, isNotLastSection, breadcrumb);
+                if (isNotLastSection)
                     currentRoute += "/";
-                }
             }
             return breadcrumb;
+        }
+        static addSection(text, route, isNotLastSection, parent) {
+            const sectionLink = uiComponent({
+                type: Html.A,
+                text: PathService.decodeCustomUrl(text),
+                classes: [this.SECTION_CLASS],
+                attributes: {
+                    href: PathService.getWikiViewRoute(route),
+                },
+            });
+            parent.appendChild(sectionLink);
+            if (isNotLastSection) {
+                const icon = getIcon(IconBundle.Material, MaterialIcons.Next);
+                icon.classList.add(BubbleUI.BoxColumn, BubbleUI.BoxCenter, this.SECTION_NEXT_ICON_CLASS);
+                parent.appendChild(icon);
+            }
+            else {
+                sectionLink.classList.add(this.CURRENT_SECTION_CLASS);
+            }
+        }
+    }
+    Breadcrumb.ID = "breadcrumb";
+    Breadcrumb.SECTION_CLASS = "br-section";
+    Breadcrumb.SECTION_NEXT_ICON_CLASS = "br-section-next-icon";
+    Breadcrumb.CURRENT_SECTION_CLASS = "current";
+
+    class Footer {
+        static create() {
+            const footer = uiComponent({
+                type: Html.Footer,
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxCenter],
+                styles: {
+                    marginTop: "2rem",
+                    padding: "1rem 2rem 6rem 2rem",
+                    width: "100%",
+                    borderTop: "0.1rem solid var(--surface-2)",
+                    maxWidth: "75rem",
+                },
+            });
+            const text = uiComponent({
+                type: Html.P,
+                classes: [BubbleUI.TextCenter],
+                text: `Powered by ${getConfiguration(AppConfigurations.CoreName)} ${getConfiguration(AppConfigurations.CoreVersion)}, made with 🩵 by ${getConfiguration(AppConfigurations.Author)}`,
+                styles: {
+                    fontSize: "1rem",
+                    fontHeight: "135%",
+                    color: "var(--surface-6)",
+                },
+            });
+            footer.appendChild(text);
+            return footer;
         }
     }
 
@@ -2201,8 +2279,8 @@ ${body}</tbody>
             const breadcrumb = Breadcrumb.create(route, WikiService.index);
             view.appendChild(breadcrumb);
             WikiView.getDocumentHTML(route, WikiService.index).then((doc) => {
-                const canvas = MarkdownCanvas.create(doc);
-                view.appendChild(canvas);
+                view.appendChild(MarkdownCanvas.create(doc));
+                view.appendChild(Footer.create());
             });
             container.appendChild(view);
             setTimeout(() => {
@@ -2220,8 +2298,9 @@ ${body}</tbody>
             // if it is a directory show a index
             if (ItemType.Directory == indexItem.type)
                 return this.createIndex(route, indexItem);
+            const routeWithoutLastSection = PathService.getUrlWithoutLastSection(route);
             // get file HTML
-            return WikiService.getDocumentHTML(PathService.getFullWikiPath(route, indexItem.path));
+            return WikiService.getDocumentHTML(PathService.getFullWikiResourcePath(PathService.createUrl([routeWithoutLastSection, indexItem.path])));
         }
         static createIndex(route, indexItem) {
             const index = uiComponent({});
@@ -2236,7 +2315,7 @@ ${body}</tbody>
                     type: Html.A,
                     text: PathService.decodeCustomUrl(PathService.getPascalCase(key)),
                     attributes: {
-                        href: PathService.getWikiViewRoute(`${route}/${key}`, true),
+                        href: PathService.getWikiViewRoute(PathService.createUrl([route, key])),
                     },
                 });
                 listItem.appendChild(link);
@@ -2262,7 +2341,7 @@ ${body}</tbody>
      */
     window.onload = async function () {
         await loadConfiguration("gtdf.config.json");
-        document.title = getConfiguration("base")["app_name"];
+        document.title = getConfiguration(AppConfigurations.AppName);
         Display.checkType();
         // load configuration
         const isDarkTheme = getConfiguration("theme") == "dark";
@@ -2308,7 +2387,7 @@ ${body}</tbody>
      * Get app icons
      */
     async function getIcons() {
-        await loadIcons("material", `${getConfiguration("path")["icons"]}/materialicons.json`);
+        await loadIcons(IconBundle.Material, `${getConfiguration("path")["icons"]}/materialicons.json`);
     }
     /**
      * Set routes
