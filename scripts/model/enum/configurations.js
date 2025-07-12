@@ -8,6 +8,7 @@ export var AppConfigurations;
     AppConfigurations["GithubRepository"] = "github_repository";
     AppConfigurations["WebUrl"] = "web_url";
     AppConfigurations["Path"] = "path";
+    AppConfigurations["ShowStartPage"] = "show_start_page";
     AppConfigurations["ShowFooter"] = "show_footer";
     AppConfigurations["ShowBreadCrumb"] = "show_breadcrumb";
 })(AppConfigurations || (AppConfigurations = {}));

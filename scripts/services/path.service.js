@@ -7,7 +7,7 @@ class PathService {
     static getUrlWithoutLastSection(url) {
         return url.substring(0, url.lastIndexOf(this.URL_SEPARATOR));
     }
-    static getWebUrl(appendix) {
+    static getWebUrl(appendix = "") {
         const webUrl = getConfiguration(AppConfigurations.WebUrl);
         return this.encodeCustomUrl(`${webUrl}/${appendix}`);
     }

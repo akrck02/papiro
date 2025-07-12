@@ -267,6 +267,7 @@
         AppConfigurations["GithubRepository"] = "github_repository";
         AppConfigurations["WebUrl"] = "web_url";
         AppConfigurations["Path"] = "path";
+        AppConfigurations["ShowStartPage"] = "show_start_page";
         AppConfigurations["ShowFooter"] = "show_footer";
         AppConfigurations["ShowBreadCrumb"] = "show_breadcrumb";
     })(AppConfigurations || (AppConfigurations = {}));
@@ -352,7 +353,7 @@
         static getUrlWithoutLastSection(url) {
             return url.substring(0, url.lastIndexOf(this.URL_SEPARATOR));
         }
-        static getWebUrl(appendix) {
+        static getWebUrl(appendix = "") {
             const webUrl = getConfiguration(AppConfigurations.WebUrl);
             return this.encodeCustomUrl(`${webUrl}/${appendix}`);
         }
@@ -2263,10 +2264,27 @@ ${body}</tbody>
 
     class MarkdownCanvas {
         static create(markdown) {
-            return uiComponent({
+            const markdownCanvas = uiComponent({
                 classes: [MarkdownCanvas.CLASS],
                 text: WikiService.render(markdown),
             });
+            markdownCanvas.querySelectorAll("img").forEach((img) => {
+                const imgHtml = img;
+                const webUrl = PathService.getWebUrl();
+                if (-1 != imgHtml.src.indexOf(webUrl)) {
+                    const newUrl = img.src.substring(PathService.getWebUrl().length);
+                    imgHtml.src = PathService.getFullWikiResourcePath(newUrl);
+                }
+            });
+            markdownCanvas.querySelectorAll("a").forEach((img) => {
+                const aHtml = img;
+                const webUrl = PathService.getWebUrl();
+                if (-1 != aHtml.href.indexOf(webUrl)) {
+                    const newUrl = img.href.substring(PathService.getWebUrl().length);
+                    aHtml.href = PathService.getWikiViewRoute(newUrl);
+                }
+            });
+            return markdownCanvas;
         }
     }
     MarkdownCanvas.CLASS = "markdown";
@@ -2402,7 +2420,10 @@ ${body}</tbody>
      * Set routes
      */
     function setRoutes(parent) {
-        setRoute("", HomeView.show);
+        if (isConfigurationActive(AppConfigurations.ShowStartPage))
+            setRoute("", HomeView.show);
+        else
+            setRoute("", WikiView.show);
         setRoute("/wiki", WikiView.show);
         showRoute(window.location.hash.slice(1).toLowerCase(), parent);
         //setNotFoundRoute(HomeView.show);
