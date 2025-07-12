@@ -3,12 +3,14 @@ import IndexMenu from "./components/menu.js";
 import { BubbleUI } from "./lib/bubble.js";
 import {
 	getConfiguration,
+	isConfigurationActive,
 	loadConfiguration,
 	setConfigurationId,
 } from "./lib/configuration.js";
 import { Display } from "./lib/display.js";
 import { uiComponent } from "./lib/dom.js";
 import { loadIcons } from "./lib/icons.js";
+import { Marked } from "./lib/markdown/markdown.js";
 import { getUrlParametersByBreakPoint } from "./lib/paths.js";
 import { setNotFoundRoute, setRoute, showRoute } from "./lib/router.js";
 import { AppConfigurations } from "./model/enum/configurations.js";
@@ -96,7 +98,10 @@ async function getIcons() {
  * Set routes
  */
 function setRoutes(parent: HTMLElement) {
-	setRoute("", HomeView.show);
+	if (isConfigurationActive(AppConfigurations.ShowStartPage))
+		setRoute("", HomeView.show);
+	else setRoute("", WikiView.show);
+
 	setRoute("/wiki", WikiView.show);
 	showRoute(window.location.hash.slice(1).toLowerCase(), parent);
 	//setNotFoundRoute(HomeView.show);

@@ -7,6 +7,7 @@ export enum AppConfigurations {
 	GithubRepository = "github_repository",
 	WebUrl = "web_url",
 	Path = "path",
+	ShowStartPage = "show_start_page",
 	ShowFooter = "show_footer",
 	ShowBreadCrumb = "show_breadcrumb",
 }

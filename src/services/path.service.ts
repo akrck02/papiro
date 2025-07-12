@@ -18,7 +18,7 @@ export default class PathService {
 		return url.substring(0, url.lastIndexOf(this.URL_SEPARATOR));
 	}
 
-	static getWebUrl(appendix: string) {
+	static getWebUrl(appendix: string = "") {
 		const webUrl = getConfiguration(AppConfigurations.WebUrl);
 		return this.encodeCustomUrl(`${webUrl}/${appendix}`);
 	}

@@ -6,6 +6,7 @@
 	"author": "akrck02",
 	"github_repository": "https://github.com/akrck02/papiro",
 	"web_url": "https://akrck02.org/papiro",
+	"show_start_page": false,
 	"show_footer": true,
 	"show_breadcrumb": true,
 	"path": {
