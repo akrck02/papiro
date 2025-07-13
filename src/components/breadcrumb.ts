@@ -3,7 +3,7 @@ import { uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
 import { getIcon } from "../lib/icons.js";
 import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
-import { Index } from "../model/index.item.js";
+import { IndexItem } from "../model/index.item.js";
 import PathService from "../services/path.service.js";
 
 export default class Breadcrumb {
@@ -12,7 +12,7 @@ export default class Breadcrumb {
 	static SECTION_NEXT_ICON_CLASS = "br-section-next-icon";
 	static CURRENT_SECTION_CLASS = "current";
 
-	static create(route: string, index: Index): HTMLElement {
+	static create(route: string, index: IndexItem): HTMLElement {
 		const breadcrumb = uiComponent({
 			type: Html.Div,
 			id: this.ID,

@@ -6,7 +6,7 @@ import { getIcon } from "../lib/icons.js";
 import { connectToSignal, emitSignal, setSignal } from "../lib/signals.js";
 import { AppConfigurations } from "../model/enum/configurations.js";
 import { IconBundle } from "../model/enum/icons.js";
-import { Index, IndexItem, ItemType } from "../model/index.item.js";
+import { IndexItem, ItemType } from "../model/index.item.js";
 import PathService from "../services/path.service.js";
 import WikiService from "../services/wiki.service.js";
 
@@ -17,7 +17,7 @@ export default class IndexMenu {
 	static readonly LINK_SELECTED_CLASS = "selected";
 	static readonly MENU_TOGGLE_SIGNAL = setSignal();
 
-	static create(index: Index): HTMLElement {
+	static create(index: IndexItem): HTMLElement {
 		const menu = uiComponent({
 			type: Html.Div,
 			id: this.ID,
@@ -42,8 +42,18 @@ export default class IndexMenu {
 		});
 		menu.appendChild(options);
 
-		for (const key in index) {
-			options.appendChild(this.createOption(key, key, index[key]));
+		for (const key in index.files) {
+			options.appendChild(this.createOption(key, key, index.files[key]));
+		}
+
+		for (let i = 0; i < 1000; i++) {
+			options.appendChild(
+				this.createOption("" + i, "" + i, {
+					files: {},
+					path: "",
+					type: 1,
+				}),
+			);
 		}
 
 		return menu;

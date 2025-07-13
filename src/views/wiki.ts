@@ -11,7 +11,6 @@ import { Html } from "../lib/html.js";
 import { AppConfigurations } from "../model/enum/configurations.js";
 import {
 	getIndexItemFromRoute,
-	Index,
 	IndexItem,
 	ItemType,
 } from "../model/index.item.js";
@@ -52,7 +51,10 @@ export default class WikiView {
 		}, 100);
 	}
 
-	static async getDocumentHTML(route: string, index: Index): Promise<string> {
+	static async getDocumentHTML(
+		route: string,
+		index: IndexItem,
+	): Promise<string> {
 		// If it is the home
 		if ("" == route.trim()) {
 			if (undefined == index["home"]) return "";

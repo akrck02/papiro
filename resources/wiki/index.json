@@ -1,26 +1,30 @@
 {
-	"home": {
-		"type": 2,
-		"path": "index.md"
-	},
-	"get-started": {
-		"type": 2,
-		"path": "get-started.md"
-	},
-	"installation": {
-		"type": 1,
-		"files": {
-			"github-pages": {
-				"type": 2,
-				"path": "github-pages.md"
-			},
-			"local-testing": {
-				"type": 2,
-				"path": "local-testing.md"
-			},
-			"docker": {
-				"type": 2,
-				"path": "docker.md"
+	"path": "/",
+	"type": 1,
+	"files": {
+		"home": {
+			"type": 2,
+			"path": "index.md"
+		},
+		"get-started": {
+			"type": 2,
+			"path": "get-started.md"
+		},
+		"installation": {
+			"type": 1,
+			"files": {
+				"github-pages": {
+					"type": 2,
+					"path": "github-pages.md"
+				},
+				"local-testing": {
+					"type": 2,
+					"path": "local-testing.md"
+				},
+				"docker": {
+					"type": 2,
+					"path": "docker.md"
+				}
 			}
 		}
 	}

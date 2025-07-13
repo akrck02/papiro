@@ -4,6 +4,7 @@ div#index-menu {
 	min-width: 25rem;
 	height: 100%;
 	padding: 1rem;
+	overflow-y: auto;
 }
 
 :root[data-display="mobile"] div#index-menu {

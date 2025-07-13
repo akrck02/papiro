@@ -6,17 +6,17 @@ import {
 	AppConfigurations,
 	PathConfigurations,
 } from "../model/enum/configurations.js";
-import { Index } from "../model/index.item.js";
+import { IndexItem } from "../model/index.item.js";
 import PathService from "./path.service.js";
 
 export default class WikiService {
-	static index: Index;
+	static index: IndexItem;
 
 	static render(markdown: string): string {
 		return Marked.parse(markdown);
 	}
 
-	static async loadIndex(): Promise<Index> {
+	static async loadIndex(): Promise<IndexItem> {
 		const route = PathService.getFullWikiResourcePath("index.json");
 		const response = await httpGet({
 			url: route,
