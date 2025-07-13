@@ -331,7 +331,7 @@
         if (0 == params.length)
             return;
         let key = params.shift();
-        let parent = index[key];
+        let parent = index.files[key];
         if (ItemType.File == parent.type)
             return parent;
         while (undefined != parent || ItemType.Directory == parent.type) {
@@ -404,8 +404,15 @@
                 classes: [BubbleUI.BoxColumn],
             });
             menu.appendChild(options);
-            for (const key in index) {
-                options.appendChild(this.createOption(key, key, index[key]));
+            for (const key in index.files) {
+                options.appendChild(this.createOption(key, key, index.files[key]));
+            }
+            for (let i = 0; i < 1000; i++) {
+                options.appendChild(this.createOption("" + i, "" + i, {
+                    files: {},
+                    path: "",
+                    type: 1,
+                }));
             }
             return menu;
         }

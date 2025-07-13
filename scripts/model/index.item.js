@@ -10,7 +10,7 @@ export function getIndexItemFromRoute(index, route) {
     if (0 == params.length)
         return;
     let key = params.shift();
-    let parent = index[key];
+    let parent = index.files[key];
     if (ItemType.File == parent.type)
         return parent;
     while (undefined != parent || ItemType.Directory == parent.type) {
