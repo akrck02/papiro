@@ -33,13 +33,6 @@ class IndexMenu {
         for (const key in index.files) {
             options.appendChild(this.createOption(key, key, index.files[key]));
         }
-        for (let i = 0; i < 1000; i++) {
-            options.appendChild(this.createOption("" + i, "" + i, {
-                files: {},
-                path: "",
-                type: 1,
-            }));
-        }
         return menu;
     }
     static createOption(route, key, value, level = 0) {
