@@ -37,7 +37,7 @@ class WikiView {
     static async getDocumentHTML(route, index) {
         // If it is the home
         if ("" == route.trim()) {
-            if (undefined == index["home"])
+            if (undefined == index.files["home"])
                 return "";
             route = "home";
         }
