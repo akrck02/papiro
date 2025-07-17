@@ -57,4 +57,9 @@ jobs:
           prerelease: false
           title: "Latest"
           files: |
-            */*
+            index.html
+            gtdf.config.json
+            LICENSE
+            styles
+            scripts
+            resources
