@@ -1,7 +1,7 @@
-name: Deploy to github pages
+name: Stable release
 on:
   push:
-    branches: [main, test/ci]
+    branches: [main]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -44,8 +44,13 @@ jobs:
       - name: Check the output
         run: ls -lha .
 
-      - name: Deploy 🚀
-        uses: JamesIves/github-pages-deploy-action@v4.3.0
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          branch: gh-pages # The branch the action should deploy to.
-          folder: . # The folder the action should deploy.
+          tag_name: latest
+          release_name: latest
+          draft: false
+          prerelease: false
