@@ -33,7 +33,7 @@ jobs:
         run: mkdir -p styles/src temp/src/
 
       - name: Remove old javascript files
-        run: rm -rf scripts
+        run: rm -rf scripts/*
 
       - name: Move javascript
         run: mv out/start.js scripts/start.js
