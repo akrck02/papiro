@@ -44,13 +44,17 @@ jobs:
       - name: Check the output
         run: ls -lha .
 
+      - name: Get current date
+        id: date
+        run: echo "echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.sha }}
+          tag_name: $DATE
           release_name: latest
           draft: false
           prerelease: false
