@@ -61,4 +61,4 @@ jobs:
           prerelease: false
           title: "Latest"
           files: |
-            papiro-latest.tar.gz
+            artefacts/papiro-latest.tar.gz
