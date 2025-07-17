@@ -50,7 +50,7 @@ jobs:
 
       - name: Compress code
         id: compress
-        run: tar -czvf papiro-latest.tar.gz . --exclude papiro-latest.tar.gz
+        run: tar --exclude papiro-latest.tar.gz -czvf papiro-latest.tar.gz .
 
       - name: Create Release
         id: create_release
