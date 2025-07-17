@@ -48,6 +48,10 @@ jobs:
         id: date
         run: echo "date=$(date +'%Y-%m-%d')" >> $GITHUB_OUTPUT
 
+      - name: Create artefacts
+        id: create-artefact
+        run: mkdir artefacts
+
       - name: Compress code
         id: compress
         run: tar --exclude artefacts/papiro-latest.tar.gz -czvf artefacts/papiro-latest.tar.gz .
