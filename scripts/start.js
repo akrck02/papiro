@@ -265,7 +265,7 @@
         AppConfigurations["CoreVersion"] = "core_version";
         AppConfigurations["Author"] = "author";
         AppConfigurations["GithubRepository"] = "github_repository";
-        AppConfigurations["WebUrl"] = "web_url";
+        AppConfigurations["WebSubpath"] = "web_subpath";
         AppConfigurations["Path"] = "path";
         AppConfigurations["ShowStartPage"] = "show_start_page";
         AppConfigurations["ShowFooter"] = "show_footer";
@@ -298,6 +298,46 @@
         MaterialIcons["ContentCopy"] = "content_copy";
         MaterialIcons["MenuOpen"] = "menu_open";
     })(MaterialIcons || (MaterialIcons = {}));
+
+    class PathService {
+        static getPascalCase(name) {
+            return name.substring(0, 1).toUpperCase().concat(name.substring(1));
+        }
+        static getUrlWithoutLastSection(url) {
+            return url.substring(0, url.lastIndexOf(this.URL_SEPARATOR));
+        }
+        static getWebUrl(appendix = "") {
+            let webUrl = `${location.protocol}//${location.host}`;
+            const subpath = getConfiguration(AppConfigurations.WebSubpath);
+            if ("" != subpath)
+                webUrl += `/${subpath}`;
+            return this.encodeCustomUrl(`${webUrl}/${appendix}`);
+        }
+        static getWikiViewRoute(appendix) {
+            let webUrl = `${location.protocol}//${location.host}`;
+            const subpath = getConfiguration(AppConfigurations.WebSubpath);
+            if ("" != subpath)
+                webUrl += `/${subpath}`;
+            return this.encodeCustomUrl(this.createUrl([webUrl, this.URL_HASH, this.WIKI_PATH, appendix]));
+        }
+        static getFullWikiResourcePath(appendix) {
+            const wikiPath = getConfiguration(AppConfigurations.Path)[PathConfigurations.Wiki];
+            return this.encodeCustomUrl(this.getWebUrl(this.createUrl([wikiPath, appendix])));
+        }
+        static createUrl(items) {
+            return items.filter((i) => "" != i.trim()).join(this.URL_SEPARATOR);
+        }
+        static encodeCustomUrl(url) {
+            return (url?.replaceAll(" ", this.URL_SPACE_SEPARATOR).toLocaleLowerCase() ?? "");
+        }
+        static decodeCustomUrl(url) {
+            return (url?.replaceAll(this.URL_SPACE_SEPARATOR, " ").toLocaleLowerCase() ?? "");
+        }
+    }
+    PathService.URL_SEPARATOR = "/";
+    PathService.URL_SPACE_SEPARATOR = "-";
+    PathService.URL_HASH = "#";
+    PathService.WIKI_PATH = "wiki";
 
     const THEME_CHANGED_SIGNAL = setSignal();
     class Theme {
@@ -345,40 +385,6 @@
         }
         return;
     }
-
-    class PathService {
-        static getPascalCase(name) {
-            return name.substring(0, 1).toUpperCase().concat(name.substring(1));
-        }
-        static getUrlWithoutLastSection(url) {
-            return url.substring(0, url.lastIndexOf(this.URL_SEPARATOR));
-        }
-        static getWebUrl(appendix = "") {
-            const webUrl = `${location.protocol}//${location.host}`;
-            return this.encodeCustomUrl(`${webUrl}/${appendix}`);
-        }
-        static getWikiViewRoute(appendix) {
-            const webUrl = `${location.protocol}//${location.host}`;
-            return this.encodeCustomUrl(this.createUrl([webUrl, this.URL_HASH, this.WIKI_PATH, appendix]));
-        }
-        static getFullWikiResourcePath(appendix) {
-            const wikiPath = getConfiguration(AppConfigurations.Path)[PathConfigurations.Wiki];
-            return this.encodeCustomUrl(this.getWebUrl(this.createUrl([wikiPath, appendix])));
-        }
-        static createUrl(items) {
-            return items.filter((i) => "" != i.trim()).join(this.URL_SEPARATOR);
-        }
-        static encodeCustomUrl(url) {
-            return (url?.replaceAll(" ", this.URL_SPACE_SEPARATOR).toLocaleLowerCase() ?? "");
-        }
-        static decodeCustomUrl(url) {
-            return (url?.replaceAll(this.URL_SPACE_SEPARATOR, " ").toLocaleLowerCase() ?? "");
-        }
-    }
-    PathService.URL_SEPARATOR = "/";
-    PathService.URL_SPACE_SEPARATOR = "-";
-    PathService.URL_HASH = "#";
-    PathService.WIKI_PATH = "wiki";
 
     class IndexMenu {
         static create(index) {
@@ -487,7 +493,7 @@
                 id: TopBar.TITLE_ID,
                 text: logo.outerHTML + getConfiguration(AppConfigurations.AppName),
                 attributes: {
-                    href: `${getConfiguration(AppConfigurations.WebUrl)}/#/`,
+                    href: `${PathService.getWebUrl()}/#/`,
                 },
                 classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
             });

@@ -5,6 +5,7 @@
   "core_version": "v1.0.0",
   "author": "akrck02",
   "github_repository": "https://github.com/akrck02/papiro",
+  "web_path": "papiro",
   "show_start_page": true,
   "show_footer": true,
   "show_breadcrumb": true,
