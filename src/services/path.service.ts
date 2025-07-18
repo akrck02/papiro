@@ -19,12 +19,17 @@ export default class PathService {
   }
 
   static getWebUrl(appendix: string = "") {
-    const webUrl = `${location.protocol}//${location.host}`;
+    let webUrl = `${location.protocol}//${location.host}`;
+    const subpath = getConfiguration(AppConfigurations.WebSubpath);
+    if ("" != subpath) webUrl += `/${subpath}`;
+
     return this.encodeCustomUrl(`${webUrl}/${appendix}`);
   }
 
   static getWikiViewRoute(appendix: string): string {
-    const webUrl = `${location.protocol}//${location.host}`;
+    let webUrl = `${location.protocol}//${location.host}`;
+    const subpath = getConfiguration(AppConfigurations.WebSubpath);
+    if ("" != subpath) webUrl += `/${subpath}`;
     return this.encodeCustomUrl(
       this.createUrl([webUrl, this.URL_HASH, this.WIKI_PATH, appendix]),
     );
