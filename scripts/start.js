@@ -354,11 +354,11 @@
             return url.substring(0, url.lastIndexOf(this.URL_SEPARATOR));
         }
         static getWebUrl(appendix = "") {
-            const webUrl = getConfiguration(AppConfigurations.WebUrl);
+            const webUrl = `${location.protocol}//${location.host}`;
             return this.encodeCustomUrl(`${webUrl}/${appendix}`);
         }
         static getWikiViewRoute(appendix) {
-            const webUrl = getConfiguration(AppConfigurations.WebUrl);
+            const webUrl = `${location.protocol}//${location.host}`;
             return this.encodeCustomUrl(this.createUrl([webUrl, this.URL_HASH, this.WIKI_PATH, appendix]));
         }
         static getFullWikiResourcePath(appendix) {
