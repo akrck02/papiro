@@ -1,88 +1,89 @@
 div#index-menu {
-	background: var(--surface-2);
-	width: 25rem;
-	min-width: 25rem;
-	height: 100%;
-	padding: 1rem;
-	overflow-y: auto;
+    background: var(--surface-2);
+    width: 25rem;
+    min-width: 25rem;
+    height: 100%;
+    padding: 1rem;
+    overflow-y: auto;
 }
 
-:root[data-display="mobile"] div#index-menu {
-	position: fixed;
-	z-index: 9;
-	right: 100%;
-	width: 100%;
-	transition: right var(--animation-fast) ease-in;
+:root[data-dcalc(100% - 3rem)isplay="mobile"] div#index-menu {
+    position: fixed;
+    z-index: 9;
+    right: 100%;
+    width: 100%;
+    height: calc(100% - 3rem);
+    transition: right var(--animation-fast) ease-in;
 }
 
 :root[data-display="mobile"] div#index-menu.show {
-	right: 0;
+    right: 0;
 }
 
 div#index-menu h1#title {
-	display: none;
-	padding-bottom: 1rem;
-	border-bottom: 0.05rem solid var(--surface-3);
+    display: none;
+    padding-bottom: 1rem;
+    border-bottom: 0.05rem solid var(--surface-3);
 }
 
 :root[data-display="mobile"] div#index-menu h1#title {
-	display: block;
+    display: block;
 }
 
 div#index-menu input#searchbar {
-	width: 100%;
-	margin: 0;
-	margin-bottom: 1rem;
-	background: var(--surface-3);
+    width: 100%;
+    margin: 0;
+    margin-bottom: 1rem;
+    background: var(--surface-3);
 }
 
 div#index-menu a#index-link {
-	display: flex;
-	position: relative;
-	flex-direction: row;
-	justify-content: start;
-	align-items: center;
-	margin-top: 0.2rem;
-	padding-top: 0.8rem;
-	padding-left: 0;
-	padding-bottom: 0.8rem;
-	border-radius: 01rem;
-	font-size: 1.25rem;
-	color: var(--on-surface-1);
-	cursor: pointer;
-	transition: background var(--animation-fast);
+    display: flex;
+    position: relative;
+    flex-direction: row;
+    justify-content: start;
+    align-items: center;
+    margin-top: 0.2rem;
+    padding-top: 0.8rem;
+    padding-left: 0;
+    padding-bottom: 0.8rem;
+    border-radius: 01rem;
+    font-size: 1.25rem;
+    color: var(--on-surface-1);
+    cursor: pointer;
+    transition: background var(--animation-fast);
 }
 
 div#index-menu a#index-link::after {
-	content: ".";
-	display: block;
-	position: absolute;
-	left: 0.4rem;
-	top: 0.45rem;
-	width: var(--size);
-	height: 2rem;
-	color: transparent;
-	border-radius: 0.35rem;
-	transition: background var(--animation-fast);
-	background: transparent;
-	color: transparent;
+    content: ".";
+    display: block;
+    position: absolute;
+    left: 0.4rem;
+    top: 0.45rem;
+    width: var(--size);
+    height: 2rem;
+    color: transparent;
+    border-radius: 0.35rem;
+    transition: background var(--animation-fast);
+    background: transparent;
+    color: transparent;
 }
 
 div#index-menu a#index-link.selected::after {
-	background: var(--primary-color);
-	color: var(--primary-color);
+    background: var(--primary-color);
+    color: var(--primary-color);
 }
 div#index-menu a#index-link:focus {
-	border: none;
+    border: none;
 }
 
 div#index-menu a#index-link:not(.selected):hover::after,
 div#index-menu a#index-link:not(.selected):focus::after {
-	background: var(--primary-color);
-	color: var(--primary-color);
-	opacity: 0.5;
+    background: var(--primary-color);
+    color: var(--primary-color);
+    opacity: 0.5;
 }
 
 div#index-menu a#index-link.selected svg {
-	fill: var(--on-primary-color);
+    fill: var(--on-primary-color);
 }
