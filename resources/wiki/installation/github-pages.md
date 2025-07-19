@@ -8,7 +8,7 @@ The most common use for papiro is to publish it as a github page.
 
 Create a github repository for your documents and [enable the github pages feature following the official guide.](https://docs.github.com/en/pages/getting-started-with-github-pages/creating-a-github-pages-site)
 
-Upload you files to a directory inside your repository and install the [official papiro github action.](https://github.com/marketplace/actions/papiro-deploy)
+Upload your files to a directory inside your repository and install the [official papiro github action.](https://github.com/marketplace/actions/papiro-deploy)
 
 ### Configure papiro deploy action
 ---
@@ -46,7 +46,7 @@ jobs:
 
  This workflow will download the latest version of papiro, convert and index your documents and deploy the website to a branch called gh-pages in your repository.
 
-> ⚠️ Make sure that the actions can write into the repository and that the gh-pages branch is used as gh-pages branch
+> ⚠️ Make sure that the actions can write into the repository and that the gh-pages branch is used as github pages branch in the configuration
 
 ---
 
