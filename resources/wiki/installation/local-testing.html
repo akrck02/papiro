@@ -1,0 +1,43 @@
+<h1 id="local-testing">Local testing 🧪</h1>
+
+<hr>
+
+<p>Download the latest papiro version from <a href="https://github.com/akrck02/papiro" target="_blank">the official github repository.</a>
+In case your testing on a local machine, just enter the repository directory using the following command.</p>
+
+<pre><code class="language-bash">cd ./papiro
+</code></pre>
+
+<p>Once there the typescript must be transpiled using the following command.</p>
+
+<pre><code class="language-bash">tsc
+</code></pre>
+
+<p>Use the following command to launch a new webserver.</p>
+
+<pre><code class="language-bash">python ./server-n-cache.py
+</code></pre>
+
+<p>Once done, the web will be launched in the following URL.</p>
+
+<blockquote>
+<p><a href="http://127.0.0.1:8000" target="_blank">http://127.0.0.1:8000</a></p>
+</blockquote>
+
+<p>*** Warning: You need to add your markdown or html files to the web. ***</p>
+
+<p>As you are in a local environment, there is no pipeline to automatically convert your files and index them in real time.
+Copy your files (folders and html or markdown files) to the following path.</p>
+
+<blockquote>
+<p>resources/uploads</p>
+</blockquote>
+
+<p>Then use the papiro indexer binary to convert and index your files</p>
+
+<pre><code class="language-bash">./bin/papiro-indexer -path ./resources/uploads -destination ./resources/wiki
+</code></pre>
+
+<blockquote>
+<p>Congratulations 🎉🎉 <br> &mdash; your wiki is now ready to visit in the local environment. &mdash;</p>
+</blockquote>

@@ -46,6 +46,7 @@
 
 .markdown code,
 .markdown blockquote {
+	position: relative;
 	background-color: var(--surface-2);
 	color: var(--on-surface-1);
 	margin: 1rem;
@@ -60,10 +61,32 @@
 
 .markdown p code {
 	display: inline-flex;
+	margin: 0.2rem;
+	padding: 0.4rem;
 }
 
 .markdown pre code {
 	display: flex;
+}
+
+.markdown code button.copy-button {
+	position: absolute;
+	right: 0.3rem;
+	top: 0.3rem;
+	margin: 0;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	padding: 0.5rem;
+	min-height: 0.5rem;
+	height: 2rem;
+	border-radius: 0.5rem;
+}
+
+.markdown code button.copy-button:active {
+	transform: none;
+	background: transparent;
+	transition: background var(--animation-fast);
 }
 
 :root[data-display="mobile"] .markdown code *,

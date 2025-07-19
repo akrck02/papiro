@@ -1,12 +1,13 @@
 {
-  "compilerOptions": {
-    "target": "ES2021",
-    "outDir": "./scripts/",
-    "rootDir": "./src/",
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
-  }
+	"compilerOptions": {
+		"target": "ES2021",
+		"outDir": "./scripts/",
+		"rootDir": "./src/",
+		"esModuleInterop": true,
+		"experimentalDecorators": true,
+		"emitDecoratorMetadata": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"allowJs": true
+	}
 }

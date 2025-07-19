@@ -1,4 +1,7 @@
-import { uiComponent } from "../lib/dom.js";
+import { setDomEvents, uiComponent } from "../lib/dom.js";
+import { Html } from "../lib/html.js";
+import { getIcon } from "../lib/icons.js";
+import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
 import PathService from "../services/path.service.js";
 import WikiService from "../services/wiki.service.js";
 
@@ -26,6 +29,28 @@ export default class MarkdownCanvas {
 				const newUrl = img.href.substring(PathService.getWebUrl().length);
 				aHtml.href = PathService.getWikiViewRoute(newUrl);
 			}
+		});
+
+		markdownCanvas.querySelectorAll("pre code").forEach((code) => {
+			const codeHtml = code as HTMLElement;
+			const copyButton = uiComponent({
+				type: Html.Button,
+				classes: ["copy-button"],
+				text: getIcon(
+					IconBundle.Material,
+					MaterialIcons.ContentCopy,
+					"1rem",
+					"var(--surface-6)",
+				).outerHTML,
+			});
+
+			setDomEvents(copyButton, {
+				click: () => {
+					navigator.clipboard.writeText(codeHtml.innerText);
+				},
+			});
+
+			codeHtml.appendChild(copyButton);
 		});
 
 		return markdownCanvas;
