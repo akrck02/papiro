@@ -35,6 +35,4 @@ Then use the papiro indexer binary to convert and index your files
 ./bin/papiro-indexer -path ./resources/uploads -destination ./resources/wiki
 ```
 
-now that you have everything ready run the following command to convert the markdowns to html and index them in the index.json file
-
 > Congratulations 🎉🎉 <br> --- your wiki is now ready to visit in the local environment. ---
