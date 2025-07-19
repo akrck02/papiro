@@ -55,6 +55,7 @@
 	font-family: var(--font-console);
 	display: block;
 	line-height: 135%;
+	overflow-x: auto;
 }
 
 .markdown p code {
