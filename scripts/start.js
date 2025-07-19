@@ -2291,6 +2291,20 @@ ${body}</tbody>
                     aHtml.href = PathService.getWikiViewRoute(newUrl);
                 }
             });
+            markdownCanvas.querySelectorAll("pre code").forEach((code) => {
+                const codeHtml = code;
+                const copyButton = uiComponent({
+                    type: Html.Button,
+                    classes: ["copy-button"],
+                    text: getIcon(IconBundle.Material, MaterialIcons.ContentCopy, "1rem", "var(--surface-6)").outerHTML,
+                });
+                setDomEvents(copyButton, {
+                    click: () => {
+                        navigator.clipboard.writeText(codeHtml.innerText);
+                    },
+                });
+                codeHtml.appendChild(copyButton);
+            });
             return markdownCanvas;
         }
     }
