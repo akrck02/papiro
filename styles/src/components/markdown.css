@@ -57,6 +57,14 @@
 	line-height: 135%;
 }
 
+.markdown p code {
+	display: inline-flex;
+}
+
+.markdown pre code {
+	display: flex;
+}
+
 :root[data-display="mobile"] .markdown code *,
 :root[data-display="mobile"] .markdown blockquote * {
 	font-size: 1rem;

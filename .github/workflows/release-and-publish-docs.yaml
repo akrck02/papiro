@@ -70,6 +70,7 @@ jobs:
             artefacts/papiro-latest.tar.gz
   publish-docs:
     runs-on: ubuntu-latest
+    needs: build
     steps:
       - uses: actions/checkout@v3
       - uses: akrck02/papiro-deploy@main
