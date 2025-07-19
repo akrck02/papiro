@@ -2,6 +2,8 @@ name: Stable release
 on:
   push:
     branches: [main]
+permissions:
+  contents: write
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -66,3 +68,21 @@ jobs:
           title: "v1.0.0 - beta"
           files: |
             artefacts/papiro-latest.tar.gz
+  publish-docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: akrck02/papiro-deploy@main
+        with:
+          title: "Papiro"
+          description: "The simple markdown wiki."
+          path: "resources/wiki"
+          isObsidianProject: false
+          showFooter: true
+          showBreadcrumb: true
+          showStartPage: true
+      - name: Deploy to github actions 🚀
+        uses: JamesIves/github-pages-deploy-action@v4.3.0 # please checkout and give a star to this amazing action.
+        with:
+          branch: gh-pages # The branch the action should deploy to.
+          folder: . # The folder the action should deploy.

@@ -2,20 +2,10 @@ import TopBar from "../components/bar.js";
 import IndexMenu from "../components/menu.js";
 import { BubbleUI } from "../lib/bubble.js";
 import { getConfiguration } from "../lib/configuration.js";
-import {
-	removeAllDomBySelector,
-	setDomEvents,
-	setDomStyles,
-	uiComponent,
-} from "../lib/dom.js";
+import { uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
-import { httpGet } from "../lib/http.js";
-import { getIcon } from "../lib/icons.js";
-import { connectToSignal, setSignal } from "../lib/signals.js";
 import { AppConfigurations } from "../model/enum/configurations.js";
 import PathService from "../services/path.service.js";
-import { Theme, THEME_CHANGED_SIGNAL } from "../services/theme.js";
-import WikiService from "../services/wiki.service.js";
 
 export default class HomeView {
 	// HTML ids and classes
@@ -61,7 +51,7 @@ export default class HomeView {
 		const subtitle = uiComponent({
 			type: Html.H2,
 			id: HomeView.SUBTITLE_ID,
-			text: "The simple markdown wiki.",
+			text: getConfiguration(AppConfigurations.AppDescription),
 		});
 		content.appendChild(subtitle);
 
