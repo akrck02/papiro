@@ -260,6 +260,7 @@
     var AppConfigurations;
     (function (AppConfigurations) {
         AppConfigurations["AppName"] = "app_name";
+        AppConfigurations["AppDescription"] = "app_description";
         AppConfigurations["AppVersion"] = "app_version";
         AppConfigurations["CoreName"] = "core_name";
         AppConfigurations["CoreVersion"] = "core_version";
@@ -2171,7 +2172,7 @@ ${body}</tbody>
             const subtitle = uiComponent({
                 type: Html.H2,
                 id: HomeView.SUBTITLE_ID,
-                text: "The simple markdown wiki.",
+                text: getConfiguration(AppConfigurations.AppDescription),
             });
             content.appendChild(subtitle);
             const link = uiComponent({
