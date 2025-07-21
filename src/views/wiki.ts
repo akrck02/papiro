@@ -80,11 +80,16 @@ export default class WikiView {
   }
 
   private static createIndex(route: string, indexItem: IndexItem) {
-    const index = uiComponent({});
+    const index = uiComponent({
+      classes: ["index-page"],
+    });
+
     const title = uiComponent({
       type: Html.H1,
       text: `${route}`,
     });
+
+    const separator = uiComponent({ type: Html.Hr });
 
     const list = uiComponent({ type: Html.Ul });
     for (const key in indexItem.files) {
@@ -102,6 +107,7 @@ export default class WikiView {
     }
 
     index.appendChild(title);
+    index.appendChild(separator);
     index.appendChild(list);
     return index.outerHTML;
   }

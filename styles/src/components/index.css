@@ -1,0 +1,32 @@
+.markdown div.index-page ul {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+:root[data-display="mobile"] .markdown div.index-page ul {
+    flex-direction: column;
+}
+
+.markdown div.index-page h1 {
+    text-align: center;
+}
+
+.markdown div.index-page li::before {
+    content: "";
+    display: none;
+}
+
+.markdown div.index-page a {
+    padding: 1rem;
+    background: var(--surface-2);
+    border-radius: 0.45rem;
+    margin: 1rem;
+    color: var(--on-surface-2);
+}
+
+:root[data-display="mobile"] .markdown div.index-page a {
+    padding: 1rem;
+    margin: 0.2rem 1rem;
+    width: 100%;
+}
