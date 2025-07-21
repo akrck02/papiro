@@ -501,6 +501,17 @@
                     link.classList.remove(this.LINK_SELECTED_CLASS);
             });
         }
+        static setFirstAsSelected() {
+            let found = false;
+            document.querySelectorAll(`#${this.INDEX_LINK_ID}`).forEach((link) => {
+                if (!found) {
+                    link.classList.add(this.LINK_SELECTED_CLASS);
+                    found = true;
+                }
+                else
+                    link.classList.remove(this.LINK_SELECTED_CLASS);
+            });
+        }
     }
     IndexMenu.ID = "index-menu";
     IndexMenu.TITLE_ID = "title";
@@ -2371,9 +2382,11 @@ ${body}</tbody>
         static async getDocumentHTML(route, index) {
             // If it is the home
             if ("" == route.trim()) {
-                if (undefined == index.files["home"])
-                    return "";
-                route = "home";
+                route = Object.keys(index.files)[0];
+                IndexMenu.setFirstAsSelected();
+            }
+            else {
+                IndexMenu.setSelectedRoute();
             }
             const indexItem = getIndexItemFromRoute(index, route);
             // if it is a directory show a index
@@ -2487,7 +2500,6 @@ ${body}</tbody>
      */
     async function start() {
         setRoutes(documentContainer);
-        IndexMenu.setSelectedRoute();
     }
 
 })();
