@@ -37,8 +37,17 @@ div#index-menu input#searchbar {
     background: var(--surface-3);
 }
 
+div#index-menu div.container div.item-container {
+    transition: opacity var(--animation-fast);
+    opacity: 1;
+}
+
 div#index-menu div.container.hidden div.item-container {
     display: none;
+}
+
+div#index-menu div.container.hidding div.item-container {
+    display: flex;
 }
 
 div#index-menu a#index-link {
