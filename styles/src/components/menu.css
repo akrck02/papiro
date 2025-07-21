@@ -97,7 +97,7 @@ div#index-menu a#index-link:not(.selected):focus::after {
 
 div#index-menu div.container a#index-link svg {
     position: absolute;
-    top : .5rem;
+    top: 0.5rem;
     right: 1rem;
     fill: var(--on-surface-1);
 }
@@ -105,5 +105,3 @@ div#index-menu div.container a#index-link svg {
 div#index-menu div.container.hidden a#index-link svg {
     transform: rotateZ(-180deg);
 }
-
-div#index-menu a#index-link
