@@ -1,13 +1,13 @@
 .markdown {
-	display: flex;
-	flex-direction: column;
-	padding: 2rem 2rem;
-	width: 100%;
-	max-width: 75rem;
+    display: flex;
+    flex-direction: column;
+    padding: 2rem 2rem;
+    width: 100%;
+    max-width: 75rem;
 }
 
 :root[data-display="mobile"] .markdown {
-	padding: 1rem 0.75rem;
+    padding: 1rem 0.75rem;
 }
 
 .markdown h1,
@@ -16,161 +16,163 @@
 .markdown h4,
 .markdown h5,
 .markdown h6 {
-	margin-top: 2rem;
+    margin-top: 2rem;
 }
 
 :root[data-display="mobile"] .markdown h1 {
-	font-size: 1.6rem;
-	margin: 1rem 1rem;
+    font-size: 1.6rem;
+    margin: 1rem 1rem;
 }
 :root[data-display="mobile"] .markdown h2 {
-	font-size: 1.4rem;
-	margin: 1rem 1rem;
+    font-size: 1.4rem;
+    margin: 1rem 1rem;
 }
 :root[data-display="mobile"] .markdown h3 {
-	font-size: 1.2rem;
-	margin: 1rem 1rem;
+    font-size: 1.2rem;
+    margin: 1rem 1rem;
 }
 :root[data-display="mobile"] .markdown h4 {
-	font-size: 1rem;
-	margin: 1rem 1rem;
+    font-size: 1rem;
+    margin: 1rem 1rem;
 }
 :root[data-display="mobile"] .markdown h5 {
-	font-size: 0.8rem;
-	margin: 1rem 1rem;
+    font-size: 0.8rem;
+    margin: 1rem 1rem;
 }
 :root[data-display="mobile"] .markdown h6 {
-	font-size: 0.6rem;
-	margin: 1rem 1rem;
+    font-size: 0.6rem;
+    margin: 1rem 1rem;
 }
 
 .markdown code,
 .markdown blockquote {
-	position: relative;
-	background-color: var(--surface-2);
-	color: var(--on-surface-1);
-	margin: 1rem;
-	padding: 1rem;
-	font-size: 1rem;
-	border-radius: 0.35rem;
-	font-family: var(--font-console);
-	display: block;
-	line-height: 135%;
-	overflow-x: auto;
+    position: relative;
+    background-color: var(--surface-2);
+    color: var(--on-surface-1);
+    margin: 1rem;
+    padding: 1rem;
+    font-size: 1rem;
+    border-radius: 0.35rem;
+    font-family: var(--font-console);
+    display: block;
+    line-height: 135%;
+    overflow-x: auto;
 }
 
 .markdown p code {
-	display: inline-flex;
-	margin: 0.2rem;
-	padding: 0.4rem;
+    display: inline-flex;
+    margin: 0.2rem;
+    padding: 0.4rem;
 }
 
 .markdown pre code {
-	display: flex;
+    display: flex;
+    user-select: text;
+    cursor: text;
 }
 
 .markdown code button.copy-button {
-	position: absolute;
-	right: 0.3rem;
-	top: 0.3rem;
-	margin: 0;
-	display: flex;
-	justify-content: center;
-	align-items: center;
-	padding: 0.5rem;
-	min-height: 0.5rem;
-	height: 2rem;
-	border-radius: 0.5rem;
+    position: absolute;
+    right: 0.3rem;
+    top: 0.3rem;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+    min-height: 0.5rem;
+    height: 2rem;
+    border-radius: 0.5rem;
 }
 
 .markdown code button.copy-button:active {
-	transform: none;
-	background: transparent;
-	transition: background var(--animation-fast);
+    transform: none;
+    background: transparent;
+    transition: background var(--animation-fast);
 }
 
 :root[data-display="mobile"] .markdown code *,
 :root[data-display="mobile"] .markdown blockquote * {
-	font-size: 1rem;
+    font-size: 1rem;
 }
 
 .markdown blockquote {
-	font-family: var(--font-light);
-	font-style: italic;
-	display: block;
+    font-family: var(--font-light);
+    font-style: italic;
+    display: block;
 }
 
 .markdown blockquote p {
-	font-weight: bolder;
+    font-weight: bolder;
 }
 
 :root[data-display="mobile"] .markdown blockquote p {
-	font-weight: 380;
+    font-weight: 380;
 }
 
 .markdown img {
-	width: 100%;
-	object-fit: cover;
-	margin: 1rem 0;
-	border-radius: 0.35rem;
+    width: 100%;
+    object-fit: cover;
+    margin: 1rem 0;
+    border-radius: 0.35rem;
 }
 
 .markdown p {
-	font-size: 1.25rem;
-	margin: 0.75rem 1rem;
-	line-height: 135%;
-	font-weight: 380;
+    font-size: 1.25rem;
+    margin: 0.75rem 1rem;
+    line-height: 135%;
+    font-weight: 380;
 }
 
 :root[data-display="mobile"] .markdown p {
-	font-size: 1rem;
+    font-size: 1rem;
 }
 
 .markdown hr {
-	opacity: 0.035;
-	border: 0.1rem solid var(--on-surface-1);
-	width: 100%;
-	border-radius: 1rem;
+    opacity: 0.035;
+    border: 0.1rem solid var(--on-surface-1);
+    width: 100%;
+    border-radius: 1rem;
 }
 
 .markdown ul,
 .markdown ol {
-	padding: 1rem;
+    padding: 1rem;
 }
 
 .markdown ul li {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	font-size: 1.25rem;
-	margin-top: 0.7rem;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    font-size: 1.25rem;
+    margin-top: 0.7rem;
 }
 
 .markdown ol li {
-	align-items: center;
-	font-size: 1.25rem;
-	margin-top: 0.5rem;
-	margin-left: 1.5rem;
+    align-items: center;
+    font-size: 1.25rem;
+    margin-top: 0.5rem;
+    margin-left: 1.5rem;
 }
 
 .markdown ol li {
-	list-style: decimal !important;
+    list-style: decimal !important;
 }
 
 .markdown ul li::before {
-	--size: 0.5rem;
-	content: ".";
-	display: inline-block;
+    --size: 0.5rem;
+    content: ".";
+    display: inline-block;
 
-	width: var(--size);
-	height: var(--size);
-	margin-right: 1rem;
-	color: transparent;
-	border-radius: 0.35rem;
-	background: var(--on-surface-1);
+    width: var(--size);
+    height: var(--size);
+    margin-right: 1rem;
+    color: transparent;
+    border-radius: 0.35rem;
+    background: var(--on-surface-1);
 }
 
 :root[data-display="mobile"] .markdown a {
-	font-size: 1rem;
-	line-height: 135%;
+    font-size: 1rem;
+    line-height: 135%;
 }
