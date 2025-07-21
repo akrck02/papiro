@@ -419,9 +419,16 @@
         static createOption(route, key, value, level = 0) {
             switch (value.type) {
                 case ItemType.Directory:
-                    const item = this.indexLink(route, key, level);
+                    const item = this.indexLink(route, key, level, false);
+                    const expandIcon = getIcon(IconBundle.Material, MaterialIcons.Expand);
+                    item.appendChild(expandIcon);
                     const container = uiComponent({
-                        classes: [BubbleUI.BoxColumn],
+                        classes: [BubbleUI.BoxColumn, "container"],
+                    });
+                    setDomEvents(item, {
+                        click: () => {
+                            container.classList.toggle("hidden");
+                        },
                     });
                     container.appendChild(item);
                     for (const key in value.files) {
@@ -429,16 +436,16 @@
                     }
                     return container;
                 case ItemType.File:
-                    return this.indexLink(route, key, level);
+                    return this.indexLink(route, key, level, true);
             }
         }
-        static indexLink(route, name, level) {
+        static indexLink(route, name, level, isFile) {
             name = PathService.getPascalCase(name);
             const text = PathService.decodeCustomUrl(name);
             const item = uiComponent({
                 type: Html.A,
                 id: this.INDEX_LINK_ID,
-                classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter, "hover-primary"],
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter],
                 text: text,
                 styles: { paddingLeft: `${2 + level}rem` },
                 selectable: false,
@@ -446,6 +453,11 @@
                     route: route,
                 },
             });
+            // if it is a Directory, return
+            if (!isFile) {
+                return item;
+            }
+            item.classList.add("file");
             if (null != route) {
                 setDomAttributes(item, {
                     href: PathService.getWikiViewRoute(route),
