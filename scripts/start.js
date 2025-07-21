@@ -425,14 +425,30 @@
                     const container = uiComponent({
                         classes: [BubbleUI.BoxColumn, "container"],
                     });
-                    setDomEvents(item, {
-                        click: () => {
-                            container.classList.toggle("hidden");
-                            setInterval(() => { }, 1);
-                        },
-                    });
                     const itemContainer = uiComponent({
                         classes: [BubbleUI.BoxColumn, "item-container"],
+                    });
+                    let clicked = false;
+                    setDomEvents(item, {
+                        click: () => {
+                            if (clicked)
+                                return;
+                            clicked = true;
+                            const expansion = container.classList.contains("hidden");
+                            if (expansion) {
+                                container.classList.remove("hidden");
+                                setTimeout(() => {
+                                    itemContainer.style.opacity = "1";
+                                    clicked = false;
+                                }, 10);
+                                return;
+                            }
+                            itemContainer.style.opacity = "0";
+                            setTimeout(() => {
+                                container.classList.toggle("hidden");
+                                clicked = false;
+                            }, 300);
+                        },
                     });
                     container.appendChild(item);
                     for (const key in value.files) {
