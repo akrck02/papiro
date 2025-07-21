@@ -2397,11 +2397,14 @@ ${body}</tbody>
             return WikiService.getDocumentHTML(PathService.getFullWikiResourcePath(PathService.createUrl([routeWithoutLastSection, indexItem.path])));
         }
         static createIndex(route, indexItem) {
-            const index = uiComponent({});
+            const index = uiComponent({
+                classes: ["index-page"],
+            });
             const title = uiComponent({
                 type: Html.H1,
                 text: `${route}`,
             });
+            const separator = uiComponent({ type: Html.Hr });
             const list = uiComponent({ type: Html.Ul });
             for (const key in indexItem.files) {
                 const listItem = uiComponent({ type: Html.Li });
@@ -2416,6 +2419,7 @@ ${body}</tbody>
                 list.appendChild(listItem);
             }
             index.appendChild(title);
+            index.appendChild(separator);
             index.appendChild(list);
             return index.outerHTML;
         }
