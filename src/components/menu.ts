@@ -5,7 +5,7 @@ import { Html } from "../lib/html.js";
 import { getIcon } from "../lib/icons.js";
 import { connectToSignal, emitSignal, setSignal } from "../lib/signals.js";
 import { AppConfigurations } from "../model/enum/configurations.js";
-import { IconBundle } from "../model/enum/icons.js";
+import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
 import { IndexItem, ItemType } from "../model/index.item.js";
 import PathService from "../services/path.service.js";
 import WikiService from "../services/wiki.service.js";
@@ -57,9 +57,17 @@ export default class IndexMenu {
   ): HTMLElement {
     switch (value.type) {
       case ItemType.Directory:
-        const item = this.indexLink(route, key, level);
+        const item = this.indexLink(route, key, level, false);
+        const expandIcon = getIcon(IconBundle.Material, MaterialIcons.Expand);
+        item.appendChild(expandIcon);
         const container = uiComponent({
-          classes: [BubbleUI.BoxColumn],
+          classes: [BubbleUI.BoxColumn, "container"],
+        });
+
+        setDomEvents(item, {
+          click: () => {
+            container.classList.toggle("hidden");
+          },
         });
 
         container.appendChild(item);
@@ -76,7 +84,7 @@ export default class IndexMenu {
 
         return container;
       case ItemType.File:
-        return this.indexLink(route, key, level);
+        return this.indexLink(route, key, level, true);
     }
   }
 
@@ -84,6 +92,7 @@ export default class IndexMenu {
     route: string,
     name: string,
     level: number,
+    isFile: boolean,
   ): HTMLElement {
     name = PathService.getPascalCase(name);
     const text = PathService.decodeCustomUrl(name);
@@ -91,7 +100,7 @@ export default class IndexMenu {
     const item = uiComponent({
       type: Html.A,
       id: this.INDEX_LINK_ID,
-      classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter, "hover-primary"],
+      classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter],
       text: text,
       styles: { paddingLeft: `${2 + level}rem` },
       selectable: false,
@@ -99,6 +108,13 @@ export default class IndexMenu {
         route: route,
       },
     });
+
+    // if it is a Directory, return
+    if (!isFile) {
+      return item;
+    }
+
+    item.classList.add("file");
 
     if (null != route) {
       setDomAttributes(item, {

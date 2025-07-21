@@ -4,6 +4,7 @@
     padding: 2rem 2rem;
     width: 100%;
     max-width: 75rem;
+    color: var(--on-background);
 }
 
 :root[data-display="mobile"] .markdown {
@@ -17,6 +18,12 @@
 .markdown h5,
 .markdown h6 {
     margin-top: 2rem;
+    color: var(--on-background);
+    filter: brightness(1);
+}
+
+.markdown p {
+    color: var(--on-surface-2);
 }
 
 :root[data-display="mobile"] .markdown h1 {
