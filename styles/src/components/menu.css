@@ -37,9 +37,7 @@ div#index-menu input#searchbar {
     background: var(--surface-3);
 }
 
-div#index-menu
-    div.container.hidden
-    a#index-link:not(div#index-menu div.container.hidden a:first-child) {
+div#index-menu div.container.hidden div.item-container {
     display: none;
 }
 
@@ -100,8 +98,10 @@ div#index-menu div.container a#index-link svg {
     top: 0.5rem;
     right: 1rem;
     fill: var(--on-surface-1);
+    transform: rotateZ(0deg);
+    transition: transform var(--animation-fast);
 }
 
 div#index-menu div.container.hidden a#index-link svg {
-    transform: rotateZ(-180deg);
+    transform: rotateZ(-90deg);
 }

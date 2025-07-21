@@ -59,6 +59,7 @@ export default class IndexMenu {
       case ItemType.Directory:
         const item = this.indexLink(route, key, level, false);
         const expandIcon = getIcon(IconBundle.Material, MaterialIcons.Expand);
+
         item.appendChild(expandIcon);
         const container = uiComponent({
           classes: [BubbleUI.BoxColumn, "container"],
@@ -67,12 +68,17 @@ export default class IndexMenu {
         setDomEvents(item, {
           click: () => {
             container.classList.toggle("hidden");
+            setInterval(() => {}, 1);
           },
+        });
+
+        const itemContainer = uiComponent({
+          classes: [BubbleUI.BoxColumn, "item-container"],
         });
 
         container.appendChild(item);
         for (const key in value.files) {
-          container.appendChild(
+          itemContainer.appendChild(
             this.createOption(
               `${route}/${key}`.toLocaleLowerCase(),
               key,
@@ -82,6 +88,7 @@ export default class IndexMenu {
           );
         }
 
+        container.appendChild(itemContainer);
         return container;
       case ItemType.File:
         return this.indexLink(route, key, level, true);
