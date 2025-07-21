@@ -467,7 +467,7 @@
                 type: Html.A,
                 id: this.INDEX_LINK_ID,
                 classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter],
-                text: text,
+                text: PathService.getPascalCase(text),
                 styles: { paddingLeft: `${2 + level}rem` },
                 selectable: false,
                 data: {
