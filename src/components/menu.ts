@@ -166,4 +166,15 @@ export default class IndexMenu {
       else link.classList.remove(this.LINK_SELECTED_CLASS);
     });
   }
+
+  static setFirstAsSelected() {
+    let found = false;
+    document.querySelectorAll(`#${this.INDEX_LINK_ID}`).forEach((link) => {
+      const htmlLink = link as HTMLAnchorElement;
+      if (!found) {
+        link.classList.add(this.LINK_SELECTED_CLASS);
+        found = true;
+      } else link.classList.remove(this.LINK_SELECTED_CLASS);
+    });
+  }
 }
