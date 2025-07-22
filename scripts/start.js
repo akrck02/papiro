@@ -629,15 +629,19 @@
     }
 
     const paths = new Map();
-    let homeHandler = async (_p, c) => { c.innerHTML = "Home page."; };
-    let notFoundHandler = async (_p, c) => { c.innerHTML = "Page not found."; };
+    let homeHandler = async (_p, c) => {
+        c.innerHTML = "Home page.";
+    };
+    let notFoundHandler = async (_p, c) => {
+        c.innerHTML = "Page not found.";
+    };
     /**
      * Register a new route.
      * @param path The router path
      * @param handler The route handler
      */
     function setRoute(path, handler) {
-        // If the path is empry return 
+        // If the path is empry return
         if (undefined == path)
             return;
         // If the path is blank or /, register home and return
@@ -656,6 +660,20 @@
         path = path.replaceAll(regexp, "/([^\/]+)");
         paths.set(path, handler);
         console.debug(`Set route ${path}`);
+    }
+    /**
+     * Register the route to display when route path is not found.
+     * @param handler The view handler to call
+     */
+    function setNotFoundRoute(handler) {
+        notFoundHandler = handler;
+    }
+    /**
+     * Register the route to displayon home.
+     * @param handler The view handler to call
+     */
+    function setHomeRoute(handler) {
+        homeHandler = handler;
     }
     /**
      * Show view for the given route.
@@ -2239,6 +2257,46 @@ ${body}</tbody>
     HomeView.SUBTITLE_ID = "subtitle";
     HomeView.EXPLORE_LINK_ID = "explore";
 
+    class NotFound {
+        static async show(params, container) {
+            const errorView = uiComponent({
+                type: Html.View,
+                id: NotFound.id,
+                classes: [BubbleUI.BoxColumn, BubbleUI.BoxCenter],
+                styles: {
+                    height: "100%",
+                    width: "100%",
+                },
+            });
+            const icon = getIcon(IconBundle.Material, MaterialIcons.Search, "10rem", "var(--surface-3)");
+            errorView.appendChild(icon);
+            const h1 = uiComponent({
+                type: Html.H1,
+                text: "Page not found",
+                styles: {
+                    color: "var(--surface-3)",
+                },
+            });
+            errorView.appendChild(h1);
+            const homeButton = uiComponent({
+                type: Html.Button,
+                text: "Return home",
+                styles: {
+                    marginTop: "1.5rem",
+                    color: "var(--on-surface-2)",
+                },
+            });
+            errorView.appendChild(homeButton);
+            setDomEvents(homeButton, {
+                click: () => {
+                    location.href = `${PathService.getWebUrl()}#`;
+                },
+            });
+            container.appendChild(errorView);
+        }
+    }
+    NotFound.id = "not-found";
+
     class Breadcrumb {
         static create(route, index) {
             const breadcrumb = uiComponent({
@@ -2492,12 +2550,12 @@ ${body}</tbody>
      */
     function setRoutes(parent) {
         if (isConfigurationActive(AppConfigurations.ShowStartPage))
-            setRoute("", HomeView.show);
+            setHomeRoute(HomeView.show);
         else
-            setRoute("", WikiView.show);
+            setHomeRoute(WikiView.show);
+        setNotFoundRoute(NotFound.show);
         setRoute("/wiki", WikiView.show);
         showRoute(window.location.hash.slice(1).toLowerCase(), parent);
-        //setNotFoundRoute(HomeView.show);
     }
     /**
      *  Start the web app
