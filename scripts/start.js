@@ -538,7 +538,7 @@
                 id: TopBar.TITLE_ID,
                 text: logo.outerHTML + getConfiguration(AppConfigurations.AppName),
                 attributes: {
-                    href: `${PathService.getWebUrl()}/#/`,
+                    href: `${PathService.getWebUrl()}#/`,
                 },
                 classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
             });
