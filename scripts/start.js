@@ -581,6 +581,45 @@
     TopBar.THEME_ICON_ID = "theme-icon";
     TopBar.MENU_ICON_ID = "menu-icon";
 
+    class Search {
+        static create() {
+            if (null != this.instance)
+                return this.instance;
+            this.instance = uiComponent({
+                id: this.ID,
+                classes: [BubbleUI.BoxColumn, "hidden"],
+            });
+            this.searchBar = uiComponent({
+                type: Html.Input,
+                id: this.SEARCHBAR_ID,
+                attributes: {
+                    placeholder: "Search here...",
+                },
+            });
+            this.results = uiComponent({});
+            document.addEventListener("keyup", (e) => {
+                // We detect if the user has pressed the key and keeps holding it down
+                if (e.repeat) {
+                    return;
+                }
+                if (e.altKey && e.key === "f") {
+                    this.toggle();
+                }
+            });
+            this.instance.appendChild(this.searchBar);
+            return this.instance;
+        }
+        static toggle() {
+            if (null == this.instance)
+                return;
+            this.instance.classList.toggle("hidden");
+            this.searchBar.value = "";
+            this.searchBar.focus();
+        }
+    }
+    Search.ID = "search-modal";
+    Search.SEARCHBAR_ID = "searchbar";
+
     const SMALL_DEVICE_WIDTH = 760;
     const MEDIUM_DEVICE_WIDTH = 1024;
     /**
@@ -2511,6 +2550,8 @@ ${body}</tbody>
         // create top bar
         const topBar = TopBar.create();
         document.body.appendChild(topBar);
+        const search = Search.create();
+        document.body.appendChild(search);
         // load wiki index
         await WikiService.loadIndex();
         // content container
