@@ -1,0 +1,29 @@
+div#search-modal {
+    position: fixed;
+    padding: 1rem 1rem;
+    width: 50rem;
+    height: 30rem;
+    border-radius: 0.75rem;
+    right: calc(50% - 25rem);
+    top: calc(50% - 20rem);
+    background: var(--surface-1);
+    z-index: 5;
+    box-shadow: rgba(0, 0, 0, 0.15) 0px 0.1rem 1rem;
+}
+
+:root[data-display="mobile"] div#search-modal {
+    flex-direction: column-reverse;
+    width: 90%;
+    top: unset;
+    bottom: 4rem;
+    right: 5%;
+}
+
+div#search-modal.hidden {
+    display: none;
+}
+
+div#search-modal input#searchbar {
+    margin: 0;
+    width: 100%;
+}
