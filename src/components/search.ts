@@ -1,6 +1,7 @@
 import { BubbleUI } from "../lib/bubble.js";
 import { setDomEvents, uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
+import Shortcuts from "../lib/shortcut.js";
 import { IndexItem, ItemType } from "../model/index.item.js";
 import PathService from "../services/path.service.js";
 import StringService from "../services/string.service.js";
@@ -18,7 +19,10 @@ export default class Search {
 
 	static instance: HTMLElement;
 	static searchBar: HTMLInputElement;
-	static results: HTMLElement;
+	static resultContainer: HTMLElement;
+	static results: HTMLElement[] = [];
+
+	static selectionIndex = 0;
 
 	static create(): HTMLElement {
 		if (null != this.instance) return this.instance;
@@ -38,38 +42,46 @@ export default class Search {
 
 		const separator = uiComponent({ type: Html.Hr });
 
-		this.results = uiComponent({
+		this.resultContainer = uiComponent({
 			id: this.RESULTS_ID,
 			classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
 		});
 
-		document.addEventListener("keyup", (e: KeyboardEvent) => {
-			// We detect if the user has pressed the key and keeps holding it down
-			if (e.repeat) return;
-
-			if (e.altKey && e.key === "f") {
-				this.toggle();
-			}
+		Shortcuts.set({
+			key: "f",
+			shiftKey: true,
+			callback: () => Search.toggle(),
 		});
 
 		setDomEvents(this.searchBar, {
 			keyup: (e: KeyboardEvent) => {
+				if (e.key?.toUpperCase() == "ESCAPE") {
+					Search.toggle();
+					return;
+				}
+
+				if (e.key?.toUpperCase() == "ARROWDOWN") {
+					this.results[this.selectionIndex].focus();
+					return;
+				}
+
 				this.search(this.searchBar.value);
 			},
 		});
 
 		this.instance.appendChild(this.searchBar);
 		this.instance.appendChild(separator);
-		this.instance.appendChild(this.results);
+		this.instance.appendChild(this.resultContainer);
 
 		return this.instance;
 	}
 
 	private static search(query: string) {
 		const links: Link[] = [];
+		this.results = [];
+		this.selectionIndex = 0;
 
 		for (const itemName in WikiService.index.files) {
-			console.log(itemName);
 			this.searchLinks(
 				links,
 				query,
@@ -78,10 +90,10 @@ export default class Search {
 			);
 		}
 
-		this.results.innerHTML = "";
+		this.resultContainer.innerHTML = "";
 
 		if (0 == links.length) {
-			this.results.appendChild(
+			this.resultContainer.appendChild(
 				uiComponent({
 					type: Html.P,
 					text: "No elements.",
@@ -101,7 +113,38 @@ export default class Search {
 				},
 			});
 
-			this.results.appendChild(selectable);
+			setDomEvents(selectable, {
+				keyup: (e: KeyboardEvent) => {
+					e.preventDefault();
+					const key = e.key?.toUpperCase();
+
+					if (key == "ESCAPE") {
+						Search.toggle();
+						return;
+					}
+
+					if (key == "ARROWDOWN") {
+						this.selectionIndex++;
+						if (this.selectionIndex == this.results.length) {
+							this.selectionIndex = 0;
+						}
+
+						this.results[this.selectionIndex].focus();
+						return;
+					} else if (key == "ARROWUP") {
+						this.selectionIndex--;
+						if (this.selectionIndex < 0) {
+							this.searchBar.focus();
+						}
+
+						this.results[this.selectionIndex].focus();
+						return;
+					}
+				},
+			});
+
+			this.results.push(selectable);
+			this.resultContainer.appendChild(selectable);
 		}
 	}
 
