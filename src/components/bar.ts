@@ -13,6 +13,7 @@ import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
 import PathService from "../services/path.service.js";
 import { Theme, THEME_CHANGED_SIGNAL } from "../services/theme.js";
 import IndexMenu from "./menu.js";
+import Search from "./search.js";
 
 export default class TopBar {
 	static readonly ID = "top-bar";
@@ -84,11 +85,15 @@ export default class TopBar {
 		showMenuIcon.id = TopBar.MENU_ICON_ID;
 		iconBar.appendChild(showMenuIcon);
 
+		setDomEvents(showMenuIcon, {
+			click: (e) => emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {}),
+		});
+
 		const searchIcon = getIcon(IconBundle.Material, MaterialIcons.Search);
 		iconBar.appendChild(searchIcon);
 
-		setDomEvents(showMenuIcon, {
-			click: (e) => emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {}),
+		setDomEvents(searchIcon, {
+			click: (e) => Search.toggle(),
 		});
 
 		return topBar;
