@@ -519,239 +519,245 @@
     IndexMenu.LINK_SELECTED_CLASS = "selected";
     IndexMenu.MENU_TOGGLE_SIGNAL = setSignal();
 
-    class TopBar {
-        static create() {
-            const topBar = uiComponent({
-                type: Html.Header,
-                id: TopBar.ID,
-                classes: [BubbleUI.BoxRow, BubbleUI.BoxXBetween, BubbleUI.BoxYCenter],
-            });
-            const logo = uiComponent({
-                type: Html.Img,
-                id: TopBar.LOGO_ID,
-                attributes: {
-                    src: `${getConfiguration(AppConfigurations.Path)[PathConfigurations.Icons]}/logo.svg`,
-                },
-            });
-            const navTitle = uiComponent({
-                type: Html.A,
-                id: TopBar.TITLE_ID,
-                text: logo.outerHTML + getConfiguration(AppConfigurations.AppName),
-                attributes: {
-                    href: `${PathService.getWebUrl()}#/`,
-                },
-                classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
-            });
-            topBar.appendChild(navTitle);
-            const iconBar = uiComponent({
-                type: Html.Div,
-                id: TopBar.ICON_BAR_ID,
-                classes: [BubbleUI.BoxRow, BubbleUI.BoxXEnd],
-            });
-            topBar.appendChild(iconBar);
-            const themeIconButton = uiComponent({
-                id: TopBar.THEME_ICON_ID,
-                styles: { cursor: "pointer" },
-            });
-            let themeIcon = getIcon(IconBundle.Material, Theme.isDark() ? MaterialIcons.LightMode : MaterialIcons.DarkMode);
-            themeIconButton.appendChild(themeIcon);
-            iconBar.appendChild(themeIconButton);
-            connectToSignal(THEME_CHANGED_SIGNAL, async () => {
-                themeIcon = getIcon(IconBundle.Material, Theme.isDark() ? MaterialIcons.LightMode : MaterialIcons.DarkMode);
-                themeIconButton.innerHTML = themeIcon?.innerHTML;
-            });
-            setDomEvents(themeIconButton, {
-                click: (e) => Theme.toggle(),
-            });
-            const showMenuIcon = getIcon(IconBundle.Material, MaterialIcons.MenuOpen);
-            showMenuIcon.id = TopBar.MENU_ICON_ID;
-            iconBar.appendChild(showMenuIcon);
-            const searchIcon = getIcon(IconBundle.Material, MaterialIcons.Search);
-            iconBar.appendChild(searchIcon);
-            setDomEvents(showMenuIcon, {
-                click: (e) => emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {}),
-            });
-            return topBar;
-        }
-    }
-    TopBar.ID = "top-bar";
-    TopBar.LOGO_ID = "logo";
-    TopBar.TITLE_ID = "title";
-    TopBar.ICON_BAR_ID = "icon-bar-id";
-    TopBar.THEME_ICON_ID = "theme-icon";
-    TopBar.MENU_ICON_ID = "menu-icon";
-
-    class Search {
-        static create() {
-            if (null != this.instance)
-                return this.instance;
-            this.instance = uiComponent({
-                id: this.ID,
-                classes: [BubbleUI.BoxColumn, "hidden"],
-            });
-            this.searchBar = uiComponent({
-                type: Html.Input,
-                id: this.SEARCHBAR_ID,
-                attributes: {
-                    placeholder: "Search here...",
-                },
-            });
-            this.results = uiComponent({});
-            document.addEventListener("keyup", (e) => {
-                // We detect if the user has pressed the key and keeps holding it down
-                if (e.repeat) {
+    class Shortcuts {
+        /**
+         * Start keyboard service
+         */
+        static start() {
+            document.addEventListener("keyup", (event) => {
+                if (event.repeat)
+                    return;
+                const target = event.target;
+                if (target.tagName === "INPUT" ||
+                    target.tagName === "TEXTAREA" ||
+                    target.isContentEditable) {
                     return;
                 }
-                if (e.altKey && e.key === "f") {
-                    this.toggle();
+                const action = this.getShortcutAction(event);
+                this.execute(action);
+            });
+        }
+        /**
+         * Get action if shortcut is registered or null
+         * @param event the keyboard event
+         * @returns the related action
+         */
+        static getShortcutAction(event) {
+            return this.registry.get(this.getEventKeys(event));
+        }
+        /**
+         * Get event as key string
+         * @param event the keyboard event
+         * @returns event as key string
+         */
+        static getEventKeys(event) {
+            const parts = [];
+            if (event.ctrlKey)
+                parts.push("Ctrl");
+            if (event.shiftKey)
+                parts.push("Shift");
+            if (event.altKey)
+                parts.push("Alt");
+            if (event.metaKey)
+                parts.push("Meta"); // Para Cmd en Mac
+            if (!["Control", "Shift", "Alt", "Meta"].includes(event.key)) {
+                parts.push(event.key.toUpperCase());
+            }
+            return parts.join("+");
+        }
+        /**
+         * Get shortcut as key string
+         * @param shortcut the shortcut
+         * @returns shortcut as key string
+         */
+        static getShortcutKeys(shortcut) {
+            const parts = [];
+            if (shortcut.ctrlKey)
+                parts.push("Ctrl");
+            if (shortcut.shiftKey)
+                parts.push("Shift");
+            if (shortcut.altKey)
+                parts.push("Alt");
+            if (shortcut.metaKey)
+                parts.push("Meta");
+            parts.push(shortcut.key.toUpperCase());
+            return parts.join("+");
+        }
+        /**
+         * Execute a shotcut action
+         * @param action the action
+         */
+        static execute(action) {
+            if (undefined == action || undefined == action.callback)
+                return;
+            action.callback();
+        }
+        /**
+         * Set a new action for a shortcut
+         * @param shortcut the shortcut
+         */
+        static set(shortcut) {
+            this.registry.set(this.getShortcutKeys(shortcut), shortcut);
+        }
+    }
+    Shortcuts.registry = new Map();
+
+    class StringService {
+        static levenshteinDistance(a, b) {
+            const an = a.length;
+            const bn = b.length;
+            if (an == 0) {
+                return bn;
+            }
+            if (bn == 0) {
+                return an;
+            }
+            const matrix = new Array(bn + 1);
+            for (let i = 0; i <= bn; ++i) {
+                const row = (matrix[i] = new Array(an + 1));
+                row[0] = i;
+            }
+            const firstRow = matrix[0];
+            for (let j = 1; j <= an; ++j) {
+                firstRow[j] = j;
+            }
+            for (let i = 1; i <= bn; ++i) {
+                for (let j = 1; j <= an; ++j) {
+                    if (b.charAt(i - 1) === a.charAt(j - 1)) {
+                        matrix[i][j] = matrix[i - 1][j - 1];
+                    }
+                    else {
+                        matrix[i][j] =
+                            Math.min(matrix[i - 1][j - 1], // substitution
+                            matrix[i][j - 1], // insertion
+                            matrix[i - 1][j]) + 1;
+                    }
+                }
+            }
+            return matrix[bn][an];
+        }
+        /**
+         * Get if the text contains the searcher with typo tolerance
+         * @param text The text to search in
+         * @param searcher The text to search for
+         * @returns True if the text contains the searcher
+         */
+        static containsMatching(text, searcher) {
+            return StringService.containsMatchingWithTolerance(text, searcher, StringService.DEFAULT_TOLERANCE);
+        }
+        /**
+         * Get if the text contains the searcher with typo tolerance
+         * @param text The text to search in
+         * @param query The text to search for
+         * @param tolerance The tolerance to use
+         * @returns True if the text contains the searcher
+         */
+        static containsMatchingWordWithTolerance(text, query, tolerance) {
+            text = StringService.normalized(text.toUpperCase().trim());
+            query = StringService.normalized(query.toUpperCase().trim());
+            return text
+                .split(/\s/)
+                .some((word) => word.includes(query) ||
+                StringService.levenshteinDistance(query, word) < tolerance);
+        }
+        /**
+         * Get if the text contains the searcher with typo tolerance
+         * @param text The text to search in
+         * @param query The text to search for
+         * @param tolerance The tolerance to use
+         * @returns True if the text contains the searcher
+         */
+        static containsMatchingWithTolerance(text, query, tolerance) {
+            text = text.trim();
+            query = query.trim();
+            if (text.toUpperCase().includes(query.toUpperCase())) {
+                return true;
+            }
+            const words = query.split(/\s/);
+            let matching = words.some((word) => this.containsMatchingWordWithTolerance(text, word, tolerance));
+            return matching;
+        }
+        /**
+         * Returns a word matching with typo tolerance
+         * @param text The text to search in
+         * @param query The word to search for
+         * @param tolerance The tolerance to use
+         * @return
+         */
+        static getMatching(text, query, tolerance) {
+            text = text.trim();
+            query = query.trim();
+            const matches = [];
+            if (text.toUpperCase().includes(query.toUpperCase())) {
+                matches.push(query);
+                return matches;
+            }
+            const words = text.split(/\s/);
+            words.forEach((word) => {
+                const matching = this.getMatchingWord(text, word, tolerance);
+                if (matching != null) {
+                    matches.push(matching);
                 }
             });
-            this.instance.appendChild(this.searchBar);
-            return this.instance;
+            return matches;
         }
-        static toggle() {
-            if (null == this.instance)
-                return;
-            this.instance.classList.toggle("hidden");
-            this.searchBar.value = "";
-            this.searchBar.focus();
+        /**
+         * Returns a word matching with typo tolerance
+         * @param text The text to search in
+         * @param searcher The word to search for
+         * @param tolerance The tolerance to use
+         * @return
+         */
+        static getMatchingWord(text, searcher, tolerance) {
+            const words = text.split(/\s/);
+            let matchingWord = "";
+            words.find((word) => StringService.normalized(word)
+                .toUpperCase()
+                .includes(searcher.toUpperCase()) ||
+                StringService.levenshteinDistance(StringService.normalized(searcher).toUpperCase(), StringService.normalized(word).toUpperCase()) < tolerance);
+            return matchingWord;
         }
-    }
-    Search.ID = "search-modal";
-    Search.SEARCHBAR_ID = "searchbar";
-
-    const SMALL_DEVICE_WIDTH = 760;
-    const MEDIUM_DEVICE_WIDTH = 1024;
-    /**
-    * Get if the device is a small device
-    * @returns True if the device is a small device
-    */
-    function isSmallDevice() {
-        return window.matchMedia(`only screen and (max-width: ${SMALL_DEVICE_WIDTH}px)`).matches;
-    }
-    /**
-    * Get if the device is a medium device
-    * @returns True if the device is a medium device
-    */
-    function isMediumDevice() {
-        return window.matchMedia(`only screen and (min-width: ${SMALL_DEVICE_WIDTH}px) and (max-width: ${MEDIUM_DEVICE_WIDTH}px)`).matches;
-    }
-    /**
-    * Get if matches one of the mobile media queries
-    * @returns True if the device is a mobile device
-    */
-    function isMobile() {
-        return (navigator.userAgent.match(/Android/i) ||
-            navigator.userAgent.match(/BlackBerry/i) ||
-            navigator.userAgent.match(/iPhone|iPad|iPod/i) ||
-            navigator.userAgent.match(/Opera Mini/i) ||
-            navigator.userAgent.match(/IEMobile/i));
-    }
-
-    class Display {
-        static checkType() {
-            if (isMobile() || isSmallDevice() || isMediumDevice()) {
-                setDomDataset(document.documentElement, {
-                    display: "mobile"
-                });
-                setConfiguration("display", "mobile");
-                return;
+        /**
+         * Get normalized text (no accents)
+         * @param text
+         * @return the text without accents
+         */
+        static normalized(text) {
+            const sensible = [
+                "\u00C1",
+                "\u00C9",
+                "\u00CD",
+                "\u00D3",
+                "\u00DA",
+                "\u00D1",
+                "\u00E1",
+                "\u00E9",
+                "\u00ED",
+                "\u00F3",
+                "\u00FA",
+                "\u00F1",
+            ];
+            const normalized = [
+                "A",
+                "E",
+                "I",
+                "O",
+                "U",
+                "N",
+                "a",
+                "e",
+                "i",
+                "o",
+                "u",
+                "n",
+            ];
+            for (let i = 0; i < normalized.length; i++) {
+                text = text.replaceAll(sensible[i], normalized[i]);
             }
-            setDomDataset(document.documentElement, {
-                display: "desktop"
-            });
-            setConfiguration("display", "desktop");
-        }
-        static isMobile() {
-            return "mobile" == getConfiguration("display");
+            return text;
         }
     }
-
-    const paths = new Map();
-    let homeHandler = async (_p, c) => {
-        c.innerHTML = "Home page.";
-    };
-    let notFoundHandler = async (_p, c) => {
-        c.innerHTML = "Page not found.";
-    };
-    /**
-     * Register a new route.
-     * @param path The router path
-     * @param handler The route handler
-     */
-    function setRoute(path, handler) {
-        // If the path is empry return
-        if (undefined == path)
-            return;
-        // If the path is blank or /, register home and return
-        path = path.trim();
-        // If the path is home
-        if ("/" == path || "" == path) {
-            homeHandler = handler;
-            return;
-        }
-        // If the path ends with / trim it
-        const indexOfSlash = path.indexOf("/");
-        if (-1 != indexOfSlash && "/" == path.substring(path.length - 1))
-            path = path.substring(0, path.length - 1);
-        // Replace all the variables with regex expressions to capture them later
-        const regexp = /\/(\$+)/g;
-        path = path.replaceAll(regexp, "/([^\/]+)");
-        paths.set(path, handler);
-        console.debug(`Set route ${path}`);
-    }
-    /**
-     * Register the route to display when route path is not found.
-     * @param handler The view handler to call
-     */
-    function setNotFoundRoute(handler) {
-        notFoundHandler = handler;
-    }
-    /**
-     * Register the route to displayon home.
-     * @param handler The view handler to call
-     */
-    function setHomeRoute(handler) {
-        homeHandler = handler;
-    }
-    /**
-     * Show view for the given route.
-     * @param path The given path to search for
-     * @param container The container to display the views in
-     */
-    function showRoute(path, container) {
-        container.innerHTML = "";
-        // If it is the home route, show
-        if ("/" == path || "" == path) {
-            homeHandler([], container);
-            return;
-        }
-        // Else search matching route
-        const keys = Array.from(paths.keys()).sort(compareRouteLength);
-        for (const route of keys) {
-            // Check if route matches
-            const regexp = RegExp(route);
-            const params = path.match(regexp);
-            if (null != params && 0 != params.length) {
-                paths.get(route)(params.slice(1), container);
-                return;
-            }
-        }
-        // If no route found, show not found view.
-        notFoundHandler([], container);
-    }
-    /**
-     * Compare the length of two routes
-     */
-    function compareRouteLength(a, b) {
-        const aLength = a.split("/").length - 1;
-        const bLength = b.split("/").length - 1;
-        if (aLength == bLength)
-            return 0;
-        if (aLength < bLength)
-            return 1;
-        return -1;
-    }
+    StringService.DEFAULT_TOLERANCE = 4;
 
     /**
      * This enum represents the available HTTP methods
@@ -2239,6 +2245,356 @@ ${body}</tbody>
         }
     }
 
+    class Search {
+        static create() {
+            if (null != this.instance)
+                return this.instance;
+            this.instance = uiComponent({
+                id: this.ID,
+                classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter, "hidden"],
+            });
+            this.searchBar = uiComponent({
+                type: Html.Input,
+                id: this.SEARCHBAR_ID,
+                attributes: {
+                    placeholder: "Search here...",
+                },
+            });
+            const separator = uiComponent({ type: Html.Hr });
+            this.resultContainer = uiComponent({
+                id: this.RESULTS_ID,
+                classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
+            });
+            Shortcuts.set({
+                key: "f",
+                shiftKey: true,
+                callback: () => Search.toggle(),
+            });
+            setDomEvents(this.searchBar, {
+                keyup: (e) => {
+                    if (e.key?.toUpperCase() == "ESCAPE") {
+                        Search.toggle();
+                        return;
+                    }
+                    if (e.key?.toUpperCase() == "ARROWDOWN") {
+                        this.results[this.selectionIndex].focus();
+                        return;
+                    }
+                    this.search(this.searchBar.value);
+                },
+            });
+            this.instance.appendChild(this.searchBar);
+            this.instance.appendChild(separator);
+            this.instance.appendChild(this.resultContainer);
+            return this.instance;
+        }
+        static search(query) {
+            const links = [];
+            this.results = [];
+            this.selectionIndex = 0;
+            for (const itemName in WikiService.index.files) {
+                this.searchLinks(links, query, itemName, itemName, WikiService.index.files[itemName]);
+            }
+            this.resultContainer.innerHTML = "";
+            if (0 == links.length) {
+                this.resultContainer.appendChild(uiComponent({
+                    type: Html.P,
+                    text: "No elements.",
+                }));
+                return;
+            }
+            for (const i in links) {
+                const link = links[i];
+                const selectable = uiComponent({
+                    type: Html.A,
+                    text: link.name,
+                    attributes: {
+                        href: PathService.getWikiViewRoute(link.path),
+                    },
+                });
+                setDomEvents(selectable, {
+                    keyup: (e) => {
+                        e.preventDefault();
+                        const key = e.key?.toUpperCase();
+                        if (key == "ESCAPE") {
+                            Search.toggle();
+                            return;
+                        }
+                        if (key == "ENTER") {
+                            Search.toggle();
+                            return;
+                        }
+                        if (key == "ARROWDOWN") {
+                            this.selectionIndex++;
+                            if (this.selectionIndex == this.results.length) {
+                                this.selectionIndex = 0;
+                            }
+                            this.results[this.selectionIndex].focus();
+                            return;
+                        }
+                        else if (key == "ARROWUP") {
+                            this.selectionIndex--;
+                            if (this.selectionIndex < 0) {
+                                this.searchBar.focus();
+                            }
+                            this.results[this.selectionIndex].focus();
+                            return;
+                        }
+                    },
+                });
+                this.results.push(selectable);
+                this.resultContainer.appendChild(selectable);
+            }
+        }
+        static searchLinks(links, query, name, route, item) {
+            // if no valid params, return
+            if (undefined == query ||
+                undefined == name ||
+                undefined == item ||
+                undefined == links)
+                return;
+            // if it is a file, return
+            if (ItemType.File == item.type) {
+                // if the query does not match, do no add to search results
+                if (false == this.queryMatches(name, query))
+                    return;
+                // add file to search results
+                links.push({
+                    name: PathService.getPascalCase(PathService.decodeCustomUrl(name)),
+                    path: `${route}`,
+                });
+                return;
+            }
+            else {
+                // if the query matches add file to search results
+                if (true == this.queryMatches(name, query)) {
+                    links.push({
+                        name: PathService.getPascalCase(PathService.decodeCustomUrl(name)),
+                        path: `${route}`,
+                    });
+                }
+                // if it is a directory, search for the matching contents inside
+                for (const childName in item.files) {
+                    this.searchLinks(links, query, childName, `${route}/${childName}`, item.files[childName]);
+                }
+            }
+        }
+        static queryMatches(value, query) {
+            console.debug(value, query);
+            return StringService.containsMatching(value, query);
+        }
+        static toggle() {
+            if (null == this.instance)
+                return;
+            this.instance.classList.toggle("hidden");
+            this.searchBar.value = "";
+            this.searchBar.focus();
+        }
+    }
+    Search.ID = "search-modal";
+    Search.SEARCHBAR_ID = "searchbar";
+    Search.RESULTS_ID = "results";
+    Search.results = [];
+    Search.selectionIndex = 0;
+
+    class TopBar {
+        static create() {
+            const topBar = uiComponent({
+                type: Html.Header,
+                id: TopBar.ID,
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxXBetween, BubbleUI.BoxYCenter],
+            });
+            const logo = uiComponent({
+                type: Html.Img,
+                id: TopBar.LOGO_ID,
+                attributes: {
+                    src: `${getConfiguration(AppConfigurations.Path)[PathConfigurations.Icons]}/logo.svg`,
+                },
+            });
+            const navTitle = uiComponent({
+                type: Html.A,
+                id: TopBar.TITLE_ID,
+                text: logo.outerHTML + getConfiguration(AppConfigurations.AppName),
+                attributes: {
+                    href: `${PathService.getWebUrl()}#/`,
+                },
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
+            });
+            topBar.appendChild(navTitle);
+            const iconBar = uiComponent({
+                type: Html.Div,
+                id: TopBar.ICON_BAR_ID,
+                classes: [BubbleUI.BoxRow, BubbleUI.BoxXEnd],
+            });
+            topBar.appendChild(iconBar);
+            const themeIconButton = uiComponent({
+                id: TopBar.THEME_ICON_ID,
+                styles: { cursor: "pointer" },
+            });
+            let themeIcon = getIcon(IconBundle.Material, Theme.isDark() ? MaterialIcons.LightMode : MaterialIcons.DarkMode);
+            themeIconButton.appendChild(themeIcon);
+            iconBar.appendChild(themeIconButton);
+            connectToSignal(THEME_CHANGED_SIGNAL, async () => {
+                themeIcon = getIcon(IconBundle.Material, Theme.isDark() ? MaterialIcons.LightMode : MaterialIcons.DarkMode);
+                themeIconButton.innerHTML = themeIcon?.innerHTML;
+            });
+            setDomEvents(themeIconButton, {
+                click: (e) => Theme.toggle(),
+            });
+            const showMenuIcon = getIcon(IconBundle.Material, MaterialIcons.MenuOpen);
+            showMenuIcon.id = TopBar.MENU_ICON_ID;
+            iconBar.appendChild(showMenuIcon);
+            setDomEvents(showMenuIcon, {
+                click: (e) => emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {}),
+            });
+            const searchIcon = getIcon(IconBundle.Material, MaterialIcons.Search);
+            iconBar.appendChild(searchIcon);
+            setDomEvents(searchIcon, {
+                click: (e) => Search.toggle(),
+            });
+            return topBar;
+        }
+    }
+    TopBar.ID = "top-bar";
+    TopBar.LOGO_ID = "logo";
+    TopBar.TITLE_ID = "title";
+    TopBar.ICON_BAR_ID = "icon-bar-id";
+    TopBar.THEME_ICON_ID = "theme-icon";
+    TopBar.MENU_ICON_ID = "menu-icon";
+
+    const SMALL_DEVICE_WIDTH = 760;
+    const MEDIUM_DEVICE_WIDTH = 1024;
+    /**
+    * Get if the device is a small device
+    * @returns True if the device is a small device
+    */
+    function isSmallDevice() {
+        return window.matchMedia(`only screen and (max-width: ${SMALL_DEVICE_WIDTH}px)`).matches;
+    }
+    /**
+    * Get if the device is a medium device
+    * @returns True if the device is a medium device
+    */
+    function isMediumDevice() {
+        return window.matchMedia(`only screen and (min-width: ${SMALL_DEVICE_WIDTH}px) and (max-width: ${MEDIUM_DEVICE_WIDTH}px)`).matches;
+    }
+    /**
+    * Get if matches one of the mobile media queries
+    * @returns True if the device is a mobile device
+    */
+    function isMobile() {
+        return (navigator.userAgent.match(/Android/i) ||
+            navigator.userAgent.match(/BlackBerry/i) ||
+            navigator.userAgent.match(/iPhone|iPad|iPod/i) ||
+            navigator.userAgent.match(/Opera Mini/i) ||
+            navigator.userAgent.match(/IEMobile/i));
+    }
+
+    class Display {
+        static checkType() {
+            if (isMobile() || isSmallDevice() || isMediumDevice()) {
+                setDomDataset(document.documentElement, {
+                    display: "mobile"
+                });
+                setConfiguration("display", "mobile");
+                return;
+            }
+            setDomDataset(document.documentElement, {
+                display: "desktop"
+            });
+            setConfiguration("display", "desktop");
+        }
+        static isMobile() {
+            return "mobile" == getConfiguration("display");
+        }
+    }
+
+    const paths = new Map();
+    let homeHandler = async (_p, c) => {
+        c.innerHTML = "Home page.";
+    };
+    let notFoundHandler = async (_p, c) => {
+        c.innerHTML = "Page not found.";
+    };
+    /**
+     * Register a new route.
+     * @param path The router path
+     * @param handler The route handler
+     */
+    function setRoute(path, handler) {
+        // If the path is empry return
+        if (undefined == path)
+            return;
+        // If the path is blank or /, register home and return
+        path = path.trim();
+        // If the path is home
+        if ("/" == path || "" == path) {
+            homeHandler = handler;
+            return;
+        }
+        // If the path ends with / trim it
+        const indexOfSlash = path.indexOf("/");
+        if (-1 != indexOfSlash && "/" == path.substring(path.length - 1))
+            path = path.substring(0, path.length - 1);
+        // Replace all the variables with regex expressions to capture them later
+        const regexp = /\/(\$+)/g;
+        path = path.replaceAll(regexp, "/([^\/]+)");
+        paths.set(path, handler);
+        console.debug(`Set route ${path}`);
+    }
+    /**
+     * Register the route to display when route path is not found.
+     * @param handler The view handler to call
+     */
+    function setNotFoundRoute(handler) {
+        notFoundHandler = handler;
+    }
+    /**
+     * Register the route to displayon home.
+     * @param handler The view handler to call
+     */
+    function setHomeRoute(handler) {
+        homeHandler = handler;
+    }
+    /**
+     * Show view for the given route.
+     * @param path The given path to search for
+     * @param container The container to display the views in
+     */
+    function showRoute(path, container) {
+        container.innerHTML = "";
+        // If it is the home route, show
+        if ("/" == path || "" == path) {
+            homeHandler([], container);
+            return;
+        }
+        // Else search matching route
+        const keys = Array.from(paths.keys()).sort(compareRouteLength);
+        for (const route of keys) {
+            // Check if route matches
+            const regexp = RegExp(route);
+            const params = path.match(regexp);
+            if (null != params && 0 != params.length) {
+                paths.get(route)(params.slice(1), container);
+                return;
+            }
+        }
+        // If no route found, show not found view.
+        notFoundHandler([], container);
+    }
+    /**
+     * Compare the length of two routes
+     */
+    function compareRouteLength(a, b) {
+        const aLength = a.split("/").length - 1;
+        const bLength = b.split("/").length - 1;
+        if (aLength == bLength)
+            return 0;
+        if (aLength < bLength)
+            return 1;
+        return -1;
+    }
+
     class HomeView {
         /**
          * Show home view
@@ -2547,6 +2903,7 @@ ${body}</tbody>
             Theme.setLight();
         }
         await getIcons();
+        Shortcuts.start();
         // create top bar
         const topBar = TopBar.create();
         document.body.appendChild(topBar);
