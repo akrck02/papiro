@@ -217,7 +217,15 @@
         if (undefined == content)
             return undefined;
         const svg = `<svg height="${size}" width="${size}" viewBox="0 0 24 24" fill="${fill}">${content || ""}</svg>`;
-        return uiComponent({ type: "div", text: svg });
+        return uiComponent({
+            type: "div",
+            text: svg,
+            styles: {
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+            },
+        });
     }
 
     function uuidv4() {
@@ -298,6 +306,7 @@
         MaterialIcons["DarkMode"] = "dark_mode";
         MaterialIcons["ContentCopy"] = "content_copy";
         MaterialIcons["MenuOpen"] = "menu_open";
+        MaterialIcons["ExitToApp"] = "exit_to_app";
     })(MaterialIcons || (MaterialIcons = {}));
 
     class PathService {
@@ -519,31 +528,33 @@
     IndexMenu.LINK_SELECTED_CLASS = "selected";
     IndexMenu.MENU_TOGGLE_SIGNAL = setSignal();
 
+    var KeyInteraction;
+    (function (KeyInteraction) {
+        KeyInteraction["keyUp"] = "keyup";
+        KeyInteraction["keyDown"] = "keydown";
+    })(KeyInteraction || (KeyInteraction = {}));
+    /**
+     *  Public class to register shortcuts by context
+     */
     class Shortcuts {
-        /**
-         * Start keyboard service
-         */
-        static start() {
-            document.addEventListener("keyup", (event) => {
-                if (event.repeat)
-                    return;
-                const target = event.target;
-                if (target.tagName === "INPUT" ||
-                    target.tagName === "TEXTAREA" ||
-                    target.isContentEditable) {
-                    return;
-                }
-                const action = this.getShortcutAction(event);
-                this.execute(action);
-            });
+        static register(element) {
+            const uuid = uuidv4();
+            this.globalRegistry.set(uuid, new ShortcutRegistry(element));
+            return uuid;
         }
-        /**
-         * Get action if shortcut is registered or null
-         * @param event the keyboard event
-         * @returns the related action
-         */
-        static getShortcutAction(event) {
-            return this.registry.get(this.getEventKeys(event));
+        static set(key, shortcut) {
+            this.globalRegistry.get(key)?.set(shortcut);
+        }
+    }
+    Shortcuts.globalRegistry = new Map();
+    /**
+     * Shortcut registry from a given handler
+     */
+    class ShortcutRegistry {
+        constructor(context) {
+            this.registry = new Map();
+            this.context = context;
+            this.start();
         }
         /**
          * Get event as key string
@@ -596,11 +607,63 @@
          * Set a new action for a shortcut
          * @param shortcut the shortcut
          */
-        static set(shortcut) {
-            this.registry.set(this.getShortcutKeys(shortcut), shortcut);
+        set(shortcut) {
+            this.registry.set(ShortcutRegistry.getShortcutKeys(shortcut), shortcut);
+        }
+        /**
+         * Start keyboard service
+         */
+        start() {
+            const registry = this.registry;
+            this.context.addEventListener(KeyInteraction.keyUp, (e) => ShortcutRegistry.handleEvent(KeyInteraction.keyUp, registry, e));
+            this.context.addEventListener(KeyInteraction.keyDown, (e) => ShortcutRegistry.handleEvent(KeyInteraction.keyDown, registry, e));
+        }
+        /**
+         * Handle a key event
+         * @param event the key event
+         */
+        static handleEvent(context, registry, event) {
+            // get action, if no one is present return
+            const action = registry?.get(ShortcutRegistry.getEventKeys(event));
+            if (undefined == action || context != action.interaction)
+                return;
+            // if prevent default active, prevent
+            if (true == action.preventDefault) {
+                event.preventDefault();
+            }
+            // if stop stop propagation active, prevent
+            if (true == action.stopPropagation) {
+                event.stopPropagation();
+            }
+            if (!action.repeatable && event.repeat)
+                // handle not repeatable events
+                return;
+            // if omit editable content is set check if editable
+            const target = event.target;
+            if (action.omitEditableContent == true &&
+                ShortcutRegistry.isEditableContent(target)) {
+                return;
+            }
+            this.execute(action);
+        }
+        /**
+         * Get if target is editable
+         * @param target the element to inspect
+         * @returns if target is editable
+         */
+        static isEditableContent(target) {
+            return (target.tagName === "INPUT" ||
+                target.tagName === "TEXTAREA" ||
+                target.isContentEditable);
         }
     }
-    Shortcuts.registry = new Map();
+
+    class GlobalShortcuts {
+        static set(shortcut) {
+            Shortcuts.set(this.REGISTRY, shortcut);
+        }
+    }
+    GlobalShortcuts.REGISTRY = Shortcuts.register(document.documentElement);
 
     class StringService {
         static levenshteinDistance(a, b) {
@@ -2245,13 +2308,27 @@ ${body}</tbody>
         }
     }
 
+    /**
+     * Search modal component, this class is a singleton
+     * it will be instanciated when the first call to "create"
+     * is executed, the following calls will inmediately return
+     * the current instance.
+     */
     class Search {
+        /**
+         * Create the shortcut component or get current instance if exists
+         * @returns the component
+         */
         static create() {
             if (null != this.instance)
                 return this.instance;
             this.instance = uiComponent({
                 id: this.ID,
                 classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter, "hidden"],
+            });
+            const searchToolbar = uiComponent({
+                id: this.SEARCH_TOOLBAR_ID,
+                classes: [BubbleUI.BoxCenter],
             });
             this.searchBar = uiComponent({
                 type: Html.Input,
@@ -2260,41 +2337,85 @@ ${body}</tbody>
                     placeholder: "Search here...",
                 },
             });
+            searchToolbar.appendChild(this.searchBar);
+            this.exitButton = uiComponent({
+                type: Html.Button,
+                text: getIcon(IconBundle.Material, MaterialIcons.ExitToApp, "", "")
+                    .outerHTML,
+            });
+            this.exitButton.onclick = () => Search.exit();
+            const exitButtonShortcutUuid = Shortcuts.register(this.exitButton);
+            Shortcuts.set(exitButtonShortcutUuid, {
+                key: "ARROWLEFT",
+                interaction: KeyInteraction.keyUp,
+                callback: () => Search.searchBar.focus(),
+            });
+            searchToolbar.appendChild(this.exitButton);
+            this.instance.appendChild(searchToolbar);
             const separator = uiComponent({ type: Html.Hr });
+            this.instance.appendChild(separator);
             this.resultContainer = uiComponent({
                 id: this.RESULTS_ID,
                 classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
             });
-            Shortcuts.set({
+            this.instance.appendChild(this.resultContainer);
+            this.setSearchShortcuts();
+            return this.instance;
+        }
+        /**
+         * Set search shortcuts
+         */
+        static setSearchShortcuts() {
+            GlobalShortcuts.set({
+                interaction: KeyInteraction.keyUp,
                 key: "f",
                 shiftKey: true,
                 callback: () => Search.toggle(),
+                repeatable: false,
+                omitEditableContent: true,
+            });
+            const searchShortcutRegistry = Shortcuts.register(this.instance);
+            Shortcuts.set(searchShortcutRegistry, {
+                interaction: KeyInteraction.keyUp,
+                key: "ESCAPE",
+                callback: () => {
+                    Search.exit();
+                },
             });
             setDomEvents(this.searchBar, {
                 keyup: (e) => {
-                    if (e.key?.toUpperCase() == "ESCAPE") {
-                        Search.toggle();
+                    if (e.key?.toUpperCase() == "ARROWUP") {
+                        Search.selectionIndex = Search.results.length - 1;
+                        Search.results[Search.selectionIndex]?.focus();
                         return;
                     }
                     if (e.key?.toUpperCase() == "ARROWDOWN") {
-                        this.results[this.selectionIndex].focus();
+                        Search.selectionIndex = 0;
+                        Search.results[Search.selectionIndex]?.focus();
                         return;
                     }
-                    this.search(this.searchBar.value);
+                    if (e.key?.toUpperCase() == "ARROWRIGHT") {
+                        this.exitButton.focus();
+                        return;
+                    }
+                    Search.search(Search.searchBar.value);
                 },
             });
-            this.instance.appendChild(this.searchBar);
-            this.instance.appendChild(separator);
-            this.instance.appendChild(this.resultContainer);
-            return this.instance;
         }
+        /**
+         *
+         * @param query
+         * @returns
+         */
         static search(query) {
             const links = [];
             this.results = [];
             this.selectionIndex = 0;
+            // Get search results
             for (const itemName in WikiService.index.files) {
                 this.searchLinks(links, query, itemName, itemName, WikiService.index.files[itemName]);
             }
+            // If no elements present, show a message
             this.resultContainer.innerHTML = "";
             if (0 == links.length) {
                 this.resultContainer.appendChild(uiComponent({
@@ -2304,48 +2425,73 @@ ${body}</tbody>
                 return;
             }
             for (const i in links) {
-                const link = links[i];
-                const selectable = uiComponent({
-                    type: Html.A,
-                    text: link.name,
-                    attributes: {
-                        href: PathService.getWikiViewRoute(link.path),
-                    },
-                });
-                setDomEvents(selectable, {
-                    keyup: (e) => {
-                        e.preventDefault();
-                        const key = e.key?.toUpperCase();
-                        if (key == "ESCAPE") {
-                            Search.toggle();
-                            return;
-                        }
-                        if (key == "ENTER") {
-                            Search.toggle();
-                            return;
-                        }
-                        if (key == "ARROWDOWN") {
-                            this.selectionIndex++;
-                            if (this.selectionIndex == this.results.length) {
-                                this.selectionIndex = 0;
-                            }
-                            this.results[this.selectionIndex].focus();
-                            return;
-                        }
-                        else if (key == "ARROWUP") {
-                            this.selectionIndex--;
-                            if (this.selectionIndex < 0) {
-                                this.searchBar.focus();
-                            }
-                            this.results[this.selectionIndex].focus();
-                            return;
-                        }
-                    },
-                });
+                const selectable = this.createSelectableLink(links[i]);
                 this.results.push(selectable);
                 this.resultContainer.appendChild(selectable);
             }
         }
+        /**
+         * Create a selectable link with custom shortcuts
+         * @param link The link data
+         * @returns The html <a> element
+         */
+        static createSelectableLink(link) {
+            const selectable = uiComponent({
+                type: Html.A,
+                text: link.name,
+                attributes: {
+                    href: PathService.getWikiViewRoute(link.path),
+                },
+            });
+            selectable.onclick = () => {
+                Search.selectionIndex = 0;
+                Search.exit();
+            };
+            const uuid = Shortcuts.register(selectable);
+            Shortcuts.set(uuid, {
+                key: "ESCAPE",
+                interaction: KeyInteraction.keyUp,
+                callback: () => {
+                    Search.selectionIndex = 0;
+                    Search.exit();
+                },
+            });
+            Shortcuts.set(uuid, {
+                key: "ARROWUP",
+                interaction: KeyInteraction.keyUp,
+                callback: () => {
+                    Search.selectionIndex--;
+                    if (Search.selectionIndex < 0) {
+                        Search.searchBar.focus();
+                        this.selectionIndex = 0;
+                        return;
+                    }
+                    Search.results[Search.selectionIndex].focus();
+                },
+            });
+            Shortcuts.set(uuid, {
+                key: "ARROWDOWN",
+                interaction: KeyInteraction.keyUp,
+                callback: () => {
+                    Search.selectionIndex++;
+                    if (Search.selectionIndex == Search.results.length) {
+                        Search.selectionIndex = 0;
+                        Search.searchBar.focus();
+                        return;
+                    }
+                    Search.results[Search.selectionIndex].focus();
+                },
+            });
+            return selectable;
+        }
+        /**
+         * Search links for the given query
+         * @param links The link list to fill
+         * @param query The query to match
+         * @param name The link name
+         * @param route The link route
+         * @param item The index item matching the route
+         */
         static searchLinks(links, query, name, route, item) {
             // if no valid params, return
             if (undefined == query ||
@@ -2379,19 +2525,47 @@ ${body}</tbody>
                 }
             }
         }
+        /**
+         * Get if the given value matches the query
+         * @param value The value to inspect
+         * @param query The query to match
+         * @returns if the given value matches the query
+         */
         static queryMatches(value, query) {
-            console.debug(value, query);
             return StringService.containsMatching(value, query);
         }
+        /**
+         * Toggle the search modal
+         */
         static toggle() {
             if (null == this.instance)
                 return;
-            this.instance.classList.toggle("hidden");
-            this.searchBar.value = "";
+            if (this.instance.classList.contains("hidden"))
+                this.open();
+            else
+                this.exit();
+        }
+        /**
+         * Open the search modal
+         */
+        static open() {
+            if (null == this.instance)
+                return;
+            this.instance.classList.remove("hidden");
             this.searchBar.focus();
+        }
+        /**
+         * exit the search modal
+         */
+        static exit() {
+            if (null == this.instance)
+                return;
+            this.instance.classList.add("hidden");
+            this.searchBar.value = "";
         }
     }
     Search.ID = "search-modal";
+    Search.SEARCH_TOOLBAR_ID = "search-toolbar";
     Search.SEARCHBAR_ID = "searchbar";
     Search.RESULTS_ID = "results";
     Search.results = [];
@@ -2540,7 +2714,6 @@ ${body}</tbody>
         const regexp = /\/(\$+)/g;
         path = path.replaceAll(regexp, "/([^\/]+)");
         paths.set(path, handler);
-        console.debug(`Set route ${path}`);
     }
     /**
      * Register the route to display when route path is not found.
@@ -2903,7 +3076,6 @@ ${body}</tbody>
             Theme.setLight();
         }
         await getIcons();
-        Shortcuts.start();
         // create top bar
         const topBar = TopBar.create();
         document.body.appendChild(topBar);
