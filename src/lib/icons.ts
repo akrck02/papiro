@@ -38,5 +38,13 @@ export function getIcon(
 	if (undefined == content) return undefined;
 
 	const svg = `<svg height="${size}" width="${size}" viewBox="0 0 24 24" fill="${fill}">${content || ""}</svg>`;
-	return uiComponent({ type: "div", text: svg });
+	return uiComponent({
+		type: "div",
+		text: svg,
+		styles: {
+			display: "flex",
+			justifyContent: "center",
+			alignItems: "center",
+		},
+	});
 }
