@@ -702,11 +702,11 @@
         /**
          * Get if the text contains the searcher with typo tolerance
          * @param text The text to search in
-         * @param searcher The text to search for
+         * @param query The text to search for
          * @returns True if the text contains the searcher
          */
-        static containsMatching(text, searcher) {
-            return StringService.containsMatchingWithTolerance(text, searcher, StringService.DEFAULT_TOLERANCE);
+        static search(text, query) {
+            return StringService.searchWithTolerance(text, query, StringService.DEFAULT_TOLERANCE);
         }
         /**
          * Get if the text contains the searcher with typo tolerance
@@ -716,12 +716,20 @@
          * @returns True if the text contains the searcher
          */
         static containsMatchingWordWithTolerance(text, query, tolerance) {
-            text = StringService.normalized(text.toUpperCase().trim());
-            query = StringService.normalized(query.toUpperCase().trim());
-            return text
-                .split(/\s/)
-                .some((word) => word.includes(query) ||
-                StringService.levenshteinDistance(query, word) < tolerance);
+            text = PathService.decodeCustomUrl(StringService.normalized(text.trim().replaceAll(" ", "").toUpperCase())).toUpperCase();
+            query = StringService.normalized(query.trim().replaceAll(" ", "").toUpperCase()).toUpperCase();
+            if (text == query || text.includes(query))
+                return true;
+            if (StringService.levenshteinDistance(query, text) < tolerance)
+                return true;
+            let matchesTolerance = false;
+            const words = text.split(/\s/);
+            for (const word of words) {
+                if (StringService.levenshteinDistance(query, word) < tolerance) {
+                    return true;
+                }
+            }
+            return matchesTolerance;
         }
         /**
          * Get if the text contains the searcher with typo tolerance
@@ -730,7 +738,7 @@
          * @param tolerance The tolerance to use
          * @returns True if the text contains the searcher
          */
-        static containsMatchingWithTolerance(text, query, tolerance) {
+        static searchWithTolerance(text, query, tolerance) {
             text = text.trim();
             query = query.trim();
             if (text.toUpperCase().includes(query.toUpperCase())) {
@@ -820,7 +828,7 @@
             return text;
         }
     }
-    StringService.DEFAULT_TOLERANCE = 4;
+    StringService.DEFAULT_TOLERANCE = 2;
 
     /**
      * This enum represents the available HTTP methods
@@ -2394,10 +2402,6 @@ ${body}</tbody>
                         Search.results[Search.selectionIndex]?.focus();
                         return;
                     }
-                    if (e.key?.toUpperCase() == "ARROWRIGHT") {
-                        this.exitButton.focus();
-                        return;
-                    }
                     Search.search(Search.searchBar.value);
                 },
             });
@@ -2513,7 +2517,8 @@ ${body}</tbody>
             }
             else {
                 // if the query matches add file to search results
-                if (true == this.queryMatches(name, query)) {
+                if (item.path.endsWith(".html") &&
+                    true == this.queryMatches(name, query)) {
                     links.push({
                         name: PathService.getPascalCase(PathService.decodeCustomUrl(name)),
                         path: `${route}`,
@@ -2532,7 +2537,7 @@ ${body}</tbody>
          * @returns if the given value matches the query
          */
         static queryMatches(value, query) {
-            return StringService.containsMatching(value, query);
+            return StringService.search(value, query);
         }
         /**
          * Toggle the search modal
