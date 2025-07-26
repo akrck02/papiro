@@ -127,11 +127,6 @@ export default class Search {
 					return;
 				}
 
-				if (e.key?.toUpperCase() == "ARROWRIGHT") {
-					this.exitButton.focus();
-					return;
-				}
-
 				Search.search(Search.searchBar.value);
 			},
 		});
@@ -308,7 +303,7 @@ export default class Search {
 	 * @returns if the given value matches the query
 	 */
 	private static queryMatches(value: string, query: string): boolean {
-		return StringService.containsMatching(value, query);
+		return StringService.search(value, query);
 	}
 
 	/**
