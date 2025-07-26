@@ -1,5 +1,7 @@
+import PathService from "./path.service.js";
+
 export default class StringService {
-	static readonly DEFAULT_TOLERANCE = 4;
+	static readonly DEFAULT_TOLERANCE = 2;
 
 	static levenshteinDistance(a: string, b: string) {
 		const an = a.length;
@@ -39,13 +41,13 @@ export default class StringService {
 	/**
 	 * Get if the text contains the searcher with typo tolerance
 	 * @param text The text to search in
-	 * @param searcher The text to search for
+	 * @param query The text to search for
 	 * @returns True if the text contains the searcher
 	 */
-	static containsMatching(text: string, searcher: string): boolean {
-		return StringService.containsMatchingWithTolerance(
+	static search(text: string, query: string): boolean {
+		return StringService.searchWithTolerance(
 			text,
-			searcher,
+			query,
 			StringService.DEFAULT_TOLERANCE,
 		);
 	}
@@ -62,15 +64,25 @@ export default class StringService {
 		query: string,
 		tolerance: number,
 	): boolean {
-		text = StringService.normalized(text.toUpperCase().trim());
-		query = StringService.normalized(query.toUpperCase().trim());
-		return text
-			.split(/\s/)
-			.some(
-				(word) =>
-					word.includes(query) ||
-					StringService.levenshteinDistance(query, word) < tolerance,
-			);
+		text = PathService.decodeCustomUrl(
+			StringService.normalized(text.trim().replaceAll(" ", "").toUpperCase()),
+		).toUpperCase();
+		query = StringService.normalized(
+			query.trim().replaceAll(" ", "").toUpperCase(),
+		).toUpperCase();
+
+		if (text == query || text.includes(query)) return true;
+		if (StringService.levenshteinDistance(query, text) < tolerance) return true;
+
+		let matchesTolerance = false;
+		const words = text.split(/\s/);
+		for (const word of words) {
+			if (StringService.levenshteinDistance(query, word) < tolerance) {
+				return true;
+			}
+		}
+
+		return matchesTolerance;
 	}
 
 	/**
@@ -80,7 +92,7 @@ export default class StringService {
 	 * @param tolerance The tolerance to use
 	 * @returns True if the text contains the searcher
 	 */
-	static containsMatchingWithTolerance(
+	static searchWithTolerance(
 		text: string,
 		query: string,
 		tolerance: number,

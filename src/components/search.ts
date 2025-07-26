@@ -127,11 +127,6 @@ export default class Search {
 					return;
 				}
 
-				if (e.key?.toUpperCase() == "ARROWRIGHT") {
-					this.exitButton.focus();
-					return;
-				}
-
 				Search.search(Search.searchBar.value);
 			},
 		});
@@ -277,7 +272,11 @@ export default class Search {
 			return;
 		} else {
 			// if the query matches add file to search results
-			if (true == this.queryMatches(name, query)) {
+
+			if (
+				item.path.endsWith(".html") &&
+				true == this.queryMatches(name, query)
+			) {
 				links.push({
 					name: PathService.getPascalCase(PathService.decodeCustomUrl(name)),
 					path: `${route}`,
@@ -304,7 +303,7 @@ export default class Search {
 	 * @returns if the given value matches the query
 	 */
 	private static queryMatches(value: string, query: string): boolean {
-		return StringService.containsMatching(value, query);
+		return StringService.search(value, query);
 	}
 
 	/**
