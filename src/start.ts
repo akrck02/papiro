@@ -17,7 +17,7 @@ import {
 	setRoute,
 	showRoute,
 } from "./lib/router.js";
-import Shortcuts from "./lib/shortcut.js";
+import Shortcuts from "./lib/shortcuts.js";
 import { AppConfigurations } from "./model/enum/configurations.js";
 import { IconBundle } from "./model/enum/icons.js";
 import { Theme } from "./services/theme.js";
@@ -52,7 +52,6 @@ window.onload = async function () {
 	}
 
 	await getIcons();
-	Shortcuts.start();
 
 	// create top bar
 	const topBar = TopBar.create();

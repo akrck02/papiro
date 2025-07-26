@@ -31,18 +31,53 @@ div#search-modal.hidden {
 	display: none;
 }
 
-div#search-modal input#searchbar {
+div#search-modal div#search-toolbar {
+	width: 100%;
+	padding: 0 1.7rem;
+}
+
+div#search-modal div#search-toolbar input#searchbar {
 	margin: 0;
 	width: 94%;
 }
 
-:root[data-display="mobile"] div#search-modal input#searchbar {
+:root[data-display="mobile"]
+	div#search-modal
+	div#search-toolbar
+	input#searchbar {
 	height: 3rem;
 }
 
-div#search-modal input#searchbar:focus {
+div#search-modal div#search-toolbar input#searchbar:focus {
 	outline-color: transparent;
 	color: var(--primary-color);
+}
+
+div#search-modal div#search-toolbar button:first-child {
+	.6rem
+}
+
+div#search-modal div#search-toolbar button {
+	margin: 0;
+	margin-left: .6rem;
+	border-radius: 1rem;
+}
+
+div#search-modal div#search-toolbar button:hover,
+div#search-modal div#search-toolbar button:active,
+div#search-modal div#search-toolbar button:focus {
+	filter: none;
+}
+
+div#search-modal div#search-toolbar button svg {
+	width: 1.5rem;
+	fill: var(--surface-6);
+	transition: fill var(--animation-fast);
+}
+
+div#search-modal div#search-toolbar button:focus svg,
+div#search-modal div#search-toolbar button:hover svg {
+	fill: var(--primary-color);
 }
 
 div#search-modal div#results {
@@ -79,6 +114,7 @@ div#search-modal div#results a:first-child {
 	margin-top: 1rem;
 }
 
+div#search-modal div#results a:hover,
 div#search-modal div#results a:focus {
 	border-color: var(--primary-color);
 	color: var(--primary-color);
@@ -97,4 +133,5 @@ div#search-modal div#results a {
 	background: var(--surface-2);
 	margin-top: 0.5rem;
 	width: 97%;
+	transition: border-color var(--animation-fast), color var(--animation-fast);
 }

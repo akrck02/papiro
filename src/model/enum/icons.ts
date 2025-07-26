@@ -14,4 +14,5 @@ export enum MaterialIcons {
 	DarkMode = "dark_mode",
 	ContentCopy = "content_copy",
 	MenuOpen = "menu_open",
+	ExitToApp = "exit_to_app",
 }

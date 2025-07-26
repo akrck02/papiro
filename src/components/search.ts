@@ -1,219 +1,336 @@
 import { BubbleUI } from "../lib/bubble.js";
 import { setDomEvents, uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
-import Shortcuts from "../lib/shortcut.js";
+import { getIcon } from "../lib/icons.js";
+import Shortcuts, { KeyInteraction } from "../lib/shortcuts.js";
+import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
 import { IndexItem, ItemType } from "../model/index.item.js";
 import PathService from "../services/path.service.js";
+import GlobalShortcuts from "../services/shortcut.global.js";
 import StringService from "../services/string.service.js";
 import WikiService from "../services/wiki.service.js";
 
 type Link = {
-  name: string;
-  path: string;
+	name: string;
+	path: string;
 };
 
+/**
+ * Search modal component, this class is a singleton
+ * it will be instanciated when the first call to "create"
+ * is executed, the following calls will inmediately return
+ * the current instance.
+ */
 export default class Search {
-  static readonly ID = "search-modal";
-  static readonly SEARCHBAR_ID = "searchbar";
-  static readonly RESULTS_ID = "results";
+	static readonly ID = "search-modal";
+	static readonly SEARCH_TOOLBAR_ID = "search-toolbar";
+	static readonly SEARCHBAR_ID = "searchbar";
+	static readonly RESULTS_ID = "results";
 
-  static instance: HTMLElement;
-  static searchBar: HTMLInputElement;
-  static resultContainer: HTMLElement;
-  static results: HTMLElement[] = [];
+	static instance: HTMLElement;
+	static searchBar: HTMLInputElement;
+	static resultContainer: HTMLElement;
+	static results: HTMLAnchorElement[] = [];
+	static exitButton: HTMLButtonElement;
 
-  static selectionIndex = 0;
+	static selectionIndex = 0;
 
-  static create(): HTMLElement {
-    if (null != this.instance) return this.instance;
+	/**
+	 * Create the shortcut component or get current instance if exists
+	 * @returns the component
+	 */
+	static create(): HTMLElement {
+		if (null != this.instance) return this.instance;
 
-    this.instance = uiComponent({
-      id: this.ID,
-      classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter, "hidden"],
-    });
+		this.instance = uiComponent({
+			id: this.ID,
+			classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter, "hidden"],
+		});
 
-    this.searchBar = uiComponent({
-      type: Html.Input,
-      id: this.SEARCHBAR_ID,
-      attributes: {
-        placeholder: "Search here...",
-      },
-    }) as HTMLInputElement;
+		const searchToolbar = uiComponent({
+			id: this.SEARCH_TOOLBAR_ID,
+			classes: [BubbleUI.BoxCenter],
+		});
 
-    const separator = uiComponent({ type: Html.Hr });
+		this.searchBar = uiComponent({
+			type: Html.Input,
+			id: this.SEARCHBAR_ID,
+			attributes: {
+				placeholder: "Search here...",
+			},
+		}) as HTMLInputElement;
+		searchToolbar.appendChild(this.searchBar);
 
-    this.resultContainer = uiComponent({
-      id: this.RESULTS_ID,
-      classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
-    });
+		this.exitButton = uiComponent({
+			type: Html.Button,
+			text: getIcon(IconBundle.Material, MaterialIcons.ExitToApp, "", "")
+				.outerHTML,
+		}) as HTMLButtonElement;
+		this.exitButton.onclick = () => Search.exit();
+		const exitButtonShortcutUuid = Shortcuts.register(this.exitButton);
+		Shortcuts.set(exitButtonShortcutUuid, {
+			key: "ARROWLEFT",
+			interaction: KeyInteraction.keyUp,
+			callback: () => Search.searchBar.focus(),
+		});
 
-    Shortcuts.set({
-      key: "f",
-      shiftKey: true,
-      callback: () => Search.toggle(),
-    });
+		searchToolbar.appendChild(this.exitButton);
 
-    setDomEvents(this.searchBar, {
-      keyup: (e: KeyboardEvent) => {
-        if (e.key?.toUpperCase() == "ESCAPE") {
-          Search.toggle();
-          return;
-        }
+		this.instance.appendChild(searchToolbar);
 
-        if (e.key?.toUpperCase() == "ARROWDOWN") {
-          this.results[this.selectionIndex].focus();
-          return;
-        }
+		const separator = uiComponent({ type: Html.Hr });
+		this.instance.appendChild(separator);
 
-        this.search(this.searchBar.value);
-      },
-    });
+		this.resultContainer = uiComponent({
+			id: this.RESULTS_ID,
+			classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
+		});
+		this.instance.appendChild(this.resultContainer);
 
-    this.instance.appendChild(this.searchBar);
-    this.instance.appendChild(separator);
-    this.instance.appendChild(this.resultContainer);
+		this.setSearchShortcuts();
+		return this.instance;
+	}
 
-    return this.instance;
-  }
+	/**
+	 * Set search shortcuts
+	 */
+	private static setSearchShortcuts() {
+		GlobalShortcuts.set({
+			interaction: KeyInteraction.keyUp,
+			key: "f",
+			shiftKey: true,
+			callback: () => Search.toggle(),
+			repeatable: false,
+			omitEditableContent: true,
+		});
 
-  private static search(query: string) {
-    const links: Link[] = [];
-    this.results = [];
-    this.selectionIndex = 0;
+		const searchShortcutRegistry = Shortcuts.register(this.instance);
+		Shortcuts.set(searchShortcutRegistry, {
+			interaction: KeyInteraction.keyUp,
+			key: "ESCAPE",
+			callback: () => {
+				Search.exit();
+			},
+		});
 
-    for (const itemName in WikiService.index.files) {
-      this.searchLinks(
-        links,
-        query,
-        itemName,
-        itemName,
-        WikiService.index.files[itemName],
-      );
-    }
+		setDomEvents(this.searchBar, {
+			keyup: (e: KeyboardEvent) => {
+				if (e.key?.toUpperCase() == "ARROWUP") {
+					Search.selectionIndex = Search.results.length - 1;
+					Search.results[Search.selectionIndex]?.focus();
+					return;
+				}
 
-    this.resultContainer.innerHTML = "";
+				if (e.key?.toUpperCase() == "ARROWDOWN") {
+					Search.selectionIndex = 0;
+					Search.results[Search.selectionIndex]?.focus();
+					return;
+				}
 
-    if (0 == links.length) {
-      this.resultContainer.appendChild(
-        uiComponent({
-          type: Html.P,
-          text: "No elements.",
-        }),
-      );
+				if (e.key?.toUpperCase() == "ARROWRIGHT") {
+					this.exitButton.focus();
+					return;
+				}
 
-      return;
-    }
+				Search.search(Search.searchBar.value);
+			},
+		});
+	}
 
-    for (const i in links) {
-      const link = links[i];
-      const selectable = uiComponent({
-        type: Html.A,
-        text: link.name,
-        attributes: {
-          href: PathService.getWikiViewRoute(link.path),
-        },
-      });
+	/**
+	 *
+	 * @param query
+	 * @returns
+	 */
+	private static search(query: string) {
+		const links: Link[] = [];
+		this.results = [];
+		this.selectionIndex = 0;
 
-      setDomEvents(selectable, {
-        keyup: (e: KeyboardEvent) => {
-          e.preventDefault();
-          const key = e.key?.toUpperCase();
+		// Get search results
+		for (const itemName in WikiService.index.files) {
+			this.searchLinks(
+				links,
+				query,
+				itemName,
+				itemName,
+				WikiService.index.files[itemName],
+			);
+		}
 
-          if (key == "ESCAPE") {
-            Search.toggle();
-            return;
-          }
+		// If no elements present, show a message
+		this.resultContainer.innerHTML = "";
+		if (0 == links.length) {
+			this.resultContainer.appendChild(
+				uiComponent({
+					type: Html.P,
+					text: "No elements.",
+				}),
+			);
 
-          if (key == "ENTER") {
-            Search.toggle();
-            return;
-          }
+			return;
+		}
 
-          if (key == "ARROWDOWN") {
-            this.selectionIndex++;
-            if (this.selectionIndex == this.results.length) {
-              this.selectionIndex = 0;
-            }
+		for (const i in links) {
+			const selectable = this.createSelectableLink(links[i]);
+			this.results.push(selectable);
+			this.resultContainer.appendChild(selectable);
+		}
+	}
 
-            this.results[this.selectionIndex].focus();
-            return;
-          } else if (key == "ARROWUP") {
-            this.selectionIndex--;
-            if (this.selectionIndex < 0) {
-              this.searchBar.focus();
-            }
+	/**
+	 * Create a selectable link with custom shortcuts
+	 * @param link The link data
+	 * @returns The html <a> element
+	 */
+	private static createSelectableLink(link: Link): HTMLAnchorElement {
+		const selectable = uiComponent({
+			type: Html.A,
+			text: link.name,
+			attributes: {
+				href: PathService.getWikiViewRoute(link.path),
+			},
+		});
 
-            this.results[this.selectionIndex].focus();
-            return;
-          }
-        },
-      });
+		selectable.onclick = () => {
+			Search.selectionIndex = 0;
+			Search.exit();
+		};
 
-      this.results.push(selectable);
-      this.resultContainer.appendChild(selectable);
-    }
-  }
+		const uuid = Shortcuts.register(selectable);
+		Shortcuts.set(uuid, {
+			key: "ESCAPE",
+			interaction: KeyInteraction.keyUp,
+			callback: () => {
+				Search.selectionIndex = 0;
+				Search.exit();
+			},
+		});
 
-  private static searchLinks(
-    links: Link[],
-    query: string,
-    name: string,
-    route: string,
-    item: IndexItem,
-  ) {
-    // if no valid params, return
-    if (
-      undefined == query ||
-      undefined == name ||
-      undefined == item ||
-      undefined == links
-    )
-      return;
+		Shortcuts.set(uuid, {
+			key: "ARROWUP",
+			interaction: KeyInteraction.keyUp,
+			callback: () => {
+				Search.selectionIndex--;
+				if (Search.selectionIndex < 0) {
+					Search.searchBar.focus();
+					this.selectionIndex = 0;
+					return;
+				}
+				Search.results[Search.selectionIndex].focus();
+			},
+		});
 
-    // if it is a file, return
-    if (ItemType.File == item.type) {
-      // if the query does not match, do no add to search results
-      if (false == this.queryMatches(name, query)) return;
+		Shortcuts.set(uuid, {
+			key: "ARROWDOWN",
+			interaction: KeyInteraction.keyUp,
+			callback: () => {
+				Search.selectionIndex++;
+				if (Search.selectionIndex == Search.results.length) {
+					Search.selectionIndex = 0;
+					Search.searchBar.focus();
+					return;
+				}
 
-      // add file to search results
-      links.push({
-        name: PathService.getPascalCase(PathService.decodeCustomUrl(name)),
-        path: `${route}`,
-      });
+				Search.results[Search.selectionIndex].focus();
+			},
+		});
 
-      return;
-    } else {
-      // if the query matches add file to search results
-      if (true == this.queryMatches(name, query)) {
-        links.push({
-          name: PathService.getPascalCase(PathService.decodeCustomUrl(name)),
-          path: `${route}`,
-        });
-      }
+		return selectable as HTMLAnchorElement;
+	}
 
-      // if it is a directory, search for the matching contents inside
-      for (const childName in item.files) {
-        this.searchLinks(
-          links,
-          query,
-          childName,
-          `${route}/${childName}`,
-          item.files[childName],
-        );
-      }
-    }
-  }
+	/**
+	 * Search links for the given query
+	 * @param links The link list to fill
+	 * @param query The query to match
+	 * @param name The link name
+	 * @param route The link route
+	 * @param item The index item matching the route
+	 */
+	private static searchLinks(
+		links: Link[],
+		query: string,
+		name: string,
+		route: string,
+		item: IndexItem,
+	) {
+		// if no valid params, return
+		if (
+			undefined == query ||
+			undefined == name ||
+			undefined == item ||
+			undefined == links
+		)
+			return;
 
-  private static queryMatches(value: string, query: string) {
-    console.debug(value, query);
-    return StringService.containsMatching(value, query);
-  }
+		// if it is a file, return
+		if (ItemType.File == item.type) {
+			// if the query does not match, do no add to search results
+			if (false == this.queryMatches(name, query)) return;
 
-  static toggle() {
-    if (null == this.instance) return;
+			// add file to search results
+			links.push({
+				name: PathService.getPascalCase(PathService.decodeCustomUrl(name)),
+				path: `${route}`,
+			});
 
-    this.instance.classList.toggle("hidden");
-    this.searchBar.value = "";
-    this.searchBar.focus();
-  }
+			return;
+		} else {
+			// if the query matches add file to search results
+			if (true == this.queryMatches(name, query)) {
+				links.push({
+					name: PathService.getPascalCase(PathService.decodeCustomUrl(name)),
+					path: `${route}`,
+				});
+			}
+
+			// if it is a directory, search for the matching contents inside
+			for (const childName in item.files) {
+				this.searchLinks(
+					links,
+					query,
+					childName,
+					`${route}/${childName}`,
+					item.files[childName],
+				);
+			}
+		}
+	}
+
+	/**
+	 * Get if the given value matches the query
+	 * @param value The value to inspect
+	 * @param query The query to match
+	 * @returns if the given value matches the query
+	 */
+	private static queryMatches(value: string, query: string): boolean {
+		return StringService.containsMatching(value, query);
+	}
+
+	/**
+	 * Toggle the search modal
+	 */
+	static toggle() {
+		if (null == this.instance) return;
+		if (this.instance.classList.contains("hidden")) this.open();
+		else this.exit();
+	}
+
+	/**
+	 * Open the search modal
+	 */
+	static open() {
+		if (null == this.instance) return;
+		this.instance.classList.remove("hidden");
+		this.searchBar.focus();
+	}
+
+	/**
+	 * exit the search modal
+	 */
+	static exit() {
+		if (null == this.instance) return;
+		this.instance.classList.add("hidden");
+		this.searchBar.value = "";
+	}
 }

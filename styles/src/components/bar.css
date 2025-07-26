@@ -1,36 +1,36 @@
 header#top-bar {
-    position: sticky;
-    top: 0;
-    padding: 0.5rem 1rem;
-    width: 100%;
-    height: 3rem;
-    background: var(--surface-1);
+	position: sticky;
+	top: 0;
+	padding: 0.5rem 1rem;
+	width: 100%;
+	height: 3rem;
+	background: var(--surface-1);
 }
 
 :root[data-display="mobile"] header#top-bar {
-    box-shadow: rgba(0, 0, 0, 0.05) 0px 0.1rem 0.15rem;
+	box-shadow: rgba(0, 0, 0, 0.05) 0px 0.1rem 0.15rem;
 }
 
 header#top-bar a#title {
-    font-size: 1.25rem;
-    color: var(--on-surface-3);
+	font-size: 1.25rem;
+	color: var(--on-surface-3);
 }
 
 header#top-bar img#logo {
-    height: 1.5rem;
-    margin-right: 0.75rem;
+	height: 1.5rem;
+	margin-right: 0.75rem;
 }
 
 header#top-bar div#icon-bar-id div {
-    padding-left: 1rem;
-    cursor: pointer;
+	padding-left: 1rem;
+	cursor: pointer;
 }
 
 header#top-bar div#icon-bar-id div svg {
-    fill: var(--on-surface-1);
-    width: 24px;
+	fill: var(--on-surface-1);
+	width: 24px;
 }
 
 :root[data-display="desktop"] header#top-bar div#icon-bar-id div#menu-icon {
-    display: none;
+	display: none !important;
 }

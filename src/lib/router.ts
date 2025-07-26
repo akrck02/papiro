@@ -35,7 +35,6 @@ export function setRoute(path: string, handler: viewHandler) {
 	const regexp: RegExp = /\/(\$+)/g;
 	path = path.replaceAll(regexp, "/([^\/]+)");
 	paths.set(path, handler);
-	console.debug(`Set route ${path}`);
 }
 
 /**
