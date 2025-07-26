@@ -277,7 +277,11 @@ export default class Search {
 			return;
 		} else {
 			// if the query matches add file to search results
-			if (true == this.queryMatches(name, query)) {
+
+			if (
+				item.path.endsWith(".html") &&
+				true == this.queryMatches(name, query)
+			) {
 				links.push({
 					name: PathService.getPascalCase(PathService.decodeCustomUrl(name)),
 					path: `${route}`,
