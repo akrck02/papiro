@@ -3,13 +3,12 @@ div#search-modal {
 	padding-top: 1rem;
 	padding-bottom: 0;
 	width: 50rem;
-	//min-height: 20rem;
 	height: 25rem;
 	border-radius: 0.75rem;
 	right: calc(50% - 25rem);
 	top: calc(50% - 20rem);
 	background: var(--background);
-	z-index: 5;
+	z-index: 10;
 	border: 0.15rem solid var(--surface-1);
 	box-shadow: rgba(0, 0, 0, 0.15) 0px 0.1rem 0.5rem;
 }
