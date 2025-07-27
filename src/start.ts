@@ -17,9 +17,10 @@ import {
 	setRoute,
 	showRoute,
 } from "./lib/router.js";
-import Shortcuts from "./lib/shortcuts.js";
+import Shortcuts, { KeyInteraction } from "./lib/shortcuts.js";
 import { AppConfigurations } from "./model/enum/configurations.js";
 import { IconBundle } from "./model/enum/icons.js";
+import GlobalShortcuts from "./services/shortcut.global.js";
 import { Theme } from "./services/theme.js";
 import WikiService from "./services/wiki.service.js";
 import HomeView from "./views/home.js";
@@ -50,6 +51,14 @@ window.onload = async function () {
 	} else {
 		Theme.setLight();
 	}
+
+	GlobalShortcuts.set({
+		interaction: KeyInteraction.keyUp,
+		key: "T",
+		shiftKey: true,
+		omitEditableContent: true,
+		callback: () => Theme.toggle(),
+	});
 
 	await getIcons();
 

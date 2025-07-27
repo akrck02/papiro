@@ -27,6 +27,9 @@
 	--text-color: #444444;
 	--primary-color: #268a9f;
 	--on-primary-color: #222;
+
+	height: 100%;
+	width: 100%;
 }
 
 :root[data-theme="dark"] {
