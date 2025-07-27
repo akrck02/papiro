@@ -2946,19 +2946,12 @@ ${body}</tbody>
 
     class MarkdownCanvas {
         static create(markdown) {
-            const markdownCanvas = uiComponent({
+            const canvas = uiComponent({
                 classes: [MarkdownCanvas.CLASS],
                 text: WikiService.render(markdown),
             });
-            markdownCanvas.querySelectorAll("img").forEach((img) => {
-                const imgHtml = img;
-                const webUrl = PathService.getWebUrl();
-                if (-1 != imgHtml.src.indexOf(webUrl)) {
-                    const newUrl = img.src.substring(PathService.getWebUrl().length);
-                    imgHtml.src = PathService.getFullWikiResourcePath(newUrl);
-                }
-            });
-            markdownCanvas.querySelectorAll("a").forEach((img) => {
+            this.prepareImageTags(canvas);
+            canvas.querySelectorAll("a").forEach((img) => {
                 const aHtml = img;
                 const webUrl = PathService.getWebUrl();
                 if (-1 != aHtml.href.indexOf(webUrl)) {
@@ -2966,7 +2959,7 @@ ${body}</tbody>
                     aHtml.href = PathService.getWikiViewRoute(newUrl);
                 }
             });
-            markdownCanvas.querySelectorAll("pre code").forEach((code) => {
+            canvas.querySelectorAll("pre code").forEach((code) => {
                 const codeHtml = code;
                 const copyButton = uiComponent({
                     type: Html.Button,
@@ -2980,7 +2973,40 @@ ${body}</tbody>
                 });
                 codeHtml.appendChild(copyButton);
             });
-            return markdownCanvas;
+            return canvas;
+        }
+        static prepareImageTags(canvas) {
+            const options = {
+                root: canvas,
+                rootMargin: "0px",
+                scrollMargin: "0px",
+                threshold: 1.0,
+            };
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach((entry) => {
+                    if (!entry.isIntersecting)
+                        return;
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.onload = () => {
+                        img.classList.remove("lazy");
+                        observer.unobserve(img);
+                    };
+                });
+            }, options);
+            canvas.querySelectorAll("img").forEach((img) => {
+                const imgHtml = img;
+                imgHtml.loading = "lazy";
+                imgHtml.classList.add("lazy");
+                const webUrl = PathService.getWebUrl();
+                if (-1 != imgHtml.src.indexOf(webUrl)) {
+                    const newUrl = img.src.substring(PathService.getWebUrl().length);
+                    imgHtml.src = PathService.getFullWikiResourcePath(newUrl);
+                }
+                img.dataset.src = img.src;
+                img.src = undefined;
+                imageObserver.observe(img);
+            });
         }
     }
     MarkdownCanvas.CLASS = "markdown";
@@ -3080,6 +3106,13 @@ ${body}</tbody>
         else {
             Theme.setLight();
         }
+        GlobalShortcuts.set({
+            interaction: KeyInteraction.keyUp,
+            key: "T",
+            shiftKey: true,
+            omitEditableContent: true,
+            callback: () => Theme.toggle(),
+        });
         await getIcons();
         // create top bar
         const topBar = TopBar.create();
