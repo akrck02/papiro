@@ -1,139 +1,44 @@
-import TopBar from "./component/bar.js";
-import IndexMenu from "./component/menu.js";
-import Search from "./component/search.js";
-import { BubbleUI } from "./lib/bubble.js";
-import {
-	getConfiguration,
-	isConfigurationActive,
-	loadConfiguration,
-} from "./lib/configuration.js";
-import { checkDisplayType } from "./lib/display.js";
-import { uiComponent } from "./lib/dom.js";
-import { loadIcons } from "./lib/icons.js";
-import {
-	setHomeRoute,
-	setNotFoundRoute,
-	setRoute,
-	showRoute,
-} from "./lib/router.js";
-import Shortcuts, { KeyInteraction } from "./lib/shortcuts.js";
-import { AppConfigurations } from "./model/enum/configurations.js";
-import { IconBundle } from "./model/enum/icons.js";
-import GlobalShortcuts from "./service/shortcut.global.js";
-import { Font, Theme } from "./service/theme.js";
-import WikiService from "./service/wiki.service.js";
-import HomeView from "./view/home.view.js";
-import NotFound from "./view/not.found.view.js";
-import WikiView from "./view/wiki.view.js";
-import GraphView from "./view/graph.view.js";
-
-let documentContainer: HTMLElement;
-
 /**
- * When the dynamic URL changes loads
- * the correspoding view from the URL
+ * The papiro website: the library over the whole page, configured with
+ * gtdf.config.json (written by papiro-deploy) and remembering the
+ * theme and the font of the reader.
  */
-window.addEventListener("hashchange", start);
+import { createPapiro, PapiroFont, PapiroTheme } from "./papiro.js";
 
-/**
- * When the window is loaded load
- * the app state to show
- */
-window.onload = async function () {
-	await loadConfiguration("gtdf.config.json");
-	document.title = getConfiguration(AppConfigurations.AppName);
-	checkDisplayType();
+const PREFERENCES = "papiro-preferences";
 
-	// load configuration
-	const isDarkTheme = getConfiguration("theme") == "dark";
-	if (isDarkTheme) {
-		Theme.setDark();
-	} else {
-		Theme.setLight();
+type Preferences = { theme?: PapiroTheme; font?: PapiroFont };
+
+function preferences(): Preferences {
+	try {
+		return JSON.parse(localStorage.getItem(PREFERENCES) ?? "{}");
+	} catch {
+		return {};
 	}
-
-	// system-ui unless papiro fonts were chosen
-	if (Font.isPapiroChosen()) Font.setPapiro();
-	else Font.setSystem();
-
-	GlobalShortcuts.set({
-		interaction: KeyInteraction.keyUp,
-		key: "T",
-		shiftKey: true,
-		omitEditableContent: true,
-		callback: () => Theme.toggle(),
-	});
-
-	await getIcons();
-
-	// create top bar
-	const topBar = TopBar.create();
-	document.body.appendChild(topBar);
-
-	const search = Search.create();
-	document.body.appendChild(search);
-
-	// load wiki index
-	await WikiService.loadIndex();
-
-	// content container
-	const content = uiComponent({
-		styles: {
-			width: "100%",
-			height: "calc(100% - var(--bar-height))",
-		},
-		classes: [BubbleUI.BoxRow],
-		selectable: false,
-	});
-
-	// menu
-	const menu = IndexMenu.create(WikiService.index);
-	content.appendChild(menu);
-
-	// document container
-	documentContainer = uiComponent({
-		styles: {
-			width: "100%",
-			height: "100%",
-		},
-	});
-	content.appendChild(documentContainer);
-	document.body.appendChild(content);
-	await start();
-};
-
-window.onresize = async function () {
-	checkDisplayType();
-};
-
-/**
- * Get app icons
- */
-async function getIcons() {
-	await loadIcons(
-		IconBundle.Material,
-		`${getConfiguration("path")["icons"]}/materialicons.json`,
-	);
 }
 
-/**
- * Set routes
- */
-function setRoutes(parent: HTMLElement) {
-	if (isConfigurationActive(AppConfigurations.ShowStartPage))
-		setHomeRoute(HomeView.show);
-	else setHomeRoute(WikiView.show);
-
-	setNotFoundRoute(NotFound.show);
-	setRoute("/wiki", WikiView.show);
-	// anchored: the router matches anywhere, a page could be called "graph"
-	setRoute("^/graph$", GraphView.show);
-	showRoute(window.location.hash.slice(1).toLowerCase(), parent);
+function remember(change: Preferences) {
+	localStorage.setItem(PREFERENCES, JSON.stringify({ ...preferences(), ...change }));
 }
 
-/**
- *  Start the web app
- */
-async function start() {
-	setRoutes(documentContainer);
-}
+window.addEventListener("load", async () => {
+	const config = await fetch("gtdf.config.json").then((response) => response.json());
+	const paths = config.path ?? {};
+	document.title = config.app_name ?? "Papiro";
+
+	const saved = preferences();
+	await createPapiro(document.body, {
+		source: paths.wiki ?? "resources/wiki",
+		title: config.app_name ?? "Papiro",
+		description: config.app_description ?? "",
+		logo: `${paths.icons ?? "resources/icons"}/logo.svg`,
+		startPage: true == config.show_start_page,
+		breadcrumb: false != config.show_breadcrumb,
+		footer: true == config.show_footer,
+		theme: saved.theme ?? "auto",
+		font: saved.font ?? "system",
+		shortcuts: true,
+		onThemeChange: (theme) => remember({ theme }),
+		onFontChange: (font) => remember({ font }),
+	});
+});

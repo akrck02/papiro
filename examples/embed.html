@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Papiro embedded</title>
+		<!-- the library: dist/ in a release, or jsDelivr -->
+		<link rel="stylesheet" href="../dist/papiro.css" />
+		<style>
+			/* the host app has its own look and its own routes */
+			body { margin: 0; font-family: system-ui, sans-serif; background: #eef1f6; color: #1d2433; }
+			header { padding: 1rem 2rem; background: #1d2433; color: white; }
+			header a { color: #9cc3ff; margin-right: 1rem; }
+			main { display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem; padding: 1.5rem 2rem; }
+			section { background: white; border-radius: 0.75rem; padding: 1rem; }
+			h2 { margin: 0 0 0.75rem 0; font-size: 1rem; }
+			#docs { height: 520px; border-radius: 0.5rem; overflow: hidden; }
+			#help { height: 360px; border-radius: 0.5rem; overflow: hidden; }
+			#graph { height: 260px; border-radius: 0.5rem; overflow: hidden; margin-top: 1rem; }
+			.papiro { --primary-color: #2f6fd6; } /* the host can change papiro's colours */
+		</style>
+	</head>
+	<body>
+		<header>
+			Host app · <a href="#/settings">its own route</a><a href="#/docs/wiki/">docs</a>
+			<span id="route"></span>
+		</header>
+		<main>
+			<section>
+				<h2>The whole wiki, under #/docs</h2>
+				<div id="docs"></div>
+			</section>
+			<section>
+				<h2>Help for one screen (page layout, memory routing)</h2>
+				<div id="help"></div>
+				<div id="graph"></div>
+			</section>
+		</main>
+		<script type="module">
+			import { createPapiro } from "../dist/papiro.js";
+
+			const source = new URLSearchParams(location.search).get("source") ?? "../resources/wiki";
+			const route = document.getElementById("route");
+			const showRoute = () => (route.textContent = ` · address: ${location.hash || "#"}`);
+			addEventListener("hashchange", showRoute);
+			showRoute();
+
+			await createPapiro("#docs", { source, title: "Docs", hashPrefix: "docs" });
+
+			const help = await createPapiro("#help", { source, layout: "page", route: "", theme: "light" });
+
+			await createPapiro("#graph", {
+				source,
+				layout: "graph",
+				// the graph layout tells which page was chosen, the host decides
+				onNavigate: (target) => {
+					if ("page" == target.view) help.navigate(target);
+				},
+			});
+		</script>
+	</body>
+</html>

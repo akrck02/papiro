@@ -103,8 +103,22 @@ docs/*.md ──► papiro-indexer ──► resources/wiki/*.html + index.json 
 2. [papiro-indexer](https://github.com/akrck02/papiro-indexer) turns each Markdown file into HTML,
    resolves relative links and images, converts Obsidian syntax when asked, and writes the
    `index.json` the menu and the search read.
-3. Papiro, a small TypeScript app built on GTD, loads that index and shows each page. Routing uses
-   the URL hash, so any static host works.
+3. Papiro, a small TypeScript library built on GTD, loads that index and shows each page. The
+   papiro website is that library over the whole page; routing uses the URL hash, so any static
+   host works.
+
+## 🧩 Embed it in a web app
+
+Papiro is also a library: the whole wiki, a single page or the graph inside any element, each
+instance with its own pages, address and theme.
+
+```ts
+import { createPapiro } from "https://cdn.jsdelivr.net/gh/akrck02/papiro@lib/papiro.js";
+
+await createPapiro("#docs", { source: "https://example.org/wiki", hashPrefix: "docs" });
+```
+
+[How to embed it →](docs/embedding.md)
 
 ## 👀 Preview your documents
 
@@ -139,6 +153,7 @@ and run `tsgo --noEmit`.
 | [GitHub Pages](docs/installation/github-pages.md) | Publish your documents with the papiro-deploy action. |
 | [Docker](docs/installation/docker.md) | Serve a folder of documents from a container that indexes them as they change. |
 | [Local testing](docs/installation/local-testing.md) | Preview a folder or an Obsidian vault on your machine. |
+| [Embedding](docs/embedding.md) | Papiro as a library inside a web app: layouts, routing, options, colours. |
 
 ## Licence
 

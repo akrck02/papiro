@@ -1,72 +1,17 @@
-import TopBar from "../component/bar.js";
-import IndexMenu from "../component/menu.js";
-import { BubbleUI } from "../lib/bubble.js";
-import { getConfiguration } from "../lib/configuration.js";
+import Papiro from "../core/papiro.js";
 import { uiComponent } from "../lib/dom.js";
-import { Html } from "../lib/html.js";
-import { AppConfigurations } from "../model/enum/configurations.js";
-import PathService from "../service/path.service.js";
 
+/** The start page: logo, title, description and a way in */
 export default class HomeView {
-	// HTML ids and classes
-	static readonly VIEW_ID = "home";
-	static readonly TITLE_ID = "title";
-	static readonly SUBTITLE_ID = "subtitle";
-	static readonly EXPLORE_LINK_ID = "explore";
+	static show(papiro: Papiro, container: HTMLElement) {
+		const options = papiro.options;
+		const home = uiComponent({ classes: ["papiro-home"] });
 
-	/**
-	 * Show home view
-	 */
-	static async show(parameters: string[], container: HTMLElement) {
-		const view = uiComponent({
-			type: Html.View,
-			id: HomeView.VIEW_ID,
-			classes: [BubbleUI.BoxColumn, BubbleUI.BoxYCenter],
-		});
+		const logo = "" != options.logo ? `<img src="${options.logo}" alt="">` : "";
+		home.appendChild(uiComponent({ type: "h1", text: `${logo}${options.title}` }));
+		if ("" != options.description) home.appendChild(uiComponent({ type: "p", text: options.description }));
+		home.appendChild(papiro.link({ view: "page", route: "" }, "Start reading →", ["papiro-home-start"]));
 
-		const content = uiComponent({
-			type: Html.Div,
-			classes: [BubbleUI.BoxColumn, BubbleUI.BoxCenter],
-			styles: {
-				height: "100%",
-				width: "100%",
-			},
-		});
-
-		const logo = uiComponent({
-			type: Html.Img,
-			attributes: {
-				src: `${getConfiguration("path")["icons"]}/logo.svg`,
-			},
-		});
-
-		const title = uiComponent({
-			type: Html.H1,
-			id: HomeView.TITLE_ID,
-			text: getConfiguration(AppConfigurations.AppName) + logo.outerHTML,
-			classes: [BubbleUI.BoxRow, BubbleUI.BoxCenter],
-		});
-		content.appendChild(title);
-
-		const subtitle = uiComponent({
-			type: Html.H2,
-			id: HomeView.SUBTITLE_ID,
-			text: getConfiguration(AppConfigurations.AppDescription),
-		});
-		content.appendChild(subtitle);
-
-		const link = uiComponent({
-			type: Html.A,
-			id: HomeView.EXPLORE_LINK_ID,
-			text: "Explore 👀",
-			classes: [BubbleUI.BoxColumn, BubbleUI.BoxCenter],
-			attributes: {
-				href: PathService.getWikiViewRoute(""),
-			},
-		});
-		content.appendChild(link);
-
-		view.appendChild(content);
-		container.appendChild(view);
+		container.appendChild(home);
 	}
 }

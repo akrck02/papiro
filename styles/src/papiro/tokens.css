@@ -1,0 +1,78 @@
+/* Papiro tokens: set on .papiro, a host app can change any of them there */
+.papiro {
+	--font: system-ui, sans-serif;
+	--font-title: system-ui, sans-serif;
+	--font-reading: system-ui, sans-serif;
+	--font-console: "JetBrains Mono", ui-monospace, monospace;
+
+	/* warm paper tones */
+	--background: #f7f5f0;
+	--surface-1: #f0ede6;
+	--surface-2: #fdfcf9;
+	--surface-3: #e4e0d6;
+	--text-color: #2b2a27;
+	--text-soft: #6b675e;
+	--text-faint: #9a958a;
+	--line: #e4e0d6;
+
+	--primary-color: #23798c;
+	--primary-soft: #e2eff1;
+	--warning-color: #c58a1c;
+	--mark-color: #fbeeb8;
+
+	--code-keyword: #a2477d;
+	--code-string: #4d7a2e;
+	--code-number: #b0601a;
+	--code-function: #2f6f9f;
+	--code-type: #7a5ea8;
+	--code-comment: #9a958a;
+	--code-deleted: #b5403a;
+
+	/* graph, with obsidian's default graph colours */
+	--graph-node: #5c5c5c;
+	--graph-line: #e0e0e0;
+	--graph-focus: #8a5cf5;
+	--graph-text: #222222;
+
+	--radius: 0.625rem;
+	--bar-height: 3.5rem;
+	--speed: 0.25s;
+	color-scheme: light;
+}
+
+.papiro[data-theme="dark"] {
+	--background: #171716;
+	--surface-1: #1f1f1d;
+	--surface-2: #1c1c1a;
+	--surface-3: #2e2d2a;
+	--text-color: #e9e6df;
+	--text-soft: #a9a59b;
+	--text-faint: #75716a;
+	--line: #2e2d2a;
+
+	--primary-color: #7fc3d2;
+	--primary-soft: #1f3338;
+	--warning-color: #e0b04f;
+	--mark-color: #5a4d1c;
+
+	--code-keyword: #e29bc6;
+	--code-string: #a9d18e;
+	--code-number: #e8a46b;
+	--code-function: #82b8e0;
+	--code-type: #c3a6ea;
+	--code-comment: #75716a;
+	--code-deleted: #e88a84;
+
+	--graph-node: #999999;
+	--graph-line: #363636;
+	--graph-focus: #a68af9;
+	--graph-text: #dadada;
+	color-scheme: dark;
+}
+
+/* papiro's reading fonts, the system ones are the default */
+.papiro[data-font="papiro"] {
+	--font: "Inter", system-ui, sans-serif;
+	--font-title: "Source Serif 4", Georgia, serif;
+	--font-reading: "Source Serif 4", Georgia, serif;
+}

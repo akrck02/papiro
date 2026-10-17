@@ -1,0 +1,74 @@
+/* The root takes the whole element the host gave, nothing outside is touched */
+.papiro {
+	container: papiro / inline-size;
+	position: relative;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	background: var(--background);
+	color: var(--text-color);
+	font: 15px/1.5 var(--font);
+	text-align: left;
+	transition:
+		background var(--speed),
+		color var(--speed);
+}
+
+/*
+ * A barrier against the host app: its rules for plain elements (main, h1,
+ * a…) go back to the browser defaults inside papiro. svg, img and canvas
+ * keep their size attributes, which would be reverted too.
+ */
+.papiro :where(*:not(svg, svg *, img, canvas)) {
+	all: revert;
+}
+
+.papiro *,
+.papiro *::before,
+.papiro *::after {
+	box-sizing: border-box;
+}
+
+.papiro :where(h1, h2, h3, h4, h5, h6, p, ul, ol, figure, blockquote, pre) {
+	margin: 0;
+}
+
+.papiro :where(ul, ol) {
+	padding: 0;
+}
+
+.papiro :where(button) {
+	font: inherit;
+	color: inherit;
+	background: none;
+	border: none;
+	padding: 0;
+	margin: 0;
+	cursor: pointer;
+}
+
+.papiro :where(a) {
+	color: var(--primary-color);
+	text-decoration: none;
+}
+
+.papiro :where(a, button):focus-visible {
+	outline: 0.15rem solid var(--primary-color);
+	outline-offset: 0.15rem;
+	border-radius: 0.35rem;
+}
+
+.papiro kbd {
+	font: 0.7rem var(--font-console);
+	padding: 0.05rem 0.4rem;
+	border: 1px solid var(--line);
+	border-bottom-width: 2px;
+	border-radius: 0.3rem;
+	color: var(--text-soft);
+	background: var(--surface-2);
+}
+
+.papiro .papiro-icon {
+	display: block;
+	flex: none;
+}
