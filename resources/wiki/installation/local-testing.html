@@ -8,10 +8,15 @@ In case your testing on a local machine, just enter the repository directory usi
 <pre><code class="language-bash">cd ./papiro
 </code></pre>
 
-<p>Once there the typescript must be transpiled using the following command.</p>
+<p>Once there, bundle the typescript and build the styles with the binaries in <code>bin</code>, no node needed.</p>
 
-<pre><code class="language-bash">tsc
+<pre><code class="language-bash">./bin/esbuild ./src/start.ts --bundle --tsconfig=tsconfig.json --outfile=./scripts/start.js
+./bin/lit -f styles.env &amp;&amp; cp styles/out/master.css styles/src/master.css
 </code></pre>
+
+<blockquote>
+<p>To type check the code while developing, install the typescript native preview with <code>./bin/install-ts.sh</code> and run <code>tsgo --noEmit</code>.</p>
+</blockquote>
 
 <p>Use the following command to launch a new webserver.</p>
 
