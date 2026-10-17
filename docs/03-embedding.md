@@ -16,6 +16,19 @@ Take `papiro.js` and `papiro.css` from the [latest release](https://github.com/a
 
 `papiro.js` is an ES module with no dependencies.
 
+### From TypeScript
+
+`papiro-lib.tar.gz` in the release (or the `lib` branch) has `papiro.js`, `papiro.css` and the type declarations (`papiro.d.ts` and its folders). Copy them into your project, for example in `src/lib/papiro/`, and import them as any module:
+
+```ts
+import { createPapiro, type Papiro, type PapiroOptions } from "./lib/papiro/papiro.js";
+
+const options: PapiroOptions = { source: "/wiki", layout: "page", route: "guides/settings" };
+const help: Papiro = await createPapiro("#help", options);
+```
+
+Options, layouts, themes and targets are typed, so a wrong value is a compile error.
+
 ## Show a wiki
 
 The wiki is the folder written by the papiro indexer (`index.json`, the pages and their files). Give its url as `source`; the instance takes the whole element, so give the element a size.
