@@ -1,0 +1,254 @@
+.markdown {
+	display: block;
+	width: 100%;
+	color: var(--text-color);
+	font: 1.0625rem/1.75 var(--font-reading);
+	overflow-wrap: break-word;
+}
+
+.markdown > *:first-child {
+	margin-top: 0;
+}
+
+.markdown h1,
+.markdown h2,
+.markdown h3,
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+	font-family: var(--font-title);
+	font-weight: 600;
+	color: var(--text-color);
+	letter-spacing: -0.01em;
+	scroll-margin-top: 1.5rem;
+	margin: 2.25rem 0 0.6rem 0;
+	line-height: 1.25;
+}
+
+.markdown h1 {
+	font-size: 2.5rem;
+	line-height: 1.15;
+	margin: 0 0 0.6rem 0;
+}
+
+.markdown h2 {
+	font-size: 1.5rem;
+}
+
+.markdown h3 {
+	font-size: 1.2rem;
+}
+
+.markdown h4,
+.markdown h5,
+.markdown h6 {
+	font-size: 1.05rem;
+}
+
+:root[data-display="mobile"] .markdown h1 {
+	font-size: 2rem;
+}
+
+.markdown p {
+	margin: 0.9rem 0;
+}
+
+.markdown a {
+	color: var(--primary-color);
+	text-decoration: none;
+}
+
+.markdown a:hover {
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.markdown strong {
+	font-weight: 600;
+}
+
+.markdown mark {
+	background: var(--mark-color);
+	color: inherit;
+	padding: 0 0.15rem;
+	border-radius: 0.2rem;
+}
+
+.markdown hr {
+	border: none;
+	border-top: 1px solid var(--line);
+	margin: 2rem 0;
+}
+
+/* inline code */
+.markdown code {
+	font: 0.85em var(--font-console);
+	background: var(--surface-1);
+	border: 1px solid var(--line);
+	padding: 0.05rem 0.35rem;
+	border-radius: 0.3rem;
+}
+
+/* code blocks */
+.markdown pre {
+	position: relative;
+	margin: 1.25rem 0;
+	background: var(--surface-1);
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+}
+
+.markdown pre code {
+	display: block;
+	padding: 2.25rem 1.1rem 1rem 1.1rem;
+	overflow-x: auto;
+	border: none;
+	background: none;
+	font-size: 0.84rem;
+	line-height: 1.65;
+	user-select: text;
+	cursor: text;
+}
+
+.markdown pre span.code-language {
+	position: absolute;
+	top: 0.55rem;
+	right: 2.9rem;
+	font: 0.7rem var(--font);
+	color: var(--text-faint);
+}
+
+.markdown pre button.copy-button {
+	position: absolute;
+	right: 0.35rem;
+	top: 0.3rem;
+	margin: 0;
+	padding: 0.35rem;
+	height: 2rem;
+	border-radius: 0.45rem;
+	background: transparent;
+}
+
+.markdown pre button.copy-button:hover {
+	background: var(--surface-3);
+	filter: none;
+}
+
+.markdown pre button.copy-button svg {
+	fill: var(--text-faint);
+}
+
+/* quotes and obsidian callouts */
+.markdown blockquote {
+	margin: 1.5rem 0;
+	padding: 0.75rem 1rem;
+	border: 1px solid var(--line);
+	border-left: 3px solid var(--primary-color);
+	border-radius: var(--radius);
+	background: var(--surface-2);
+	font-size: 1rem;
+}
+
+.markdown blockquote p {
+	margin: 0.3rem 0;
+}
+
+.markdown blockquote.callout > p:first-child > strong:first-child {
+	display: block;
+	font: 600 0.875rem var(--font);
+}
+
+.markdown blockquote.callout.warning {
+	border-left-color: var(--warning-color);
+}
+
+/* lists */
+.markdown ul,
+.markdown ol {
+	margin: 0.9rem 0;
+	padding-left: 1.4rem;
+}
+
+.markdown ul li {
+	list-style: disc;
+}
+
+.markdown ol li {
+	list-style: decimal;
+}
+
+.markdown li {
+	margin: 0.3rem 0;
+}
+
+.markdown li::marker {
+	color: var(--text-faint);
+}
+
+/* tables */
+.markdown table {
+	display: block;
+	overflow-x: auto;
+	border-collapse: collapse;
+	margin: 1.25rem 0;
+	font: 0.9rem/1.5 var(--font);
+}
+
+.markdown th,
+.markdown td {
+	padding: 0.5rem 0.75rem;
+	border-bottom: 1px solid var(--line);
+	text-align: left;
+}
+
+.markdown th {
+	font-weight: 600;
+	color: var(--text-soft);
+}
+
+/* images */
+.markdown img {
+	display: block;
+	max-width: 100%;
+	height: auto;
+	margin: 1.5rem auto;
+	border-radius: var(--radius);
+	border: 1px solid var(--line);
+	cursor: zoom-in;
+}
+
+.markdown img.lazy {
+	width: 100%;
+	height: 20rem;
+	animation: loading 1s infinite alternate-reverse;
+}
+
+.markdown img.zoomed {
+	position: fixed;
+	inset: 0;
+	z-index: 30;
+	width: 100%;
+	height: 100%;
+	max-width: none;
+	margin: 0;
+	padding: 2rem;
+	object-fit: contain;
+	border: none;
+	border-radius: 0;
+	background: rgb(20 20 18 / 0.85);
+	cursor: zoom-out;
+}
+
+@keyframes loading {
+	from {
+		background: var(--surface-1);
+	}
+	to {
+		background: var(--surface-3);
+	}
+}
+
+/* tags written as #tag by the obsidian indexer */
+.markdown p code:only-child {
+	font-family: var(--font-console);
+}

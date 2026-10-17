@@ -1,0 +1,32 @@
+div#breadcrumb {
+	flex-wrap: wrap;
+	gap: 0.35rem;
+	width: 100%;
+	margin-bottom: 1.1rem;
+	font-size: 0.8rem;
+	color: var(--text-faint);
+}
+
+div#breadcrumb.hide {
+	display: none;
+}
+
+div#breadcrumb a.br-section {
+	color: var(--text-soft);
+	text-transform: capitalize;
+}
+
+div#breadcrumb a.br-section:hover {
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+div#breadcrumb a.br-section.current {
+	color: var(--text-faint);
+	pointer-events: none;
+}
+
+div#breadcrumb div.br-section-next-icon svg {
+	width: 0.9rem;
+	fill: var(--text-faint);
+}
