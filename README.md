@@ -92,7 +92,7 @@ jobs:
 Then set GitHub Pages to publish the `gh-pages` branch. Every push to `main` rebuilds the site
 with the latest papiro.
 
-[All the options and the other ways to run it →](docs/get-started.md)
+[All the options and the other ways to run it →](docs/01-get-started.md)
 
 ## 🔍 How it works
 
@@ -119,7 +119,7 @@ import { createPapiro } from "https://cdn.jsdelivr.net/gh/akrck02/papiro@lib/pap
 await createPapiro("#docs", { source: "https://example.org/wiki", hashPrefix: "docs" });
 ```
 
-[How to embed it →](docs/embedding.md)
+[How to embed it →](docs/03-embedding.md)
 
 ## 👀 Preview your documents
 
@@ -150,11 +150,11 @@ and run `tsgo --noEmit`.
 
 | | |
 |---|---|
-| [Get started](docs/get-started.md) | The ways to run papiro. |
-| [GitHub Pages](docs/installation/github-pages.md) | Publish your documents with the papiro-deploy action. |
-| [Docker](docs/installation/docker.md) | Serve a folder of documents from a container that indexes them as they change. |
-| [Local testing](docs/installation/local-testing.md) | Preview a folder or an Obsidian vault on your machine. |
-| [Embedding](docs/embedding.md) | Papiro as a library inside a web app: layouts, routing, options, colours. |
+| [Get started](docs/01-get-started.md) | The ways to run papiro. |
+| [GitHub Pages](docs/02-installation/02-github-pages.md) | Publish your documents with the papiro-deploy action. |
+| [Docker](docs/02-installation/03-docker.md) | Serve a folder of documents from a container that indexes them as they change. |
+| [Local testing](docs/02-installation/01-local-testing.md) | Preview a folder or an Obsidian vault on your machine. |
+| [Embedding](docs/03-embedding.md) | Papiro as a library inside a web app: layouts, routing, options, colours. |
 
 ## Licence
 

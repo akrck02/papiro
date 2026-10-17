@@ -1,4 +1,4 @@
-import { IndexItem, ItemType } from "../model/index.item.js";
+import { IndexItem, ItemType, orderedKeys } from "../model/index.item.js";
 
 /** Links between pages: wiki route -> linked wiki routes */
 export type WikiGraph = { [route: string]: string[] };
@@ -69,7 +69,7 @@ export class WikiData {
 	}
 
 	private collect(item: IndexItem, route: string) {
-		for (const key in item.files) {
+		for (const key of orderedKeys(item)) {
 			const child = item.files[key];
 			const childRoute = "" == route ? key : `${route}/${key}`;
 			if (ItemType.File == child.type) this.routes.push(childRoute.toLowerCase());

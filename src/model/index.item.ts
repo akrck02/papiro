@@ -2,6 +2,19 @@ export class IndexItem {
 	type: number;
 	files: { [key: string]: IndexItem };
 	path: string;
+	/** position in its folder ("01-" prefix of its file), 0 when it has none */
+	order?: number;
+}
+
+/**
+ * The names of the pages and folders of a folder, in reading order:
+ * the numbered ones by their number, then the rest alphabetically
+ */
+export function orderedKeys(item: IndexItem): string[] {
+	const position = (key: string) => item.files[key].order || Number.MAX_SAFE_INTEGER;
+	return Object.keys(item.files ?? {}).sort(
+		(a, b) => position(a) - position(b) || a.localeCompare(b),
+	);
 }
 
 export enum ItemType {

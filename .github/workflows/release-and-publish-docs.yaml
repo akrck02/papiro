@@ -21,7 +21,7 @@ jobs:
           ./bin/esbuild ./src/papiro.ts --bundle --format=esm --minify --tsconfig=tsconfig.json --target=chrome90,firefox90,safari15,edge90 --outfile="$RUNNER_TEMP/lib/papiro.js"
           ./bin/lit -f styles-lib.env
           cp dist/papiro.css "$RUNNER_TEMP/lib/papiro.css"
-          cp docs/embedding.md "$RUNNER_TEMP/lib/README.md"
+          cp docs/03-embedding.md "$RUNNER_TEMP/lib/README.md"
           cp LICENSE "$RUNNER_TEMP/lib/"
 
       # jsDelivr serves the lib branch: cdn.jsdelivr.net/gh/akrck02/papiro@lib/papiro.js
@@ -71,7 +71,7 @@ jobs:
         with:
           title: "Papiro"
           description: "The simple markdown wiki."
-          path: "resources/wiki"
+          path: "docs"
           isObsidianProject: false
           showFooter: true
           showBreadcrumb: true
