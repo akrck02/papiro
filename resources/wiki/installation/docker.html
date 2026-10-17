@@ -9,19 +9,18 @@ detected.</p>
 
 <p>For the sake of simplicity we will use docker compose in this example, feel free to use whatever
 you prefer.</p>
-
-<pre><code class="language-yaml">services:
-  papiro:
-    container_name: papiro
-    image: ghcr.io/akrck02/papiro:latest
-    volumes:
-      - ./my-documents:/resources/uploads
-    environment:
-      PAPIRO_TITLE: &quot;My wiki&quot;       # the title of the wiki
-      PAPIRO_WATCH_SECONDS: 5       # how often to look for changes, 0 to never
-    ports:
-      - 80:8000
-    restart: always
+<pre><code class="language-yaml"><span class="nt">services</span><span class="p">:</span>
+  <span class="nt">papiro</span><span class="p">:</span>
+    <span class="nt">container_name</span><span class="p">:</span> <span class="l">papiro</span>
+    <span class="nt">image</span><span class="p">:</span> <span class="l">ghcr.io/akrck02/papiro:latest</span>
+    <span class="nt">volumes</span><span class="p">:</span>
+      - <span class="l">./my-documents:/resources/uploads</span>
+    <span class="nt">environment</span><span class="p">:</span>
+      <span class="nt">PAPIRO_TITLE</span><span class="p">:</span> <span class="s2">&#34;My wiki&#34;</span>       <span class="c"># the title of the wiki</span>
+      <span class="nt">PAPIRO_WATCH_SECONDS</span><span class="p">:</span> <span class="m">5</span>       <span class="c"># how often to look for changes, 0 to never</span>
+    <span class="nt">ports</span><span class="p">:</span>
+      - <span class="m">80</span><span class="p">:</span><span class="m">8000</span>
+    <span class="nt">restart</span><span class="p">:</span> <span class="l">always</span>
 </code></pre>
 
 <p>Add your documents to the <code>my-documents</code> directory and start the container using:</p>

@@ -1,0 +1,195 @@
+<h1 id="embed-papiro-in-a-web-app">Embed papiro in a web app 🧩</h1>
+
+<hr>
+
+<p>Papiro is also a library: it shows a wiki made by the papiro indexer inside any element of a page, for example the help of a web app. Every instance keeps its own pages, address and theme, and nothing outside its element is touched.</p>
+
+<h2 id="add-the-library">Add the library</h2>
+
+<p>Take <code>papiro.js</code> and <code>papiro.css</code> from the <a href="https://github.com/akrck02/papiro/releases/latest" target="_blank">latest release</a>, or use them from jsDelivr:</p>
+<pre><code class="language-html"><span class="p">&lt;</span><span class="nt">link</span> <span class="na">rel</span><span class="o">=</span><span class="s">&#34;stylesheet&#34;</span> <span class="na">href</span><span class="o">=</span><span class="s">&#34;https://cdn.jsdelivr.net/gh/akrck02/papiro@lib/papiro.css&#34;</span> <span class="p">/&gt;</span>
+<span class="p">&lt;</span><span class="nt">script</span> <span class="na">type</span><span class="o">=</span><span class="s">&#34;module&#34;</span><span class="p">&gt;</span>
+  <span class="kr">import</span> <span class="p">{</span> <span class="nx">createPapiro</span> <span class="p">}</span> <span class="nx">from</span> <span class="s2">&#34;https://cdn.jsdelivr.net/gh/akrck02/papiro@lib/papiro.js&#34;</span><span class="p">;</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</code></pre>
+
+<p><code>papiro.js</code> is an ES module with no dependencies.</p>
+
+<h2 id="show-a-wiki">Show a wiki</h2>
+
+<p>The wiki is the folder written by the papiro indexer (<code>index.json</code>, the pages and their files). Give its url as <code>source</code>; the instance takes the whole element, so give the element a size.</p>
+<pre><code class="language-ts"><span class="kr">import</span> <span class="p">{</span> <span class="nx">createPapiro</span> <span class="p">}</span> <span class="kr">from</span> <span class="s2">&#34;./papiro.js&#34;</span><span class="p">;</span>
+
+<span class="kr">const</span> <span class="nx">docs</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">createPapiro</span><span class="p">(</span><span class="s2">&#34;#docs&#34;</span><span class="p">,</span> <span class="p">{</span>
+  <span class="nx">source</span><span class="o">:</span> <span class="s2">&#34;https://example.org/wiki&#34;</span><span class="p">,</span>
+  <span class="nx">title</span><span class="o">:</span> <span class="s2">&#34;Docs&#34;</span><span class="p">,</span>
+  <span class="nx">hashPrefix</span><span class="o">:</span> <span class="s2">&#34;docs&#34;</span><span class="p">,</span> <span class="c1">// the address is #/docs/wiki/…, the rest of the hash is the app&#39;s
+</span><span class="p">});</span>
+</code></pre>
+
+<h2 id="layouts">Layouts</h2>
+
+<table>
+<thead>
+<tr>
+<th>layout</th>
+<th>shows</th>
+<th>routing by default</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td><code>wiki</code></td>
+<td>bar, menu, search, pages and graph</td>
+<td><code>hash</code></td>
+</tr>
+
+<tr>
+<td><code>page</code></td>
+<td>only the pages, from <code>route</code>: help for one screen</td>
+<td><code>memory</code></td>
+</tr>
+
+<tr>
+<td><code>graph</code></td>
+<td>only the graph of the wiki</td>
+<td><code>memory</code></td>
+</tr>
+</tbody>
+</table>
+<pre><code class="language-ts"><span class="c1">// the help of a screen, links between pages still work
+</span><span class="kr">const</span> <span class="nx">help</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">createPapiro</span><span class="p">(</span><span class="s2">&#34;#help&#34;</span><span class="p">,</span> <span class="p">{</span> <span class="nx">source</span><span class="p">,</span> <span class="nx">layout</span><span class="o">:</span> <span class="s2">&#34;page&#34;</span><span class="p">,</span> <span class="nx">route</span><span class="o">:</span> <span class="s2">&#34;guides/settings&#34;</span> <span class="p">});</span>
+
+<span class="c1">// a graph; the app decides what to do with the chosen page
+</span><span class="k">await</span> <span class="nx">createPapiro</span><span class="p">(</span><span class="s2">&#34;#map&#34;</span><span class="p">,</span> <span class="p">{</span>
+  <span class="nx">source</span><span class="p">,</span>
+  <span class="nx">layout</span><span class="o">:</span> <span class="s2">&#34;graph&#34;</span><span class="p">,</span>
+  <span class="nx">onNavigate</span><span class="o">:</span> <span class="p">(</span><span class="nx">target</span><span class="p">)</span> <span class="o">=&gt;</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="s2">&#34;page&#34;</span> <span class="o">==</span> <span class="nx">target</span><span class="p">.</span><span class="nx">view</span><span class="p">)</span> <span class="nx">help</span><span class="p">.</span><span class="nx">navigate</span><span class="p">(</span><span class="nx">target</span><span class="p">);</span>
+  <span class="p">},</span>
+<span class="p">});</span>
+</code></pre>
+
+<h2 id="routing">Routing</h2>
+
+<ul>
+<li><code>hash</code>: the page is in the address, under <code>hashPrefix</code> (<code>#/docs/wiki/guides/settings</code>), so it can be shared and the back button works. Hashes outside the prefix belong to the app and are ignored.</li>
+<li><code>memory</code>: the instance keeps the page and never touches the address.</li>
+</ul>
+
+<h2 id="options">Options</h2>
+
+<table>
+<thead>
+<tr>
+<th>option</th>
+<th>default</th>
+<th>what it does</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td><code>source</code></td>
+<td></td>
+<td>url of the indexed wiki</td>
+</tr>
+
+<tr>
+<td><code>layout</code></td>
+<td><code>wiki</code></td>
+<td><code>wiki</code>, <code>page</code> or <code>graph</code></td>
+</tr>
+
+<tr>
+<td><code>routing</code></td>
+<td>by layout</td>
+<td><code>hash</code> or <code>memory</code></td>
+</tr>
+
+<tr>
+<td><code>hashPrefix</code></td>
+<td><code>&quot;&quot;</code></td>
+<td>the section of the hash that belongs to papiro</td>
+</tr>
+
+<tr>
+<td><code>route</code></td>
+<td><code>&quot;&quot;</code></td>
+<td>first page with memory routing, <code>&quot;&quot;</code> is the first page</td>
+</tr>
+
+<tr>
+<td><code>title</code>, <code>description</code>, <code>logo</code></td>
+<td></td>
+<td>the wiki name, its description and an svg logo url</td>
+</tr>
+
+<tr>
+<td><code>theme</code></td>
+<td><code>auto</code></td>
+<td><code>auto</code> follows the system, or <code>light</code>, <code>dark</code></td>
+</tr>
+
+<tr>
+<td><code>font</code></td>
+<td><code>system</code></td>
+<td><code>system</code>, or <code>papiro</code> for its reading fonts</td>
+</tr>
+
+<tr>
+<td><code>bar</code>, <code>menu</code>, <code>search</code>, <code>graph</code>, <code>breadcrumb</code></td>
+<td>by layout</td>
+<td>show or hide each part</td>
+</tr>
+
+<tr>
+<td><code>startPage</code></td>
+<td><code>false</code></td>
+<td>a start page with the title and description</td>
+</tr>
+
+<tr>
+<td><code>footer</code></td>
+<td><code>false</code></td>
+<td><code>true</code> for the papiro credits, or html</td>
+</tr>
+
+<tr>
+<td><code>shortcuts</code></td>
+<td><code>false</code></td>
+<td><code>Ctrl K</code> opens the search, <code>Shift T</code> switches the theme</td>
+</tr>
+
+<tr>
+<td><code>onNavigate</code>, <code>onThemeChange</code>, <code>onFontChange</code></td>
+<td></td>
+<td>called on each change, for example to remember the theme</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="the-instance">The instance</h2>
+<pre><code class="language-ts"><span class="nx">docs</span><span class="p">.</span><span class="nx">navigate</span><span class="p">(</span><span class="s2">&#34;guides/settings&#34;</span><span class="p">);</span>  <span class="c1">// or { view: &#34;graph&#34; }
+</span><span class="nx">docs</span><span class="p">.</span><span class="nx">setTheme</span><span class="p">(</span><span class="s2">&#34;dark&#34;</span><span class="p">);</span>             <span class="c1">// &#34;light&#34;, &#34;dark&#34; or &#34;auto&#34;
+</span><span class="nx">docs</span><span class="p">.</span><span class="nx">setFont</span><span class="p">(</span><span class="s2">&#34;papiro&#34;</span><span class="p">);</span>
+<span class="nx">docs</span><span class="p">.</span><span class="nx">openSearch</span><span class="p">();</span>
+<span class="nx">docs</span><span class="p">.</span><span class="nx">destroy</span><span class="p">();</span>                    <span class="c1">// removes it and stops listening
+</span></code></pre>
+
+<h2 id="colours-and-fonts">Colours and fonts</h2>
+
+<p>Every style lives under the <code>.papiro</code> class, and it uses css variables that the app can change, for each theme:</p>
+<pre><code class="language-css"><span class="p">.</span><span class="nc">papiro</span><span class="o">[</span><span class="nt">data-theme</span><span class="o">=</span><span class="s2">&#34;light&#34;</span><span class="o">]</span> <span class="p">{</span> <span class="nv">--primary-color</span><span class="p">:</span> <span class="mh">#2f6fd6</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">.</span><span class="nc">papiro</span><span class="o">[</span><span class="nt">data-theme</span><span class="o">=</span><span class="s2">&#34;dark&#34;</span><span class="o">]</span> <span class="p">{</span> <span class="nv">--primary-color</span><span class="p">:</span> <span class="mh">#8ab4ff</span><span class="p">;</span> <span class="p">}</span>
+<span class="p">.</span><span class="nc">papiro</span> <span class="p">{</span> <span class="nv">--font</span><span class="p">:</span> <span class="s2">&#34;My font&#34;</span><span class="p">,</span> <span class="kc">sans-serif</span><span class="p">;</span> <span class="nv">--radius</span><span class="p">:</span> <span class="mi">4</span><span class="kt">px</span><span class="p">;</span> <span class="p">}</span>
+</code></pre>
+
+<p>Some of them: <code>--background</code>, <code>--surface-1</code>, <code>--surface-2</code>, <code>--text-color</code>, <code>--text-soft</code>, <code>--line</code>, <code>--primary-color</code>, <code>--primary-soft</code>, <code>--font</code>, <code>--font-reading</code>, <code>--font-console</code>, <code>--radius</code>, the <code>--code-*</code> colours and the <code>--graph-*</code> colours.</p>
+
+<p>The layout follows the width of the element, not of the window: in a narrow element the bar goes to the bottom and the menu becomes a drawer.</p>
+
+<blockquote>
+<p><a href="https://github.com/akrck02/papiro/blob/main/examples/embed.html" target="_blank">Example with three instances in one page</a></p>
+</blockquote>
