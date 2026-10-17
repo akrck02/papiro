@@ -1,6 +1,5 @@
 import { getConfiguration } from "../lib/configuration.js";
 import { httpGet } from "../lib/http.js";
-import { Marked } from "../lib/markdown/markdown.js";
 import { getUrlParametersByBreakPoint } from "../lib/paths.js";
 import {
 	AppConfigurations,
@@ -16,10 +15,6 @@ export default class WikiService {
 	static index: IndexItem;
 	static graph: WikiGraph;
 	static graphColors: { [route: string]: string };
-
-	static render(markdown: string): string {
-		return Marked.parse(markdown);
-	}
 
 	static async loadIndex(): Promise<IndexItem> {
 		const route = PathService.getFullWikiResourcePath("index.json");
