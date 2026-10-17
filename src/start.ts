@@ -20,7 +20,7 @@ import Shortcuts, { KeyInteraction } from "./lib/shortcuts.js";
 import { AppConfigurations } from "./model/enum/configurations.js";
 import { IconBundle } from "./model/enum/icons.js";
 import GlobalShortcuts from "./service/shortcut.global.js";
-import { Theme } from "./service/theme.js";
+import { Font, Theme } from "./service/theme.js";
 import WikiService from "./service/wiki.service.js";
 import HomeView from "./view/home.view.js";
 import NotFound from "./view/not.found.view.js";
@@ -50,6 +50,9 @@ window.onload = async function () {
 	} else {
 		Theme.setLight();
 	}
+
+	if (getConfiguration("font") == "system") Font.setSystem();
+	else Font.setPapiro();
 
 	GlobalShortcuts.set({
 		interaction: KeyInteraction.keyUp,

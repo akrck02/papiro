@@ -92,6 +92,13 @@
 	color-scheme: dark;
 }
 
+:root[data-font="system"] {
+	--font: system-ui, sans-serif;
+	--font-light: system-ui, sans-serif;
+	--font-title: system-ui, sans-serif;
+	--font-reading: system-ui, sans-serif;
+}
+
 body,
 view {
 	background: var(--background);

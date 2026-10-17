@@ -11,7 +11,7 @@ import {
 } from "../model/enum/configurations.js";
 import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
 import PathService from "../service/path.service.js";
-import { Theme, THEME_CHANGED_SIGNAL } from "../service/theme.js";
+import { Font, Theme, THEME_CHANGED_SIGNAL } from "../service/theme.js";
 import IndexMenu from "./menu.js";
 import Search from "./search.js";
 
@@ -94,6 +94,14 @@ export default class TopBar {
 		setDomEvents(themeIconButton, {
 			click: (e) => Theme.toggle(),
 		});
+
+		const fontIconButton = getIcon(IconBundle.Material, MaterialIcons.TextFields);
+		fontIconButton.id = "font-icon";
+		fontIconButton.title = "Switch font";
+		setDomEvents(fontIconButton, {
+			click: () => Font.toggle(),
+		});
+		iconBar.insertBefore(fontIconButton, themeIconButton);
 
 		const showMenuIcon = getIcon(IconBundle.Material, MaterialIcons.MenuOpen);
 		showMenuIcon.id = TopBar.MENU_ICON_ID;
