@@ -45,6 +45,12 @@
 	--code-keyword: #a2477d;
 	--code-string: #4d7a2e;
 
+	/* graph, with obsidian's default graph colours */
+	--graph-node: #5c5c5c;
+	--graph-line: #e0e0e0;
+	--graph-focus: #8a5cf5;
+	--graph-text: #222222;
+
 	--radius: 0.625rem;
 	--bar-height: 3.5rem;
 
@@ -88,6 +94,11 @@
 
 	--code-keyword: #e29bc6;
 	--code-string: #a9d18e;
+
+	--graph-node: #999999;
+	--graph-line: #363636;
+	--graph-focus: #a68af9;
+	--graph-text: #dadada;
 
 	color-scheme: dark;
 }

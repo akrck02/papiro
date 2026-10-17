@@ -238,7 +238,7 @@ export default class Graph {
 				const active =
 					undefined != hovered && (edge.from == hovered || edge.to == hovered);
 				context.globalAlpha = undefined == hovered || active ? 1 : 0.35;
-				context.strokeStyle = active ? color("--primary-color") : color("--line");
+				context.strokeStyle = active ? color("--graph-focus") : color("--graph-line");
 				context.lineWidth = active ? 1.5 : 1;
 				context.beginPath();
 				context.moveTo(from.x, from.y);
@@ -252,16 +252,15 @@ export default class Graph {
 				const highlighted = node == options.current || node == hovered;
 				context.globalAlpha = isNear(node) ? 1 : 0.3;
 				context.fillStyle = highlighted
-					? color("--primary-color")
-					: color("--text-faint");
+					? color("--graph-focus")
+					: color("--graph-node");
 				context.beginPath();
 				context.arc(point.x, point.y, radius(node), 0, 2 * Math.PI);
 				context.fill();
 
 				if (showAllLabels || highlighted) {
 					context.font = `${highlighted ? 600 : 400} 10.5px ${font}`;
-					context.fillStyle =
-						node == hovered ? color("--text-color") : color("--text-soft");
+					context.fillStyle = color("--graph-text");
 					context.textAlign = "center";
 					context.fillText(
 						this.shorten(node.name),
