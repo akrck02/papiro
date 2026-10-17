@@ -155,6 +155,10 @@ export default class Graph {
 			count.set(edge.to, count.get(edge.to) + 1);
 		}
 
+		// pages without links do not take part, they go around the graph later
+		const orphans = nodes.filter((n) => 0 == count.get(n) && !(anchorFirst && n == nodes[0]));
+		const linked = nodes.filter((n) => !orphans.includes(n));
+
 		const linkDistance = 45;
 		const charge = -110;
 		const minDistance2 = 1;
@@ -187,10 +191,10 @@ export default class Graph {
 			}
 
 			// every page pushes the others away
-			for (let i = 0; i < nodes.length; i++) {
-				for (let j = i + 1; j < nodes.length; j++) {
-					const a = nodes[i];
-					const b = nodes[j];
+			for (let i = 0; i < linked.length; i++) {
+				for (let j = i + 1; j < linked.length; j++) {
+					const a = linked[i];
+					const b = linked[j];
 					const x = b.x - a.x || 1e-6;
 					const y = b.y - a.y || 1e-6;
 					let length2 = x * x + y * y;
@@ -203,12 +207,10 @@ export default class Graph {
 				}
 			}
 
-			// a soft pull to the centre keeps loose pages close,
-			// a stronger one for pages without links
-			for (const node of nodes) {
-				const pull = 0 == count.get(node) ? gravity * 3 : gravity;
-				node.vx -= node.x * pull * alpha;
-				node.vy -= node.y * pull * alpha;
+			// a soft pull to the centre keeps the groups together
+			for (const node of linked) {
+				node.vx -= node.x * gravity * alpha;
+				node.vy -= node.y * gravity * alpha;
 				node.vx *= velocityDecay;
 				node.vy *= velocityDecay;
 				node.x += node.vx;
@@ -219,6 +221,19 @@ export default class Graph {
 				nodes[0].x = 0;
 				nodes[0].y = 0;
 			}
+		}
+
+		// pages without links on a ring just around the graph, as in obsidian
+		if (0 < orphans.length) {
+			// most of the graph, a far small group must not push the ring away
+			const distances = linked.map((n) => Math.hypot(n.x, n.y)).sort((a, b) => a - b);
+			const extent = distances[Math.floor(distances.length * 0.9)] ?? 0;
+			const radius = Math.max(extent + 40, (orphans.length * 18) / (2 * Math.PI));
+			orphans.forEach((node, i) => {
+				const angle = (2 * Math.PI * i) / orphans.length;
+				node.x = radius * Math.cos(angle);
+				node.y = radius * Math.sin(angle);
+			});
 		}
 
 		return { nodes, edges };
