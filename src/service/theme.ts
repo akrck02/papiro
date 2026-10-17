@@ -1,4 +1,4 @@
-import { setConfiguration } from "../lib/configuration.js";
+import { getConfiguration, setConfiguration } from "../lib/configuration.js";
 import { setDomDataset } from "../lib/dom.js";
 import { emitSignal, setSignal } from "../lib/signals.js";
 
@@ -26,9 +26,17 @@ export class Theme {
 }
 
 /**
- * Reading font: the papiro fonts or the system one
+ * Reading font: the system one (default) or the papiro fonts
  */
 export class Font {
+	// "font" was saved on every visit when papiro fonts were the default,
+	// a new key lets everyone start with system-ui
+	static readonly CONFIGURATION_KEY = "font_family";
+
+	static isPapiroChosen(): boolean {
+		return getConfiguration(this.CONFIGURATION_KEY) == "papiro";
+	}
+
 	static toggle() {
 		if (this.isSystem()) this.setPapiro();
 		else this.setSystem();
@@ -36,12 +44,12 @@ export class Font {
 
 	static setSystem() {
 		setDomDataset(document.documentElement, { font: "system" });
-		setConfiguration("font", "system");
+		setConfiguration(this.CONFIGURATION_KEY, "system");
 	}
 
 	static setPapiro() {
 		setDomDataset(document.documentElement, { font: "papiro" });
-		setConfiguration("font", "papiro");
+		setConfiguration(this.CONFIGURATION_KEY, "papiro");
 	}
 
 	static isSystem(): boolean {

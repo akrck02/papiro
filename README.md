@@ -53,7 +53,7 @@ Commits made with AI carry a `Co-Authored-By: Claude` line.
 </tr>
 </table>
 
-- A light and a dark theme, and a switch between papiro's fonts and the system one.
+- A light and a dark theme, and a switch between the system font (the default) and papiro's serif reading fonts.
 - A menu that follows your folders, with the current page marked.
 - Search by page name from anywhere with `Ctrl K` (`Cmd K` on a Mac).
 - An "On this page" index, the reading time, and links to the previous and next page.
