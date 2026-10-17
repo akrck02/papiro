@@ -1,6 +1,7 @@
 import Breadcrumb from "../component/breadcrumb.js";
 import Footer from "../component/footer.js";
-import LocalGraph from "../component/graph.js";
+import Graph from "../component/graph.js";
+import isMobileDisplay from "../lib/display.js";
 import MarkdownCanvas from "../component/markdown.js";
 import IndexMenu from "../component/menu.js";
 import { BubbleUI } from "../lib/bubble.js";
@@ -53,13 +54,15 @@ export default class WikiView {
 
       WikiView.addPageMeta(canvas);
       WikiView.fillTableOfContents(toc, canvas, view);
-      WikiView.addLocalGraph(toc, route);
-
+      // on phones the side column is hidden, the graph goes after the page
       const pager = WikiView.createPager(route);
-      if (null != pager) article.appendChild(pager);
+      const graphPlace = isMobileDisplay() ? article : toc;
+      WikiView.addLocalGraph(graphPlace, route).then(() => {
+        if (null != pager) article.appendChild(pager);
+        if (isConfigurationActive(AppConfigurations.ShowFooter))
+          article.appendChild(Footer.create());
+      });
 
-      if (isConfigurationActive(AppConfigurations.ShowFooter))
-        article.appendChild(Footer.create());
     });
 
     container.appendChild(view);
@@ -142,7 +145,7 @@ export default class WikiView {
       route = routes[0] ?? "";
     }
 
-    const localGraph = LocalGraph.create(route.toLowerCase(), graph);
+    const localGraph = Graph.createLocal(route.toLowerCase(), graph);
     if (undefined != localGraph) aside.appendChild(localGraph);
   }
 

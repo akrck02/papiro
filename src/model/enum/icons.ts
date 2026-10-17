@@ -16,4 +16,5 @@ export enum MaterialIcons {
 	MenuOpen = "menu_open",
 	ExitToApp = "exit_to_app",
 	TextFields = "text_fields",
+	Hub = "hub",
 }
