@@ -3,14 +3,17 @@ import { Html } from "../lib/html.js";
 import { getIcon } from "../lib/icons.js";
 import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
 import PathService from "../service/path.service.js";
-import WikiService from "../service/wiki.service.js";
 
 export default class MarkdownCanvas {
 	static readonly CLASS = "markdown";
-	static create(markdown: string): HTMLElement {
+	/**
+	 * Show a page, its html comes ready from papiro-indexer
+	 * (parsing it again as markdown broke code with backticks)
+	 */
+	static create(html: string): HTMLElement {
 		const canvas = uiComponent({
 			classes: [MarkdownCanvas.CLASS],
-			text: WikiService.render(markdown),
+			text: html,
 		});
 
 		this.prepareImageTags(canvas);
