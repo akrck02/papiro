@@ -15,6 +15,14 @@ import { Font, Theme, THEME_CHANGED_SIGNAL } from "../service/theme.js";
 import IndexMenu from "./menu.js";
 import Search from "./search.js";
 
+/**
+ * Get an icon, or an empty element if the icon set does not have it yet
+ * (a cached icon set from an older version must not break the bar)
+ */
+function barIcon(icon: MaterialIcons): HTMLElement {
+	return getIcon(IconBundle.Material, icon) ?? uiComponent({});
+}
+
 export default class TopBar {
 	static readonly ID = "top-bar";
 	static readonly LOGO_ID = "logo";
@@ -57,7 +65,7 @@ export default class TopBar {
 			type: Html.Button,
 			id: TopBar.SEARCH_TRIGGER_ID,
 			classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter],
-			text: `${getIcon(IconBundle.Material, MaterialIcons.Search).outerHTML}<span>Search the docs…</span><kbd>Ctrl K</kbd>`,
+			text: `${barIcon(MaterialIcons.Search).outerHTML}<span>Search the docs…</span><kbd>Ctrl K</kbd>`,
 		});
 		setDomEvents(searchTrigger, {
 			click: () => Search.open(),
@@ -76,16 +84,14 @@ export default class TopBar {
 			styles: { cursor: "pointer" },
 		});
 
-		let themeIcon = getIcon(
-			IconBundle.Material,
+		let themeIcon = barIcon(
 			Theme.isDark() ? MaterialIcons.LightMode : MaterialIcons.DarkMode,
 		);
 		themeIconButton.appendChild(themeIcon);
 		iconBar.appendChild(themeIconButton);
 
 		connectToSignal(THEME_CHANGED_SIGNAL, async () => {
-			themeIcon = getIcon(
-				IconBundle.Material,
+			themeIcon = barIcon(
 				Theme.isDark() ? MaterialIcons.LightMode : MaterialIcons.DarkMode,
 			);
 			themeIconButton.innerHTML = themeIcon?.innerHTML;
@@ -95,7 +101,7 @@ export default class TopBar {
 			click: (e) => Theme.toggle(),
 		});
 
-		const fontIconButton = getIcon(IconBundle.Material, MaterialIcons.TextFields);
+		const fontIconButton = barIcon(MaterialIcons.TextFields);
 		fontIconButton.id = "font-icon";
 		fontIconButton.title = "Switch font";
 		setDomEvents(fontIconButton, {
@@ -103,7 +109,7 @@ export default class TopBar {
 		});
 		iconBar.insertBefore(fontIconButton, themeIconButton);
 
-		const showMenuIcon = getIcon(IconBundle.Material, MaterialIcons.MenuOpen);
+		const showMenuIcon = barIcon(MaterialIcons.MenuOpen);
 		showMenuIcon.id = TopBar.MENU_ICON_ID;
 		iconBar.appendChild(showMenuIcon);
 
@@ -111,7 +117,7 @@ export default class TopBar {
 			click: (e) => emitSignal(IndexMenu.MENU_TOGGLE_SIGNAL, {}),
 		});
 
-		const searchIcon = getIcon(IconBundle.Material, MaterialIcons.Search);
+		const searchIcon = barIcon(MaterialIcons.Search);
 		searchIcon.id = TopBar.SEARCH_ICON_ID;
 		iconBar.appendChild(searchIcon);
 
