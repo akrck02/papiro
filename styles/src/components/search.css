@@ -112,8 +112,7 @@ div#search-modal div#results a span {
 	color: var(--text-faint);
 }
 
-div#search-modal div#results a:hover,
-div#search-modal div#results a:focus {
+div#search-modal div#results a.selected {
 	background: var(--primary-soft);
 	border-radius: 0.5rem;
 }

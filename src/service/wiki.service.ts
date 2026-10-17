@@ -15,6 +15,7 @@ export type WikiGraph = { [route: string]: string[] };
 export default class WikiService {
 	static index: IndexItem;
 	static graph: WikiGraph;
+	static graphColors: { [route: string]: string };
 
 	static render(markdown: string): string {
 		return Marked.parse(markdown);
@@ -48,6 +49,26 @@ export default class WikiService {
 		}
 
 		return this.graph;
+	}
+
+	/**
+	 * Load the colours of the obsidian graph groups, none if the
+	 * vault has no groups or the wiki is not a vault
+	 */
+	static async loadGraphColors(): Promise<{ [route: string]: string }> {
+		if (undefined != this.graphColors) return this.graphColors;
+
+		try {
+			const response = await httpGet({
+				url: PathService.getFullWikiResourcePath("graph-colors.json"),
+				parameters: {},
+			});
+			this.graphColors = response.ok ? await response.json() : {};
+		} catch {
+			this.graphColors = {};
+		}
+
+		return this.graphColors;
 	}
 
 	static async getDocumentHTML(path: string): Promise<string> {
