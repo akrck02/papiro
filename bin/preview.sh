@@ -23,7 +23,8 @@ else
 	command -v go >/dev/null || { echo "go is needed to build esbuild and papiro-indexer"; exit 1; }
 	echo "Building esbuild and papiro-indexer with go..."
 	GOBIN="$site/.bin" go install github.com/evanw/esbuild/cmd/esbuild@v0.25.8
-	GOBIN="$site/.bin" go install github.com/akrck02/papiro-indexer@latest
+	# straight from github: the module proxy can serve an older "latest" for a while
+	GOBIN="$site/.bin" GOPROXY=direct go install github.com/akrck02/papiro-indexer@main
 	esbuild="$site/.bin/esbuild"
 	indexer="$site/.bin/papiro-indexer"
 fi
