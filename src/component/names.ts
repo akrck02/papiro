@@ -1,6 +1,7 @@
-/** The readable name of a route: its last section, capitalised */
+/** The readable name of a route: its last section, capitalised, without an ordering number */
 export function pageName(route: string): string {
-	const name = route.substring(route.lastIndexOf("/") + 1).replaceAll("-", " ");
+	// "2-getting-started" sorts second and reads "Getting started"
+	const name = route.substring(route.lastIndexOf("/") + 1).replace(/^\d+[-_ ]+(?=.)/, "").replaceAll("-", " ");
 	return name.substring(0, 1).toUpperCase() + name.substring(1);
 }
 
