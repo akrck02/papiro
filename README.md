@@ -137,8 +137,8 @@ and run `tsgo --noEmit`.
 |---|---|
 | [Get started](docs/get-started.md) | The ways to run papiro. |
 | [GitHub Pages](docs/installation/github-pages.md) | Publish your documents with the papiro-deploy action. |
-| [Docker](docs/installation/docker.md) | Serve papiro from a container (not available yet). |
-| [Local testing](docs/installation/local-testing.md) | Build and run it on your machine. |
+| [Docker](docs/installation/docker.md) | Serve a folder of documents from a container that indexes them as they change. |
+| [Local testing](docs/installation/local-testing.md) | Preview a folder or an Obsidian vault on your machine. |
 
 ## Licence
 
