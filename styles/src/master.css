@@ -44,6 +44,11 @@
 
 	--code-keyword: #a2477d;
 	--code-string: #4d7a2e;
+	--code-number: #b0601a;
+	--code-function: #2f6f9f;
+	--code-type: #7a5ea8;
+	--code-comment: #9a958a;
+	--code-deleted: #b5403a;
 
 	/* graph, with obsidian's default graph colours */
 	--graph-node: #5c5c5c;
@@ -94,6 +99,11 @@
 
 	--code-keyword: #e29bc6;
 	--code-string: #a9d18e;
+	--code-number: #e8a46b;
+	--code-function: #82b8e0;
+	--code-type: #c3a6ea;
+	--code-comment: #75716a;
+	--code-deleted: #e88a84;
 
 	--graph-node: #999999;
 	--graph-line: #363636;

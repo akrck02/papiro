@@ -138,6 +138,40 @@
 	fill: var(--text-faint);
 }
 
+/* syntax highlighting: papiro-indexer writes the short chroma classes */
+.markdown pre code :is(.k, .kc, .kd, .kn, .kp, .kr, .nt, .ow) {
+	color: var(--code-keyword);
+}
+
+.markdown pre code :is(.s, .s1, .s2, .sa, .sb, .sc, .sd, .se, .sh, .si, .sx, .sr, .ss, .gi) {
+	color: var(--code-string);
+}
+
+.markdown pre code :is(.m, .mb, .mf, .mh, .mi, .mo, .il, .kc) {
+	color: var(--code-number);
+}
+
+.markdown pre code :is(.nf, .fm, .na, .nd) {
+	color: var(--code-function);
+}
+
+.markdown pre code :is(.kt, .nc, .nn, .nb, .bp, .no) {
+	color: var(--code-type);
+}
+
+.markdown pre code :is(.c, .c1, .cm, .ch, .cs, .cp, .cpf) {
+	color: var(--code-comment);
+	font-style: italic;
+}
+
+.markdown pre code :is(.gd, .err) {
+	color: var(--code-deleted);
+}
+
+.markdown pre code :is(.gh, .gu) {
+	font-weight: 600;
+}
+
 /* quotes and obsidian callouts */
 .markdown blockquote {
 	margin: 1.5rem 0;
