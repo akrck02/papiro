@@ -1,13 +1,120 @@
 view#wiki {
 	width: 100%;
 	height: 100%;
-	/* max-width: 75rem; */
 	overflow: auto;
-	font-size: 1.6rem;
 	transition: opacity var(--animation-medium);
 	opacity: 0;
 }
 
-:root[data-display="mobile"] view#wiki {
-	height: calc(100%);
+view#wiki div.page {
+	display: grid;
+	grid-template-columns: minmax(0, 42.5rem) 13.75rem;
+	gap: 3rem;
+	padding: 2.5rem 3rem 0 3rem;
+	max-width: 68.75rem;
+}
+
+:root[data-display="mobile"] view#wiki div.page {
+	grid-template-columns: minmax(0, 1fr);
+	padding: 1.5rem 1.25rem 0 1.25rem;
+}
+
+view#wiki article {
+	min-width: 0;
+}
+
+view#wiki p.page-meta {
+	display: flex;
+	gap: 0.85rem;
+	margin: 0 0 2rem 0;
+	font: 0.8rem var(--font);
+	color: var(--text-faint);
+}
+
+/* previous / next */
+view#wiki nav.pager {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.75rem;
+	margin-top: 3.5rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid var(--line);
+}
+
+view#wiki nav.pager a {
+	padding: 0.85rem 1rem;
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	background: var(--surface-2);
+	color: var(--text-color);
+	transition:
+		border-color var(--animation-fast),
+		transform var(--animation-fast);
+}
+
+view#wiki nav.pager a:hover {
+	border-color: var(--primary-color);
+	transform: translateY(-1px);
+}
+
+view#wiki nav.pager a.next {
+	grid-column: 2;
+	text-align: right;
+}
+
+view#wiki nav.pager small {
+	display: block;
+	margin-bottom: 0.15rem;
+	font-size: 0.75rem;
+	color: var(--text-faint);
+}
+
+/* table of contents */
+view#wiki aside.toc {
+	position: sticky;
+	top: 2.5rem;
+	align-self: start;
+	font-size: 0.8rem;
+}
+
+:root[data-display="mobile"] view#wiki aside.toc {
+	display: none;
+}
+
+view#wiki aside.toc.empty {
+	visibility: hidden;
+}
+
+view#wiki aside.toc p {
+	font-size: 0.7rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--text-faint);
+}
+
+view#wiki aside.toc ul {
+	margin-top: 0.5rem;
+	border-left: 1px solid var(--line);
+}
+
+view#wiki aside.toc a {
+	display: block;
+	margin-left: -1px;
+	padding: 0.25rem 0.75rem;
+	border-left: 2px solid transparent;
+	color: var(--text-soft);
+	line-height: 1.4;
+}
+
+view#wiki aside.toc a.level-3 {
+	padding-left: 1.5rem;
+}
+
+view#wiki aside.toc a:hover {
+	color: var(--text-color);
+}
+
+view#wiki aside.toc a.on {
+	color: var(--primary-color);
+	border-left-color: var(--primary-color);
 }

@@ -174,6 +174,19 @@ export default class StringService {
 	}
 
 	/**
+	 * Escape html special characters
+	 * @param text The text to escape
+	 * @returns the escaped text
+	 */
+	static escape(text: string): string {
+		return text
+			.replaceAll("&", "&amp;")
+			.replaceAll("<", "&lt;")
+			.replaceAll(">", "&gt;")
+			.replaceAll('"', "&quot;");
+	}
+
+	/**
 	 * Get normalized text (no accents)
 	 * @param text
 	 * @return the text without accents

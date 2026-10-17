@@ -9,36 +9,17 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: actions/setup-node@v5
-        with:
-          node-version: "24"
-
-      - name: Install node dependencies
-        run: npm install -g rollup && npm install -g typescript@5
-
-      - name: Transpile typescript
-        run: tsc
-
-      - name: Show directories
-        run: ls -lha scripts
-
-      - name: Minify the js ha
-        run: rollup ./scripts/start.js --file ./out/start.js --format iife
-
       - name: Minify the css
         run: ./bin/lit -f styles.env
 
+      - name: Transpile typescript and minify the js
+        run: ./bin/esbuild ./src/start.ts --bundle --minify --tsconfig=tsconfig.json --target=chrome90,firefox90,safari15,edge90 --outfile=./scripts/start.js
+
       - name: Remove innecesary files and directories
-        run: rm -rf docs .gitignore styles/src src bin/lit environment.js styles.env tsconfig.json .github README.md server-n-cache.py package-lock.json .git
+        run: rm -rf docs design .gitignore styles/src src bin/lit bin/esbuild bin/install-ts.sh styles.env tsconfig.json .github README.md server-n-cache.py package-lock.json .git
 
       - name: Create directories
-        run: mkdir -p styles/src temp/src/
-
-      - name: Remove old javascript files
-        run: rm -rf scripts/*
-
-      - name: Move javascript
-        run: mv out/start.js scripts/start.js
+        run: mkdir -p styles/src
 
       - name: Move css
         run: mv styles/out/master.css styles/src/master.css

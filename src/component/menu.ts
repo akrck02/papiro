@@ -7,8 +7,8 @@ import { connectToSignal, emitSignal, setSignal } from "../lib/signals.js";
 import { AppConfigurations } from "../model/enum/configurations.js";
 import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
 import { IndexItem, ItemType } from "../model/index.item.js";
-import PathService from "../services/path.service.js";
-import WikiService from "../services/wiki.service.js";
+import PathService from "../service/path.service.js";
+import WikiService from "../service/wiki.service.js";
 
 export default class IndexMenu {
   static readonly ID = "index-menu";
@@ -128,7 +128,7 @@ export default class IndexMenu {
       id: this.INDEX_LINK_ID,
       classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter],
       text: PathService.getPascalCase(text),
-      styles: { paddingLeft: `${2 + level}rem` },
+      styles: { paddingLeft: `${0.75 + level}rem` },
       selectable: false,
       data: {
         route: route,

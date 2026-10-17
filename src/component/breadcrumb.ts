@@ -4,7 +4,7 @@ import { Html } from "../lib/html.js";
 import { getIcon } from "../lib/icons.js";
 import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
 import { IndexItem } from "../model/index.item.js";
-import PathService from "../services/path.service.js";
+import PathService from "../service/path.service.js";
 
 export default class Breadcrumb {
 	static ID = "breadcrumb";

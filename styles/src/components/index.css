@@ -1,32 +1,43 @@
 .markdown div.index-page ul {
-    display: flex;
-    justify-content: center;
-    flex-wrap: wrap;
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+	gap: 0.75rem;
+	padding: 0;
+	margin-top: 1.5rem;
 }
 
-:root[data-display="mobile"] .markdown div.index-page ul {
-    flex-direction: column;
+.markdown div.index-page hr {
+	display: none;
 }
 
-.markdown div.index-page h1 {
-    text-align: center;
+.markdown div.index-page li {
+	margin: 0;
 }
 
 .markdown div.index-page li::before {
-    content: "";
-    display: none;
+	display: none;
+}
+
+.markdown div.index-page h1 {
+	text-transform: capitalize;
 }
 
 .markdown div.index-page a {
-    padding: 1rem;
-    background: var(--surface-2);
-    border-radius: 0.45rem;
-    margin: 1rem;
-    color: var(--on-surface-2);
+	display: block;
+	width: 100%;
+	padding: 0.9rem 1rem;
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	background: var(--surface-2);
+	color: var(--text-color);
+	font: 0.95rem var(--font);
+	text-decoration: none;
+	transition:
+		border-color var(--animation-fast),
+		transform var(--animation-fast);
 }
 
-:root[data-display="mobile"] .markdown div.index-page a {
-    padding: 1rem;
-    margin: 0.2rem 1rem;
-    width: 100%;
+.markdown div.index-page a:hover {
+	border-color: var(--primary-color);
+	transform: translateY(-1px);
 }

@@ -1,14 +1,13 @@
-import TopBar from "./components/bar.js";
-import IndexMenu from "./components/menu.js";
-import Search from "./components/search.js";
+import TopBar from "./component/bar.js";
+import IndexMenu from "./component/menu.js";
+import Search from "./component/search.js";
 import { BubbleUI } from "./lib/bubble.js";
 import {
 	getConfiguration,
 	isConfigurationActive,
 	loadConfiguration,
-	setConfigurationId,
 } from "./lib/configuration.js";
-import { Display } from "./lib/display.js";
+import { checkDisplayType } from "./lib/display.js";
 import { uiComponent } from "./lib/dom.js";
 import { loadIcons } from "./lib/icons.js";
 import {
@@ -20,12 +19,12 @@ import {
 import Shortcuts, { KeyInteraction } from "./lib/shortcuts.js";
 import { AppConfigurations } from "./model/enum/configurations.js";
 import { IconBundle } from "./model/enum/icons.js";
-import GlobalShortcuts from "./services/shortcut.global.js";
-import { Theme } from "./services/theme.js";
-import WikiService from "./services/wiki.service.js";
-import HomeView from "./views/home.js";
-import NotFound from "./views/not.found.js";
-import WikiView from "./views/wiki.js";
+import GlobalShortcuts from "./service/shortcut.global.js";
+import { Theme } from "./service/theme.js";
+import WikiService from "./service/wiki.service.js";
+import HomeView from "./view/home.view.js";
+import NotFound from "./view/not.found.view.js";
+import WikiView from "./view/wiki.view.js";
 
 let documentContainer: HTMLElement;
 
@@ -42,7 +41,7 @@ window.addEventListener("hashchange", start);
 window.onload = async function () {
 	await loadConfiguration("gtdf.config.json");
 	document.title = getConfiguration(AppConfigurations.AppName);
-	Display.checkType();
+	checkDisplayType();
 
 	// load configuration
 	const isDarkTheme = getConfiguration("theme") == "dark";
@@ -76,7 +75,7 @@ window.onload = async function () {
 	const content = uiComponent({
 		styles: {
 			width: "100%",
-			height: "calc(100% - 3rem)",
+			height: "calc(100% - var(--bar-height))",
 		},
 		classes: [BubbleUI.BoxRow],
 		selectable: false,
@@ -99,7 +98,7 @@ window.onload = async function () {
 };
 
 window.onresize = async function () {
-	Display.checkType();
+	checkDisplayType();
 };
 
 /**
