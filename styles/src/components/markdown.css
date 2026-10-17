@@ -143,10 +143,14 @@
 	margin: 1.5rem 0;
 	padding: 0.75rem 1rem;
 	border: 1px solid var(--line);
-	border-left: 3px solid var(--primary-color);
 	border-radius: var(--radius);
 	background: var(--surface-2);
 	font-size: 1rem;
+}
+
+/* callouts carry the accent, plain quotes stay quiet */
+.markdown blockquote.callout {
+	border-left: 3px solid var(--primary-color);
 }
 
 .markdown blockquote p {

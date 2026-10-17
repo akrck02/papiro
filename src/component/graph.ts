@@ -17,38 +17,109 @@ type GraphNode = {
 
 type GraphEdge = { from: GraphNode; to: GraphNode };
 
+type CanvasOptions = {
+	/** the page being read, drawn in the accent colour */
+	current?: GraphNode;
+	/** names are always shown up to this number of pages */
+	labelsUpTo: number;
+	/** drag to move and wheel to zoom */
+	interactive: boolean;
+};
+
 /**
- * Local graph: the current page and the pages it links to or is linked from,
- * placed with a small force simulation and drawn on a canvas.
+ * Graphs of the links between pages, placed with a small force
+ * simulation and drawn on a canvas with the theme colours.
  */
-export default class LocalGraph {
-	static readonly CLASS = "local-graph";
-	static readonly SIZE = 220;
-	static readonly MIN_NODES = 6;
-	static readonly MAX_NODES = 40;
-	static readonly LABELS_UP_TO = 5;
+export default class Graph {
+	static readonly LOCAL_CLASS = "local-graph";
+	static readonly LOCAL_SIZE = 220;
+	static readonly LOCAL_MIN_NODES = 6;
+	static readonly LOCAL_MAX_NODES = 40;
 	static readonly STEPS = 300;
 
 	/**
-	 * Create the local graph of a page
-	 * @returns the component, or undefined if the page has no links
+	 * The page, the pages it links to or is linked from,
+	 * and their neighbours when there are few
 	 */
-	static create(route: string, graph: WikiGraph): HTMLElement {
-		const routes = this.neighbourhood(route, graph);
-		if (routes.length < 2) return undefined;
+	static createLocal(route: string, graph: WikiGraph): HTMLElement {
+		if (undefined == graph[route]) return undefined;
 
-		const linksOf = (r: string) =>
-			(graph[r]?.length ?? 0) +
-			Object.keys(graph).filter((k) => graph[k].includes(r)).length;
+		const routes = [route];
+		const add = (r: string) => {
+			if (!routes.includes(r) && routes.length < this.LOCAL_MAX_NODES)
+				routes.push(r);
+		};
+		this.neighbours(route, graph).forEach(add);
+		if (routes.length < this.LOCAL_MIN_NODES) {
+			[...routes].forEach((r) => this.neighbours(r, graph).forEach(add));
+		}
 
-		// start on a circle so the result is the same on every visit
-		const nodes: GraphNode[] = routes.map((r, i) => {
-			const angle = (2 * Math.PI * i) / routes.length;
-			const radius = 0 == i ? 0 : 60;
+		const { nodes, edges } = this.layout(routes, graph, true);
+		const container = uiComponent({ classes: [this.LOCAL_CLASS] });
+
+		const header = uiComponent({
+			classes: ["local-graph-header"],
+			text: `<p>Linked pages</p><a href="${PathService.getWebUrl()}#/graph">Open graph</a>`,
+		});
+		container.appendChild(header);
+
+		const canvas = this.canvas(nodes, edges, {
+			current: nodes[0],
+			labelsUpTo: 5,
+			interactive: false,
+		});
+		this.resize(canvas, this.LOCAL_SIZE, this.LOCAL_SIZE);
+		container.appendChild(canvas);
+
+		if (1 == nodes.length) {
+			container.appendChild(
+				uiComponent({ type: Html.Span, text: "No links to other pages yet." }),
+			);
+		}
+
+		return container;
+	}
+
+	/**
+	 * Every page of the wiki
+	 */
+	static createGlobal(graph: WikiGraph): HTMLCanvasElement {
+		const routes = Object.keys(graph).sort();
+		const { nodes, edges } = this.layout(routes, graph, false);
+		return this.canvas(nodes, edges, { labelsUpTo: 12, interactive: true });
+	}
+
+	/** Set the drawing size of a graph canvas */
+	static resize(canvas: HTMLCanvasElement, width: number, height: number) {
+		canvas.dispatchEvent(
+			new CustomEvent("graph-resize", { detail: { width, height } }),
+		);
+	}
+
+	private static neighbours(route: string, graph: WikiGraph): string[] {
+		return [
+			...(graph[route] ?? []),
+			...Object.keys(graph).filter((k) => graph[k].includes(route)),
+		];
+	}
+
+	/**
+	 * Create the nodes and place them: they push each other away,
+	 * links pull like springs and a soft gravity keeps them together
+	 */
+	private static layout(
+		routes: string[],
+		graph: WikiGraph,
+		anchorFirst: boolean,
+	): { nodes: GraphNode[]; edges: GraphEdge[] } {
+		// start on a spiral so the result is the same on every visit
+		const nodes: GraphNode[] = routes.map((route, i) => {
+			const angle = i * 2.4;
+			const radius = anchorFirst && 0 == i ? 0 : 20 * Math.sqrt(i + 1);
 			return {
-				route: r,
-				name: this.pageName(r),
-				links: linksOf(r),
+				route: route,
+				name: this.pageName(route),
+				links: this.neighbours(route, graph).length,
 				x: radius * Math.cos(angle),
 				y: radius * Math.sin(angle),
 				vx: 0,
@@ -65,39 +136,6 @@ export default class LocalGraph {
 			}
 		}
 
-		this.simulate(nodes, edges);
-		return this.draw(nodes, edges);
-	}
-
-	/**
-	 * The page, its neighbours, and their neighbours when there are few
-	 */
-	private static neighbourhood(route: string, graph: WikiGraph): string[] {
-		if (undefined == graph[route]) return [];
-
-		const neighbours = (r: string) => [
-			...(graph[r] ?? []),
-			...Object.keys(graph).filter((k) => graph[k].includes(r)),
-		];
-
-		const routes = [route];
-		const add = (r: string) => {
-			if (!routes.includes(r) && routes.length < this.MAX_NODES) routes.push(r);
-		};
-
-		neighbours(route).forEach(add);
-		if (routes.length < this.MIN_NODES) {
-			[...routes].forEach((r) => neighbours(r).forEach(add));
-		}
-
-		return routes;
-	}
-
-	/**
-	 * Place the nodes: they push each other away, links pull like springs,
-	 * and the current page stays in the middle
-	 */
-	private static simulate(nodes: GraphNode[], edges: GraphEdge[]) {
 		const repulsion = 900;
 		const spring = 0.05;
 		const length = 55;
@@ -112,8 +150,8 @@ export default class LocalGraph {
 					const dx = a.x - b.x || 0.01;
 					const dy = a.y - b.y || 0.01;
 					const distance2 = Math.max(dx * dx + dy * dy, 1);
-					const force = repulsion / distance2;
 					const distance = Math.sqrt(distance2);
+					const force = repulsion / distance2;
 					a.vx += (dx / distance) * force;
 					a.vy += (dy / distance) * force;
 					b.vx -= (dx / distance) * force;
@@ -139,63 +177,67 @@ export default class LocalGraph {
 				node.y += node.vy;
 			}
 
-			// the current page is the anchor
-			nodes[0].x = 0;
-			nodes[0].y = 0;
+			if (anchorFirst && 0 < nodes.length) {
+				nodes[0].x = 0;
+				nodes[0].y = 0;
+			}
 		}
+
+		return { nodes, edges };
 	}
 
-	private static draw(nodes: GraphNode[], edges: GraphEdge[]): HTMLElement {
-		const size = this.SIZE;
-		const container = uiComponent({ classes: [this.CLASS] });
-		container.appendChild(uiComponent({ type: Html.P, text: "Linked pages" }));
-
+	private static canvas(
+		nodes: GraphNode[],
+		edges: GraphEdge[],
+		options: CanvasOptions,
+	): HTMLCanvasElement {
 		const canvas = document.createElement("canvas");
-		const ratio = window.devicePixelRatio || 1;
-		canvas.width = size * ratio;
-		canvas.height = size * ratio;
-		canvas.style.width = `${size}px`;
-		canvas.style.height = `${size}px`;
-		container.appendChild(canvas);
-
-		// fit the drawing in the canvas, leaving room for the labels
-		const padding = 28;
-		const extent = Math.max(
-			...nodes.map((n) => Math.max(Math.abs(n.x), Math.abs(n.y))),
-			1,
-		);
-		const scale = (size / 2 - padding) / extent;
-		const toScreen = (n: GraphNode) => ({
-			x: size / 2 + n.x * scale,
-			y: size / 2 + n.y * scale,
-		});
-		const radius = (n: GraphNode, i: number) =>
-			0 == i ? 6 : Math.min(2.5 + Math.sqrt(n.links), 6);
-
-		let hovered: GraphNode = undefined;
 		const context = canvas.getContext("2d");
+		let width = 0;
+		let height = 0;
+		let hovered: GraphNode = undefined;
+
+		// view: zoom and the offset of the graph centre on the screen
+		let fit = 1;
+		let zoom = 1;
+		let offsetX = 0;
+		let offsetY = 0;
+
+		const neighbours = new Map<GraphNode, Set<GraphNode>>(
+			nodes.map((n) => [n, new Set<GraphNode>()]),
+		);
+		for (const edge of edges) {
+			neighbours.get(edge.from).add(edge.to);
+			neighbours.get(edge.to).add(edge.from);
+		}
+
+		const scale = () => fit * zoom;
+		const toScreen = (n: GraphNode) => ({
+			x: width / 2 + offsetX + n.x * scale(),
+			y: height / 2 + offsetY + n.y * scale(),
+		});
+		const radius = (n: GraphNode) =>
+			n == options.current ? 6 : Math.min(2.5 + Math.sqrt(n.links), 7);
 
 		const render = () => {
+			if (0 == width) return;
 			const style = getComputedStyle(document.documentElement);
 			const color = (name: string) => style.getPropertyValue(name).trim();
 			const font = color("--font") || "sans-serif";
+			const ratio = window.devicePixelRatio || 1;
 
 			context.setTransform(ratio, 0, 0, ratio, 0, 0);
-			context.clearRect(0, 0, size, size);
+			context.clearRect(0, 0, width, height);
 
 			const isNear = (n: GraphNode) =>
-				undefined == hovered ||
-				n == hovered ||
-				edges.some(
-					(e) =>
-						(e.from == hovered && e.to == n) || (e.to == hovered && e.from == n),
-				);
+				undefined == hovered || n == hovered || neighbours.get(hovered).has(n);
 
 			for (const edge of edges) {
 				const from = toScreen(edge.from);
 				const to = toScreen(edge.to);
 				const active =
 					undefined != hovered && (edge.from == hovered || edge.to == hovered);
+				context.globalAlpha = undefined == hovered || active ? 1 : 0.35;
 				context.strokeStyle = active ? color("--primary-color") : color("--line");
 				context.lineWidth = active ? 1.5 : 1;
 				context.beginPath();
@@ -204,49 +246,100 @@ export default class LocalGraph {
 				context.stroke();
 			}
 
-			nodes.forEach((node, i) => {
+			const showAllLabels = nodes.length <= options.labelsUpTo || zoom >= 1.8;
+			for (const node of nodes) {
 				const point = toScreen(node);
-				context.globalAlpha = isNear(node) ? 1 : 0.35;
-				context.fillStyle =
-					0 == i || node == hovered
-						? color("--primary-color")
-						: color("--text-faint");
+				const highlighted = node == options.current || node == hovered;
+				context.globalAlpha = isNear(node) ? 1 : 0.3;
+				context.fillStyle = highlighted
+					? color("--primary-color")
+					: color("--text-faint");
 				context.beginPath();
-				context.arc(point.x, point.y, radius(node, i), 0, 2 * Math.PI);
+				context.arc(point.x, point.y, radius(node), 0, 2 * Math.PI);
 				context.fill();
 
-				const showLabel =
-					node == hovered || 0 == i || nodes.length <= this.LABELS_UP_TO;
-				if (showLabel) {
-					context.font = `${0 == i || node == hovered ? 600 : 400} 10.5px ${font}`;
+				if (showAllLabels || highlighted) {
+					context.font = `${highlighted ? 600 : 400} 10.5px ${font}`;
 					context.fillStyle =
 						node == hovered ? color("--text-color") : color("--text-soft");
 					context.textAlign = "center";
 					context.fillText(
 						this.shorten(node.name),
-						Math.min(Math.max(point.x, 40), size - 40),
-						point.y + radius(node, i) + 12,
+						Math.min(Math.max(point.x, 40), width - 40),
+						point.y + radius(node) + 12,
 					);
 				}
-			});
+			}
 			context.globalAlpha = 1;
 		};
 
-		const nodeAt = (event: MouseEvent): GraphNode => {
+		canvas.addEventListener("graph-resize", (event: CustomEvent) => {
+			width = event.detail.width;
+			height = event.detail.height;
+			const ratio = window.devicePixelRatio || 1;
+			canvas.width = width * ratio;
+			canvas.height = height * ratio;
+			canvas.style.width = `${width}px`;
+			canvas.style.height = `${height}px`;
+
+			// fit the graph, leaving room for the labels
+			const padding = 28;
+			const extentX = Math.max(...nodes.map((n) => Math.abs(n.x)), 1);
+			const extentY = Math.max(...nodes.map((n) => Math.abs(n.y)), 1);
+			fit = Math.min(
+				(width / 2 - padding) / extentX,
+				(height / 2 - padding) / extentY,
+				4,
+			);
+			render();
+		});
+
+		const pointer = (event: MouseEvent) => {
 			const bounds = canvas.getBoundingClientRect();
-			const x = event.clientX - bounds.left;
-			const y = event.clientY - bounds.top;
-			return nodes.find((n, i) => {
+			return { x: event.clientX - bounds.left, y: event.clientY - bounds.top };
+		};
+
+		const nodeAt = (event: MouseEvent): GraphNode => {
+			const { x, y } = pointer(event);
+			return nodes.find((n) => {
 				const point = toScreen(n);
-				return Math.hypot(point.x - x, point.y - y) <= radius(n, i) + 5;
+				return Math.hypot(point.x - x, point.y - y) <= radius(n) + 5;
 			});
 		};
 
+		let dragging = false;
+		let dragged = false;
+		let last = { x: 0, y: 0 };
+
+		canvas.addEventListener("mousedown", (event) => {
+			if (!options.interactive) return;
+			dragging = true;
+			dragged = false;
+			last = pointer(event);
+		});
+
+		window.addEventListener("mouseup", () => (dragging = false));
+
 		canvas.addEventListener("mousemove", (event) => {
+			if (dragging) {
+				const point = pointer(event);
+				offsetX += point.x - last.x;
+				offsetY += point.y - last.y;
+				dragged ||= Math.hypot(point.x - last.x, point.y - last.y) > 2;
+				last = point;
+				render();
+				return;
+			}
+
 			const node = nodeAt(event);
 			if (node == hovered) return;
 			hovered = node;
-			canvas.style.cursor = undefined != node && node != nodes[0] ? "pointer" : "default";
+			canvas.style.cursor =
+				undefined != node && node != options.current
+					? "pointer"
+					: options.interactive
+						? "grab"
+						: "default";
 			canvas.title = node?.name ?? "";
 			render();
 		});
@@ -256,16 +349,35 @@ export default class LocalGraph {
 			render();
 		});
 
+		canvas.addEventListener(
+			"wheel",
+			(event) => {
+				if (!options.interactive) return;
+				event.preventDefault();
+				const { x, y } = pointer(event);
+				const factor = Math.exp(-event.deltaY * 0.0008);
+				const next = Math.min(Math.max(zoom * factor, 0.3), 6);
+
+				// keep the point under the pointer in place
+				const ratio = next / zoom;
+				offsetX = (offsetX + width / 2 - x) * ratio + x - width / 2;
+				offsetY = (offsetY + height / 2 - y) * ratio + y - height / 2;
+				zoom = next;
+				render();
+			},
+			{ passive: false },
+		);
+
 		canvas.addEventListener("click", (event) => {
+			if (dragged) return;
 			const node = nodeAt(event);
-			if (undefined == node || node == nodes[0]) return;
+			if (undefined == node || node == options.current) return;
 			location.href = PathService.getWikiViewRoute(node.route);
 		});
 
 		connectToSignal(THEME_CHANGED_SIGNAL, async () => render());
 		document.fonts?.ready.then(render);
-		render();
-		return container;
+		return canvas;
 	}
 
 	/**

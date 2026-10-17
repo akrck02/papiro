@@ -120,6 +120,30 @@ view#wiki div.local-graph {
 	margin-top: 2rem;
 }
 
+view#wiki article div.local-graph {
+	margin-top: 3rem;
+}
+
+view#wiki div.local-graph-header {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	font-size: 0.7rem;
+}
+
+view#wiki div.local-graph-header p {
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--text-faint);
+}
+
+view#wiki div.local-graph span {
+	display: block;
+	margin-top: 0.4rem;
+	font-size: 0.75rem;
+	color: var(--text-faint);
+}
+
 view#wiki div.local-graph canvas {
 	display: block;
 	margin-top: 0.5rem;
