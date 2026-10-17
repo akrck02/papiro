@@ -8,6 +8,8 @@ import { WikiGraph } from "../service/wiki.service.js";
 type GraphNode = {
 	route: string;
 	name: string;
+	/** colour of its obsidian graph group */
+	color?: string;
 	links: number;
 	x: number;
 	y: number;
@@ -41,7 +43,11 @@ export default class Graph {
 	 * The page, the pages it links to or is linked from,
 	 * and their neighbours when there are few
 	 */
-	static createLocal(route: string, graph: WikiGraph): HTMLElement {
+	static createLocal(
+		route: string,
+		graph: WikiGraph,
+		colors: { [route: string]: string } = {},
+	): HTMLElement {
 		if (undefined == graph[route]) return undefined;
 
 		const routes = [route];
@@ -54,7 +60,7 @@ export default class Graph {
 			[...routes].forEach((r) => this.neighbours(r, graph).forEach(add));
 		}
 
-		const { nodes, edges } = this.layout(routes, graph, true);
+		const { nodes, edges } = this.layout(routes, graph, true, colors);
 		const container = uiComponent({ classes: [this.LOCAL_CLASS] });
 
 		const header = uiComponent({
@@ -83,9 +89,12 @@ export default class Graph {
 	/**
 	 * Every page of the wiki
 	 */
-	static createGlobal(graph: WikiGraph): HTMLCanvasElement {
+	static createGlobal(
+		graph: WikiGraph,
+		colors: { [route: string]: string } = {},
+	): HTMLCanvasElement {
 		const routes = Object.keys(graph).sort();
-		const { nodes, edges } = this.layout(routes, graph, false);
+		const { nodes, edges } = this.layout(routes, graph, false, colors);
 		return this.canvas(nodes, edges, { labelsUpTo: 12, interactive: true });
 	}
 
@@ -111,6 +120,7 @@ export default class Graph {
 		routes: string[],
 		graph: WikiGraph,
 		anchorFirst: boolean,
+		colors: { [route: string]: string },
 	): { nodes: GraphNode[]; edges: GraphEdge[] } {
 		// start on a spiral so the result is the same on every visit
 		const nodes: GraphNode[] = routes.map((route, i) => {
@@ -119,6 +129,7 @@ export default class Graph {
 			return {
 				route: route,
 				name: this.pageName(route),
+				color: colors[route],
 				links: this.neighbours(route, graph).length,
 				x: radius * Math.cos(angle),
 				y: radius * Math.sin(angle),
@@ -251,12 +262,20 @@ export default class Graph {
 				const point = toScreen(node);
 				const highlighted = node == options.current || node == hovered;
 				context.globalAlpha = isNear(node) ? 1 : 0.3;
-				context.fillStyle = highlighted
-					? color("--graph-focus")
-					: color("--graph-node");
+				// a group colour stays, a ring marks the current and hovered page
+				context.fillStyle =
+					node.color ??
+					(highlighted ? color("--graph-focus") : color("--graph-node"));
 				context.beginPath();
 				context.arc(point.x, point.y, radius(node), 0, 2 * Math.PI);
 				context.fill();
+				if (highlighted && undefined != node.color) {
+					context.strokeStyle = color("--graph-focus");
+					context.lineWidth = 2;
+					context.beginPath();
+					context.arc(point.x, point.y, radius(node) + 2.5, 0, 2 * Math.PI);
+					context.stroke();
+				}
 
 				if (showAllLabels || highlighted) {
 					context.font = `${highlighted ? 600 : 400} 10.5px ${font}`;
