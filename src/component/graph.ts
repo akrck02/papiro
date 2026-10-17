@@ -308,6 +308,17 @@ export default class Graph {
 					: Math.min(Math.max((zoom - 1.2) / 0.8, 0), 1);
 			for (const node of nodes) {
 				const point = toScreen(node);
+
+				// out of sight: neither the page nor its name
+				const margin = radius(node) + 2;
+				if (
+					point.x < -margin ||
+					point.y < -margin ||
+					point.x > width + margin ||
+					point.y > height + margin
+				)
+					continue;
+
 				const highlighted = node == options.current || node == hovered;
 				context.globalAlpha = isNear(node) ? 1 : 0.3;
 				// a group colour stays, a ring marks the current and hovered page
@@ -336,7 +347,11 @@ export default class Graph {
 					context.textAlign = "center";
 					context.fillText(
 						this.shorten(node.name),
-						Math.min(Math.max(point.x, 40), width - 40),
+						// the small local graph keeps names inside, the big one
+						// lets them leave with their page
+						options.interactive
+							? point.x
+							: Math.min(Math.max(point.x, 40), width - 40),
 						point.y + radius(node) + 12,
 					);
 				}
