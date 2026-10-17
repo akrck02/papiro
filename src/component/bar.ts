@@ -10,8 +10,8 @@ import {
 	PathConfigurations,
 } from "../model/enum/configurations.js";
 import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
-import PathService from "../services/path.service.js";
-import { Theme, THEME_CHANGED_SIGNAL } from "../services/theme.js";
+import PathService from "../service/path.service.js";
+import { Font, Theme, THEME_CHANGED_SIGNAL } from "../service/theme.js";
 import IndexMenu from "./menu.js";
 import Search from "./search.js";
 
@@ -22,6 +22,8 @@ export default class TopBar {
 	static readonly ICON_BAR_ID = "icon-bar-id";
 	static readonly THEME_ICON_ID = "theme-icon";
 	static readonly MENU_ICON_ID = "menu-icon";
+	static readonly SEARCH_TRIGGER_ID = "search-trigger";
+	static readonly SEARCH_ICON_ID = "search-icon";
 
 	static create(): HTMLElement {
 		const topBar = uiComponent({
@@ -49,6 +51,18 @@ export default class TopBar {
 		});
 
 		topBar.appendChild(navTitle);
+
+		// search trigger, the main way to search on desktop
+		const searchTrigger = uiComponent({
+			type: Html.Button,
+			id: TopBar.SEARCH_TRIGGER_ID,
+			classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter],
+			text: `${getIcon(IconBundle.Material, MaterialIcons.Search).outerHTML}<span>Search the docs…</span><kbd>Ctrl K</kbd>`,
+		});
+		setDomEvents(searchTrigger, {
+			click: () => Search.open(),
+		});
+		topBar.appendChild(searchTrigger);
 
 		const iconBar = uiComponent({
 			type: Html.Div,
@@ -81,6 +95,14 @@ export default class TopBar {
 			click: (e) => Theme.toggle(),
 		});
 
+		const fontIconButton = getIcon(IconBundle.Material, MaterialIcons.TextFields);
+		fontIconButton.id = "font-icon";
+		fontIconButton.title = "Switch font";
+		setDomEvents(fontIconButton, {
+			click: () => Font.toggle(),
+		});
+		iconBar.insertBefore(fontIconButton, themeIconButton);
+
 		const showMenuIcon = getIcon(IconBundle.Material, MaterialIcons.MenuOpen);
 		showMenuIcon.id = TopBar.MENU_ICON_ID;
 		iconBar.appendChild(showMenuIcon);
@@ -90,6 +112,7 @@ export default class TopBar {
 		});
 
 		const searchIcon = getIcon(IconBundle.Material, MaterialIcons.Search);
+		searchIcon.id = TopBar.SEARCH_ICON_ID;
 		iconBar.appendChild(searchIcon);
 
 		setDomEvents(searchIcon, {

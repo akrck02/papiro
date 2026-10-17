@@ -2,8 +2,8 @@ import { setDomAttributes, setDomEvents, uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
 import { getIcon } from "../lib/icons.js";
 import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
-import PathService from "../services/path.service.js";
-import WikiService from "../services/wiki.service.js";
+import PathService from "../service/path.service.js";
+import WikiService from "../service/wiki.service.js";
 
 export default class MarkdownCanvas {
 	static readonly CLASS = "markdown";
@@ -24,8 +24,25 @@ export default class MarkdownCanvas {
 			}
 		});
 
+		this.prepareCallouts(canvas);
+
 		canvas.querySelectorAll("pre code").forEach((code) => {
 			const codeHtml = code as HTMLElement;
+			const pre = codeHtml.parentElement;
+
+			// show the language of the block
+			const language = [...codeHtml.classList]
+				.find((name) => name.startsWith("language-"))
+				?.substring("language-".length);
+			if (language) {
+				pre.appendChild(
+					uiComponent({
+						type: Html.Span,
+						classes: ["code-language"],
+						text: language,
+					}),
+				);
+			}
 			const copyButton = uiComponent({
 				type: Html.Button,
 				classes: ["copy-button"],
@@ -33,7 +50,7 @@ export default class MarkdownCanvas {
 					IconBundle.Material,
 					MaterialIcons.ContentCopy,
 					"1rem",
-					"var(--surface-6)",
+					"var(--text-faint)",
 				).outerHTML,
 			});
 
@@ -43,10 +60,25 @@ export default class MarkdownCanvas {
 				},
 			});
 
-			codeHtml.appendChild(copyButton);
+			pre.appendChild(copyButton);
 		});
 
 		return canvas;
+	}
+
+	/**
+	 * Mark quotes starting with a bold title as callouts
+	 * (the obsidian indexer writes them that way)
+	 */
+	private static prepareCallouts(canvas: HTMLElement) {
+		canvas.querySelectorAll("blockquote").forEach((quote) => {
+			const title = quote.querySelector(":scope > p:first-child > strong:first-child");
+			if (null == title) return;
+
+			quote.classList.add("callout");
+			if (/warning|caution|danger|careful|cuidado|atenci/i.test(title.textContent ?? ""))
+				quote.classList.add("warning");
+		});
 	}
 
 	private static prepareImageTags(canvas: HTMLElement) {
@@ -82,7 +114,8 @@ export default class MarkdownCanvas {
 			}
 
 			img.dataset.src = img.src;
-			img.src = undefined;
+			img.removeAttribute("src");
+			img.addEventListener("click", () => img.classList.toggle("zoomed"));
 
 			imageObserver.observe(img);
 		});

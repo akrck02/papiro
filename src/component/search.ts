@@ -5,10 +5,10 @@ import { getIcon } from "../lib/icons.js";
 import Shortcuts, { KeyInteraction } from "../lib/shortcuts.js";
 import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
 import { IndexItem, ItemType } from "../model/index.item.js";
-import PathService from "../services/path.service.js";
-import GlobalShortcuts from "../services/shortcut.global.js";
-import StringService from "../services/string.service.js";
-import WikiService from "../services/wiki.service.js";
+import PathService from "../service/path.service.js";
+import GlobalShortcuts from "../service/shortcut.global.js";
+import StringService from "../service/string.service.js";
+import WikiService from "../service/wiki.service.js";
 
 type Link = {
 	name: string;
@@ -56,7 +56,7 @@ export default class Search {
 			type: Html.Input,
 			id: this.SEARCHBAR_ID,
 			attributes: {
-				placeholder: "Search here...",
+				placeholder: "Search pages…",
 			},
 		}) as HTMLInputElement;
 		searchToolbar.appendChild(this.searchBar);
@@ -87,6 +87,19 @@ export default class Search {
 		});
 		this.instance.appendChild(this.resultContainer);
 
+		const hints = uiComponent({
+			id: "search-hints",
+			classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter],
+			text: "<span><kbd>↑</kbd> <kbd>↓</kbd> move</span><span><kbd>Enter</kbd> open</span><span><kbd>Esc</kbd> close</span>",
+		});
+		this.instance.appendChild(hints);
+
+		// close when clicking outside
+		document.addEventListener("mousedown", (e) => {
+			if (this.instance.classList.contains("hidden")) return;
+			if (!this.instance.contains(e.target as Node)) Search.exit();
+		});
+
 		this.setSearchShortcuts();
 		return this.instance;
 	}
@@ -95,6 +108,13 @@ export default class Search {
 	 * Set search shortcuts
 	 */
 	private static setSearchShortcuts() {
+		document.addEventListener("keydown", (e: KeyboardEvent) => {
+			if ((e.ctrlKey || e.metaKey) && "k" == e.key.toLowerCase()) {
+				e.preventDefault();
+				Search.toggle();
+			}
+		});
+
 		GlobalShortcuts.set({
 			interaction: KeyInteraction.keyUp,
 			key: "f",
@@ -159,7 +179,7 @@ export default class Search {
 			this.resultContainer.appendChild(
 				uiComponent({
 					type: Html.P,
-					text: "No elements.",
+					text: "" == query.trim() ? "Type to search." : `No results for “${StringService.escape(query)}”.`,
 				}),
 			);
 
@@ -179,9 +199,18 @@ export default class Search {
 	 * @returns The html <a> element
 	 */
 	private static createSelectableLink(link: Link): HTMLAnchorElement {
+		const section = link.path.split("/").slice(0, -1);
+		const location = section.length
+			? section
+					.map((name) =>
+						PathService.getPascalCase(PathService.decodeCustomUrl(name)),
+					)
+					.join(" / ")
+			: "Home";
+
 		const selectable = uiComponent({
 			type: Html.A,
-			text: link.name,
+			text: `<b>${link.name}</b><span>${location}</span>`,
 			attributes: {
 				href: PathService.getWikiViewRoute(link.path),
 			},
@@ -321,6 +350,7 @@ export default class Search {
 	static open() {
 		if (null == this.instance) return;
 		this.instance.classList.remove("hidden");
+		this.search("");
 		this.searchBar.focus();
 	}
 

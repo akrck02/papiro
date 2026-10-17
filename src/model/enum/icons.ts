@@ -15,4 +15,5 @@ export enum MaterialIcons {
 	ContentCopy = "content_copy",
 	MenuOpen = "menu_open",
 	ExitToApp = "exit_to_app",
+	TextFields = "text_fields",
 }

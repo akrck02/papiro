@@ -1,36 +1,98 @@
 header#top-bar {
 	position: sticky;
 	top: 0;
-	padding: 0.5rem 1rem;
+	z-index: 8;
+	gap: 1rem;
+	padding: 0 1.25rem;
 	width: 100%;
-	height: 3rem;
-	background: var(--surface-1);
+	height: var(--bar-height);
+	min-height: var(--bar-height);
+	background: var(--background);
+	border-bottom: 1px solid var(--line);
 }
 
 :root[data-display="mobile"] header#top-bar {
-	box-shadow: rgba(0, 0, 0, 0.05) 0px 0.1rem 0.15rem;
+	border-bottom: none;
+	border-top: 1px solid var(--line);
 }
 
 header#top-bar a#title {
-	font-size: 1.25rem;
-	color: var(--on-surface-3);
+	min-width: 15rem;
+	font-size: 1rem;
+	font-weight: 600;
+	color: var(--text-color);
+}
+
+:root[data-display="mobile"] header#top-bar a#title {
+	min-width: 0;
 }
 
 header#top-bar img#logo {
-	height: 1.5rem;
-	margin-right: 0.75rem;
+	height: 1.4rem;
+	margin-right: 0.6rem;
 }
 
-header#top-bar div#icon-bar-id div {
-	padding-left: 1rem;
+header#top-bar button#search-trigger {
+	flex: 0 1 26rem;
+	gap: 0.6rem;
+	height: 2.15rem;
+	margin: 0 auto 0 0;
+	padding: 0 0.65rem;
+	border: 1px solid var(--line);
+	border-radius: 0.5rem;
+	background: var(--surface-2);
+	color: var(--text-faint);
+	font-size: 0.875rem;
+	text-align: left;
+	transition: border-color var(--animation-fast);
+}
+
+header#top-bar button#search-trigger:hover {
+	filter: none;
+	border-color: var(--text-faint);
+}
+
+header#top-bar button#search-trigger:active {
+	transform: none;
+}
+
+header#top-bar button#search-trigger span {
+	flex: 1;
+}
+
+header#top-bar button#search-trigger svg {
+	width: 1.1rem;
+	fill: var(--text-faint);
+}
+
+:root[data-display="mobile"] header#top-bar button#search-trigger {
+	display: none !important;
+}
+
+header#top-bar div#icon-bar-id {
+	gap: 0.25rem;
+}
+
+header#top-bar div#icon-bar-id > * {
+	display: grid;
+	place-items: center;
+	width: 2.15rem;
+	height: 2.15rem;
+	border-radius: 0.5rem;
 	cursor: pointer;
+	transition: background var(--animation-fast);
 }
 
-header#top-bar div#icon-bar-id div svg {
-	fill: var(--on-surface-1);
-	width: 24px;
+header#top-bar div#icon-bar-id > *:hover {
+	background: var(--surface-1);
 }
 
-:root[data-display="desktop"] header#top-bar div#icon-bar-id div#menu-icon {
+header#top-bar div#icon-bar-id svg {
+	fill: var(--text-soft);
+	width: 1.25rem;
+}
+
+:root[data-display="desktop"] header#top-bar div#icon-bar-id #menu-icon,
+:root[data-display="desktop"] header#top-bar div#icon-bar-id #search-icon {
 	display: none !important;
 }

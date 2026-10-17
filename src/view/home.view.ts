@@ -1,11 +1,11 @@
-import TopBar from "../components/bar.js";
-import IndexMenu from "../components/menu.js";
+import TopBar from "../component/bar.js";
+import IndexMenu from "../component/menu.js";
 import { BubbleUI } from "../lib/bubble.js";
 import { getConfiguration } from "../lib/configuration.js";
 import { uiComponent } from "../lib/dom.js";
 import { Html } from "../lib/html.js";
 import { AppConfigurations } from "../model/enum/configurations.js";
-import PathService from "../services/path.service.js";
+import PathService from "../service/path.service.js";
 
 export default class HomeView {
 	// HTML ids and classes

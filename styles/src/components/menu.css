@@ -1,116 +1,117 @@
 div#index-menu {
-    background: var(--surface-2);
-    width: 25rem;
-    min-width: 25rem;
-    height: 100%;
-    padding: 1rem;
-    overflow-y: auto;
+	background: var(--surface-1);
+	border-right: 1px solid var(--line);
+	width: 17.5rem;
+	min-width: 17.5rem;
+	height: 100%;
+	padding: 1.25rem 0.75rem;
+	overflow-y: auto;
 }
 
 :root[data-display="mobile"] div#index-menu {
-    position: fixed;
-    z-index: 9;
-    right: 100%;
-    width: 100%;
-    height: calc(100% - 3rem);
-    transition: right var(--animation-fast) ease-in;
+	position: fixed;
+	z-index: 9;
+	left: 0;
+	width: 86vw;
+	max-width: 20rem;
+	height: calc(100% - var(--bar-height));
+	transform: translateX(-100%);
+	transition: transform var(--animation-fast) ease;
+	box-shadow: 0 0 2.5rem rgb(0 0 0 / 0.15);
 }
 
 :root[data-display="mobile"] div#index-menu.show {
-    right: 0;
+	transform: none;
 }
 
 div#index-menu h1#title {
-    display: none;
-    padding-bottom: 1rem;
-    border-bottom: 0.05rem solid var(--surface-3);
-}
-
-:root[data-display="mobile"] div#index-menu h1#title {
-    display: block;
-}
-
-div#index-menu input#searchbar {
-    width: 100%;
-    margin: 0;
-    margin-bottom: 1rem;
-    background: var(--surface-3);
+	font-size: 0.7rem;
+	font-weight: 500;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--text-faint);
+	margin: 0 0 0.5rem 0;
+	padding: 0 0.6rem;
 }
 
 div#index-menu div.container div.item-container {
-    transition: opacity var(--animation-fast);
-    opacity: 1;
+	position: relative;
+	transition: opacity var(--animation-fast);
+	opacity: 1;
+}
+
+/* guide line for nested pages */
+div#index-menu div.container div.item-container::before {
+	content: "";
+	position: absolute;
+	left: 1.1rem;
+	top: 0.2rem;
+	bottom: 0.2rem;
+	border-left: 1px solid var(--line);
 }
 
 div#index-menu div.container.hidden div.item-container {
-    display: none;
-}
-
-div#index-menu div.container.hidding div.item-container {
-    display: flex;
+	display: none;
 }
 
 div#index-menu a#index-link {
-    display: flex;
-    position: relative;
-    flex-direction: row;
-    justify-content: start;
-    align-items: center;
-    margin-top: 0.2rem;
-    padding-top: 0.8rem;
-    padding-left: 0;
-    padding-bottom: 0.8rem;
-    border-radius: 5rem;
-    font-size: 1.25rem;
-    color: var(--on-surface-1);
-    cursor: pointer;
-    transition: background var(--animation-fast);
+	position: relative;
+	margin-top: 0.1rem;
+	padding-top: 0.4rem;
+	padding-right: 0.6rem;
+	padding-bottom: 0.4rem;
+	border-radius: 0.45rem;
+	font-size: 0.875rem;
+	line-height: 1.4;
+	color: var(--text-soft);
+	cursor: pointer;
+	transition:
+		background var(--animation-fast),
+		color var(--animation-fast);
 }
 
-/* div#index-menu a#index-link.selected {
-    background: var(--primary-color);
-    color: var(--surface-2);
-} */
-
-div#index-menu a#index-link.file::after {
-    content: ".";
-    display: block;
-    position: absolute;
-    left: 0.4rem;
-    top: 0.45rem;
-    width: var(--size);
-    height: 2rem;
-    color: transparent;
-    border-radius: 0.35rem;
-    transition: background var(--animation-fast);
-    background: transparent;
-    color: transparent;
+div#index-menu div.item-container a#index-link {
+	margin-left: 0.6rem;
 }
 
-div#index-menu a#index-link.selected::after {
-    background: var(--primary-color);
-    color: var(--primary-color);
-}
-div#index-menu a#index-link:focus {
-    border: none;
+div#index-menu a#index-link:hover {
+	background: var(--surface-3);
+	color: var(--text-color);
 }
 
-div#index-menu a#index-link:not(.selected):hover::after,
-div#index-menu a#index-link:not(.selected):focus::after {
-    background: var(--primary-color);
-    color: var(--primary-color);
-    opacity: 0.5;
+div#index-menu a#index-link.selected {
+	background: var(--primary-soft);
+	color: var(--primary-color);
+	font-weight: 500;
+}
+
+div#index-menu a#index-link.file.selected::before {
+	content: "";
+	position: absolute;
+	left: -0.6rem;
+	top: 0.4rem;
+	bottom: 0.4rem;
+	width: 3px;
+	border-radius: 3px;
+	background: var(--primary-color);
+}
+
+div#index-menu div.item-container a#index-link.file.selected::before {
+	left: -0.15rem;
+}
+
+div#index-menu div.container a#index-link > div {
+	margin-left: auto;
 }
 
 div#index-menu div.container a#index-link svg {
-    position: absolute;
-    top: 0.5rem;
-    right: 1rem;
-    fill: var(--on-surface-1);
-    transform: rotateZ(0deg);
-    transition: transform var(--animation-fast);
+	width: 1.1rem;
+	height: 1.1rem;
+	fill: var(--text-faint);
+	transform: rotateZ(0deg);
+	transition: transform var(--animation-fast);
 }
 
-div#index-menu div.container.hidden a#index-link svg {
-    transform: rotateZ(-90deg);
+div#index-menu div.container.hidden > a#index-link svg {
+	transform: rotateZ(-90deg);
 }

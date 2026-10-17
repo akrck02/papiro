@@ -24,3 +24,27 @@ export class Theme {
 		return document.documentElement.dataset["theme"] == "dark";
 	}
 }
+
+/**
+ * Reading font: the papiro fonts or the system one
+ */
+export class Font {
+	static toggle() {
+		if (this.isSystem()) this.setPapiro();
+		else this.setSystem();
+	}
+
+	static setSystem() {
+		setDomDataset(document.documentElement, { font: "system" });
+		setConfiguration("font", "system");
+	}
+
+	static setPapiro() {
+		setDomDataset(document.documentElement, { font: "papiro" });
+		setConfiguration("font", "papiro");
+	}
+
+	static isSystem(): boolean {
+		return document.documentElement.dataset["font"] == "system";
+	}
+}
