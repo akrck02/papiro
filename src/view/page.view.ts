@@ -6,7 +6,7 @@ import { pageName } from "../component/names.js";
 import { WikiEntry } from "../core/data.js";
 import Papiro from "../core/papiro.js";
 import { uiComponent } from "../lib/dom.js";
-import { ItemType } from "../model/index.item.js";
+import { ItemType, orderedKeys } from "../model/index.item.js";
 import NotFoundView from "./not.found.view.js";
 
 /**
@@ -68,7 +68,7 @@ export default class PageView {
 		const folder = uiComponent({ classes: ["papiro-content", "papiro-folder"] });
 		folder.appendChild(uiComponent({ type: "h1", text: pageName(entry.route) }));
 		const list = uiComponent({ classes: ["papiro-folder-list"] });
-		for (const key in entry.item.files) {
+		for (const key of orderedKeys(entry.item)) {
 			const child = entry.item.files[key];
 			const name = ItemType.Directory == child.type ? `${pageName(key)}/` : pageName(key);
 			list.appendChild(papiro.link({ view: "page", route: `${entry.route}/${key}` }, name));

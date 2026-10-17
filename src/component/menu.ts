@@ -1,7 +1,7 @@
 import Papiro from "../core/papiro.js";
 import { icon } from "../core/icons.js";
 import { uiComponent } from "../lib/dom.js";
-import { IndexItem, ItemType } from "../model/index.item.js";
+import { IndexItem, ItemType, orderedKeys } from "../model/index.item.js";
 import { pageName } from "./names.js";
 
 /**
@@ -23,7 +23,7 @@ export default class Menu {
 
 		const list = uiComponent({ classes: ["papiro-menu-list"] });
 		this.element.appendChild(list);
-		for (const key in papiro.data.index.files)
+		for (const key of orderedKeys(papiro.data.index))
 			list.appendChild(this.option(papiro, key, papiro.data.index.files[key], 0));
 	}
 
@@ -52,7 +52,7 @@ export default class Menu {
 		folder.appendChild(toggle);
 
 		const children = uiComponent({ classes: ["papiro-menu-children"] });
-		for (const key in item.files)
+		for (const key of orderedKeys(item))
 			children.appendChild(this.option(papiro, `${route}/${key}`, item.files[key], level + 1));
 		folder.appendChild(children);
 		return folder;
