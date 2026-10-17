@@ -2,11 +2,13 @@
 	"compilerOptions": {
 		"target": "ES2021",
 		"outDir": "./scripts/",
-		"rootDir": "./src/",
+		"rootDir": "./",
 		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		"skipLibCheck": true,
 	  "module": "ESNext",
+	  "moduleResolution": "bundler",
+	  "resolveJsonModule": true,
 	  "incremental": true,
 			"tsBuildInfoFile" : "./scripts/.tsbuildinfo"
 	}

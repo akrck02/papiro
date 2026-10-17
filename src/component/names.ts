@@ -1,0 +1,13 @@
+/** The readable name of a route: its last section, capitalised */
+export function pageName(route: string): string {
+	const name = route.substring(route.lastIndexOf("/") + 1).replaceAll("-", " ");
+	return name.substring(0, 1).toUpperCase() + name.substring(1);
+}
+
+/** The name of a page for the graph: a readme takes the name of its folder */
+export function graphName(route: string): string {
+	const sections = route.split("/");
+	let name = sections.pop();
+	if ("readme" == name && 0 < sections.length) name = sections.pop();
+	return pageName(name);
+}

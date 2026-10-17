@@ -1,87 +1,69 @@
-.markdown {
-	display: block;
-	width: 100%;
+.papiro .papiro-content {
 	color: var(--text-color);
 	font: 1.0625rem/1.75 var(--font-reading);
 	overflow-wrap: break-word;
 }
 
-.markdown > *:first-child {
+.papiro .papiro-content > :first-child {
 	margin-top: 0;
 }
 
-.markdown h1,
-.markdown h2,
-.markdown h3,
-.markdown h4,
-.markdown h5,
-.markdown h6 {
+.papiro .papiro-content :is(h1, h2, h3, h4, h5, h6) {
 	font-family: var(--font-title);
 	font-weight: 600;
 	color: var(--text-color);
 	letter-spacing: -0.01em;
+	line-height: 1.25;
 	scroll-margin-top: 1.5rem;
 	margin: 2.25rem 0 0.6rem 0;
-	line-height: 1.25;
 }
 
-.markdown h1 {
+.papiro .papiro-content h1 {
 	font-size: 2.5rem;
 	line-height: 1.15;
 	margin: 0 0 0.6rem 0;
 }
 
-.markdown h2 {
+.papiro .papiro-content h2 {
 	font-size: 1.5rem;
 }
 
-.markdown h3 {
+.papiro .papiro-content h3 {
 	font-size: 1.2rem;
 }
 
-.markdown h4,
-.markdown h5,
-.markdown h6 {
+.papiro .papiro-content :is(h4, h5, h6) {
 	font-size: 1.05rem;
 }
 
-:root[data-display="mobile"] .markdown h1 {
-	font-size: 2rem;
-}
-
-.markdown p {
+.papiro .papiro-content p {
 	margin: 0.9rem 0;
 }
 
-.markdown a {
-	color: var(--primary-color);
-	text-decoration: none;
-}
-
-.markdown a:hover {
+.papiro .papiro-content a:hover {
 	text-decoration: underline;
 	text-underline-offset: 3px;
 }
 
-.markdown strong {
+.papiro .papiro-content strong {
 	font-weight: 600;
 }
 
-.markdown mark {
+.papiro .papiro-content mark {
 	background: var(--mark-color);
 	color: inherit;
 	padding: 0 0.15rem;
 	border-radius: 0.2rem;
 }
 
-.markdown hr {
+.papiro .papiro-content hr {
 	border: none;
 	border-top: 1px solid var(--line);
 	margin: 2rem 0;
 }
 
 /* inline code */
-.markdown code {
+.papiro .papiro-content code {
 	font: 0.85em var(--font-console);
 	background: var(--surface-1);
 	border: 1px solid var(--line);
@@ -90,7 +72,7 @@
 }
 
 /* code blocks */
-.markdown pre {
+.papiro .papiro-content pre {
 	position: relative;
 	margin: 1.25rem 0;
 	background: var(--surface-1);
@@ -98,7 +80,7 @@
 	border-radius: var(--radius);
 }
 
-.markdown pre code {
+.papiro .papiro-content pre code {
 	display: block;
 	padding: 2.25rem 1.1rem 1rem 1.1rem;
 	overflow-x: auto;
@@ -106,11 +88,9 @@
 	background: none;
 	font-size: 0.84rem;
 	line-height: 1.65;
-	user-select: text;
-	cursor: text;
 }
 
-.markdown pre span.code-language {
+.papiro .papiro-code-language {
 	position: absolute;
 	top: 0.55rem;
 	right: 2.9rem;
@@ -118,62 +98,56 @@
 	color: var(--text-faint);
 }
 
-.markdown pre button.copy-button {
+.papiro .papiro-code-copy {
 	position: absolute;
 	right: 0.35rem;
 	top: 0.3rem;
-	margin: 0;
-	padding: 0.35rem;
-	height: 2rem;
+	padding: 0.4rem;
 	border-radius: 0.45rem;
-	background: transparent;
+	color: var(--text-faint);
 }
 
-.markdown pre button.copy-button:hover {
+.papiro .papiro-code-copy:hover {
 	background: var(--surface-3);
-	filter: none;
-}
-
-.markdown pre button.copy-button svg {
-	fill: var(--text-faint);
+	color: var(--text-color);
 }
 
 /* syntax highlighting: papiro-indexer writes the short chroma classes */
-.markdown pre code :is(.k, .kc, .kd, .kn, .kp, .kr, .nt, .ow) {
+.papiro pre code :is(.k, .kc, .kd, .kn, .kp, .kr, .nt, .ow) {
 	color: var(--code-keyword);
 }
 
-.markdown pre code :is(.s, .s1, .s2, .sa, .sb, .sc, .sd, .se, .sh, .si, .sx, .sr, .ss, .gi) {
+.papiro pre code :is(.s, .s1, .s2, .sa, .sb, .sc, .sd, .se, .sh, .si, .sx, .sr, .ss, .gi) {
 	color: var(--code-string);
 }
 
-.markdown pre code :is(.m, .mb, .mf, .mh, .mi, .mo, .il, .kc) {
+.papiro pre code :is(.m, .mb, .mf, .mh, .mi, .mo, .il, .kc) {
 	color: var(--code-number);
 }
 
-.markdown pre code :is(.nf, .fm, .na, .nd) {
+.papiro pre code :is(.nf, .fm, .na, .nd) {
 	color: var(--code-function);
 }
 
-.markdown pre code :is(.kt, .nc, .nn, .nb, .bp, .no) {
+.papiro pre code :is(.kt, .nc, .nn, .nb, .bp, .no) {
 	color: var(--code-type);
 }
 
-.markdown pre code :is(.c, .c1, .cm, .ch, .cs, .cp, .cpf) {
+.papiro pre code :is(.c, .c1, .cm, .ch, .cs, .cp, .cpf) {
 	color: var(--code-comment);
 	font-style: italic;
 }
 
-.markdown pre code :is(.gd, .err) {
+.papiro pre code :is(.gd, .err) {
 	color: var(--code-deleted);
 }
 
-.markdown pre code :is(.gh, .gu) {
+.papiro pre code :is(.gh, .gu) {
 	font-weight: 600;
 }
 
-/* quotes and obsidian callouts */
-.markdown blockquote {
+/* quotes, and obsidian callouts that carry the accent */
+.papiro .papiro-content blockquote {
 	margin: 1.5rem 0;
 	padding: 0.75rem 1rem;
 	border: 1px solid var(--line);
@@ -182,49 +156,47 @@
 	font-size: 1rem;
 }
 
-/* callouts carry the accent, plain quotes stay quiet */
-.markdown blockquote.callout {
-	border-left: 3px solid var(--primary-color);
-}
-
-.markdown blockquote p {
+.papiro .papiro-content blockquote p {
 	margin: 0.3rem 0;
 }
 
-.markdown blockquote.callout > p:first-child > strong:first-child {
+.papiro .papiro-content blockquote.callout {
+	border-left: 3px solid var(--primary-color);
+}
+
+.papiro .papiro-content blockquote.callout.warning {
+	border-left-color: var(--warning-color);
+}
+
+.papiro .papiro-content blockquote.callout > p:first-child > strong:first-child {
 	display: block;
 	font: 600 0.875rem var(--font);
 }
 
-.markdown blockquote.callout.warning {
-	border-left-color: var(--warning-color);
-}
-
 /* lists */
-.markdown ul,
-.markdown ol {
+.papiro .papiro-content :is(ul, ol) {
 	margin: 0.9rem 0;
 	padding-left: 1.4rem;
 }
 
-.markdown ul li {
+.papiro .papiro-content ul li {
 	list-style: disc;
 }
 
-.markdown ol li {
+.papiro .papiro-content ol li {
 	list-style: decimal;
 }
 
-.markdown li {
+.papiro .papiro-content li {
 	margin: 0.3rem 0;
 }
 
-.markdown li::marker {
+.papiro .papiro-content li::marker {
 	color: var(--text-faint);
 }
 
 /* tables */
-.markdown table {
+.papiro .papiro-content table {
 	display: block;
 	overflow-x: auto;
 	border-collapse: collapse;
@@ -232,20 +204,19 @@
 	font: 0.9rem/1.5 var(--font);
 }
 
-.markdown th,
-.markdown td {
+.papiro .papiro-content :is(th, td) {
 	padding: 0.5rem 0.75rem;
 	border-bottom: 1px solid var(--line);
 	text-align: left;
 }
 
-.markdown th {
+.papiro .papiro-content th {
 	font-weight: 600;
 	color: var(--text-soft);
 }
 
-/* images */
-.markdown img {
+/* images, a click zooms them */
+.papiro .papiro-content img {
 	display: block;
 	max-width: 100%;
 	height: auto;
@@ -255,13 +226,7 @@
 	cursor: zoom-in;
 }
 
-.markdown img.lazy {
-	width: 100%;
-	height: 20rem;
-	animation: loading 1s infinite alternate-reverse;
-}
-
-.markdown img.zoomed {
+.papiro .papiro-content img.zoomed {
 	position: fixed;
 	inset: 0;
 	z-index: 30;
@@ -277,16 +242,35 @@
 	cursor: zoom-out;
 }
 
-@keyframes loading {
-	from {
-		background: var(--surface-1);
-	}
-	to {
-		background: var(--surface-3);
-	}
+/* a folder lists its pages */
+.papiro .papiro-folder-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(12rem, 1fr));
+	gap: 0.75rem;
+	margin-top: 1.5rem;
 }
 
-/* tags written as #tag by the obsidian indexer */
-.markdown p code:only-child {
-	font-family: var(--font-console);
+.papiro .papiro-folder-list a {
+	padding: 0.9rem 1rem;
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	background: var(--surface-2);
+	color: var(--text-color);
+	font: 0.95rem var(--font);
+	text-decoration: none;
+	transition:
+		border-color var(--speed),
+		transform var(--speed);
+}
+
+.papiro .papiro-folder-list a:hover {
+	border-color: var(--primary-color);
+	transform: translateY(-1px);
+	text-decoration: none;
+}
+
+@container papiro (max-width: 899px) {
+	.papiro .papiro-content h1 {
+		font-size: 2rem;
+	}
 }

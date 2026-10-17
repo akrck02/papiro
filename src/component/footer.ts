@@ -1,37 +1,18 @@
-import { BubbleUI } from "../lib/bubble.js";
-import { getConfiguration } from "../lib/configuration.js";
+import Papiro from "../core/papiro.js";
 import { uiComponent } from "../lib/dom.js";
-import { Html } from "../lib/html.js";
-import { AppConfigurations } from "../model/enum/configurations.js";
 
+export const PAPIRO_VERSION = "2.0.0";
+
+/** The credits, or the html the host gave */
 export default class Footer {
-	static ID = "footer";
-	static TEXT_ID = "text";
+	static create(papiro: Papiro): HTMLElement | null {
+		const footer = papiro.options.footer;
+		if (false === footer) return null;
 
-	static create(): HTMLElement {
-		const footer = uiComponent({
-			type: Html.Footer,
-			id: this.ID,
-			classes: [BubbleUI.BoxRow, BubbleUI.BoxCenter],
-		});
-
-		const githubRepositoryLink = uiComponent({
-			type: Html.A,
-			text: getConfiguration(AppConfigurations.CoreName),
-			attributes: {
-				href: getConfiguration(AppConfigurations.GithubRepository),
-			},
-		});
-
-		const text = uiComponent({
-			type: Html.P,
-			id: this.TEXT_ID,
-			classes: [BubbleUI.TextCenter],
-			text: `Powered by ${githubRepositoryLink.outerHTML} ${getConfiguration(AppConfigurations.CoreVersion)}, made with 🩵 by ${getConfiguration(AppConfigurations.Author)}`,
-		});
-
-		footer.appendChild(text);
-
-		return footer;
+		const text =
+			"string" == typeof footer
+				? footer
+				: `Powered by <a href="https://github.com/akrck02/papiro">Papiro</a> ${PAPIRO_VERSION}`;
+		return uiComponent({ type: "footer", classes: ["papiro-footer"], text: text });
 	}
 }

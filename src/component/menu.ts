@@ -1,180 +1,73 @@
-import { BubbleUI } from "../lib/bubble.js";
-import { getConfiguration } from "../lib/configuration.js";
-import { setDomAttributes, setDomEvents, uiComponent } from "../lib/dom.js";
-import { Html } from "../lib/html.js";
-import { getIcon } from "../lib/icons.js";
-import { connectToSignal, emitSignal, setSignal } from "../lib/signals.js";
-import { AppConfigurations } from "../model/enum/configurations.js";
-import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
+import Papiro from "../core/papiro.js";
+import { icon } from "../core/icons.js";
+import { uiComponent } from "../lib/dom.js";
 import { IndexItem, ItemType } from "../model/index.item.js";
-import PathService from "../service/path.service.js";
-import WikiService from "../service/wiki.service.js";
+import { pageName } from "./names.js";
 
-export default class IndexMenu {
-  static readonly ID = "index-menu";
-  static readonly TITLE_ID = "title";
-  static readonly INDEX_LINK_ID = "index-link";
-  static readonly LINK_SELECTED_CLASS = "selected";
-  static readonly MENU_TOGGLE_SIGNAL = setSignal();
+/**
+ * The pages of the wiki, following its folders.
+ * On phones it is a drawer over the page.
+ */
+export default class Menu {
+	readonly element: HTMLElement;
+	private readonly links = new Map<string, HTMLElement>();
 
-  static create(index: IndexItem): HTMLElement {
-    const menu = uiComponent({
-      type: Html.Div,
-      id: this.ID,
-    });
+	constructor(papiro: Papiro) {
+		this.element = uiComponent({ type: "nav", classes: ["papiro-menu"] });
 
-    connectToSignal(IndexMenu.MENU_TOGGLE_SIGNAL, async () => {
-      if (menu.classList.contains("show")) menu.classList.remove("show");
-      else menu.classList.add("show");
-    });
+		if ("" != papiro.options.title) {
+			this.element.appendChild(
+				uiComponent({ type: "p", classes: ["papiro-menu-title"], text: papiro.options.title }),
+			);
+		}
 
-    const title = uiComponent({
-      type: Html.H1,
-      id: this.TITLE_ID,
-      text: getConfiguration(AppConfigurations.AppName),
-      styles: {},
-    });
-    menu.appendChild(title);
+		const list = uiComponent({ classes: ["papiro-menu-list"] });
+		this.element.appendChild(list);
+		for (const key in papiro.data.index.files)
+			list.appendChild(this.option(papiro, key, papiro.data.index.files[key], 0));
+	}
 
-    const options = uiComponent({
-      type: Html.Div,
-      classes: [BubbleUI.BoxColumn],
-    });
-    menu.appendChild(options);
+	private option(papiro: Papiro, route: string, item: IndexItem, level: number): HTMLElement {
+		const name = pageName(route);
 
-    for (const key in index.files) {
-      options.appendChild(this.createOption(key, key, index.files[key]));
-    }
+		if (ItemType.File == item.type) {
+			const link = papiro.link({ view: "page", route: route.toLowerCase() }, name, ["papiro-menu-link"]);
+			link.style.paddingLeft = `${0.75 + level}rem`;
+			this.links.set(route.toLowerCase(), link);
+			return link;
+		}
 
-    return menu;
-  }
+		const folder = uiComponent({ classes: ["papiro-menu-folder"] });
+		const toggle = uiComponent({
+			type: "button",
+			classes: ["papiro-menu-link"],
+			text: `<span>${name}</span>${icon("expand", 18)}`,
+			attributes: { "aria-expanded": "true" },
+		});
+		toggle.style.paddingLeft = `${0.75 + level}rem`;
+		toggle.onclick = () => {
+			const closed = folder.classList.toggle("closed");
+			toggle.setAttribute("aria-expanded", closed ? "false" : "true");
+		};
+		folder.appendChild(toggle);
 
-  private static createOption(
-    route: string,
-    key: string,
-    value: IndexItem,
-    level: number = 0,
-  ): HTMLElement {
-    switch (value.type) {
-      case ItemType.Directory:
-        const item = this.indexLink(route, key, level, false);
-        const expandIcon = getIcon(IconBundle.Material, MaterialIcons.Expand);
+		const children = uiComponent({ classes: ["papiro-menu-children"] });
+		for (const key in item.files)
+			children.appendChild(this.option(papiro, `${route}/${key}`, item.files[key], level + 1));
+		folder.appendChild(children);
+		return folder;
+	}
 
-        item.appendChild(expandIcon);
-        const container = uiComponent({
-          classes: [BubbleUI.BoxColumn, "container"],
-        });
+	/** Mark the page being read */
+	select(route: string | null) {
+		this.links.forEach((link, linkRoute) => link.classList.toggle("selected", linkRoute == route));
+	}
 
-        const itemContainer = uiComponent({
-          classes: [BubbleUI.BoxColumn, "item-container"],
-        });
+	toggle() {
+		this.element.classList.toggle("open");
+	}
 
-        let clicked = false;
-
-        setDomEvents(item, {
-          click: () => {
-            if (clicked) return;
-            clicked = true;
-
-            const expansion = container.classList.contains("hidden");
-
-            if (expansion) {
-              container.classList.remove("hidden");
-              setTimeout(() => {
-                itemContainer.style.opacity = "1";
-                clicked = false;
-              }, 10);
-              return;
-            }
-
-            itemContainer.style.opacity = "0";
-            setTimeout(() => {
-              container.classList.toggle("hidden");
-              clicked = false;
-            }, 300);
-          },
-        });
-
-        container.appendChild(item);
-        for (const key in value.files) {
-          itemContainer.appendChild(
-            this.createOption(
-              `${route}/${key}`.toLocaleLowerCase(),
-              key,
-              value.files[key],
-              level + 1,
-            ),
-          );
-        }
-
-        container.appendChild(itemContainer);
-        return container;
-      case ItemType.File:
-        return this.indexLink(route, key, level, true);
-    }
-  }
-
-  private static indexLink(
-    route: string,
-    name: string,
-    level: number,
-    isFile: boolean,
-  ): HTMLElement {
-    name = PathService.getPascalCase(name);
-    const text = PathService.decodeCustomUrl(name);
-
-    const item = uiComponent({
-      type: Html.A,
-      id: this.INDEX_LINK_ID,
-      classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter],
-      text: PathService.getPascalCase(text),
-      styles: { paddingLeft: `${0.75 + level}rem` },
-      selectable: false,
-      data: {
-        route: route,
-      },
-    });
-
-    // if it is a Directory, return
-    if (!isFile) {
-      return item;
-    }
-
-    item.classList.add("file");
-
-    if (null != route) {
-      setDomAttributes(item, {
-        href: PathService.getWikiViewRoute(route),
-      });
-    }
-
-    setDomEvents(item, {
-      click: () => {
-        emitSignal(this.MENU_TOGGLE_SIGNAL, {});
-        const items = document.querySelectorAll("#" + this.INDEX_LINK_ID);
-      },
-    });
-
-    return item;
-  }
-
-  static setSelectedRoute() {
-    document.querySelectorAll(`#${this.INDEX_LINK_ID}`).forEach((link) => {
-      const htmlLink = link as HTMLAnchorElement;
-      if (document.URL == htmlLink.href)
-        link.classList.add(this.LINK_SELECTED_CLASS);
-      else link.classList.remove(this.LINK_SELECTED_CLASS);
-    });
-  }
-
-  static setFirstAsSelected() {
-    let found = false;
-    document.querySelectorAll(`#${this.INDEX_LINK_ID}`).forEach((link) => {
-      const htmlLink = link as HTMLAnchorElement;
-      if (!found) {
-        link.classList.add(this.LINK_SELECTED_CLASS);
-        found = true;
-      } else link.classList.remove(this.LINK_SELECTED_CLASS);
-    });
-  }
+	close() {
+		this.element.classList.remove("open");
+	}
 }

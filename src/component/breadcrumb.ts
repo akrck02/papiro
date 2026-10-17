@@ -1,67 +1,24 @@
-import { BubbleUI } from "../lib/bubble.js";
+import Papiro from "../core/papiro.js";
+import { icon } from "../core/icons.js";
 import { uiComponent } from "../lib/dom.js";
-import { Html } from "../lib/html.js";
-import { getIcon } from "../lib/icons.js";
-import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
-import { IndexItem } from "../model/index.item.js";
-import PathService from "../service/path.service.js";
+import { pageName } from "./names.js";
 
+/** The folders of the page being read */
 export default class Breadcrumb {
-	static ID = "breadcrumb";
-	static SECTION_CLASS = "br-section";
-	static SECTION_NEXT_ICON_CLASS = "br-section-next-icon";
-	static CURRENT_SECTION_CLASS = "current";
-
-	static create(route: string, index: IndexItem): HTMLElement {
-		const breadcrumb = uiComponent({
-			type: Html.Div,
-			id: this.ID,
-			classes: [BubbleUI.BoxRow, BubbleUI.BoxXStart, BubbleUI.BoxYCenter],
-		});
-
+	static create(papiro: Papiro, route: string): HTMLElement | null {
 		const sections = route.split("/");
-		if (2 > sections.length) {
-			breadcrumb.classList.add("hide");
-			return breadcrumb;
-		}
+		if (sections.length < 2) return null;
 
-		let currentRoute = "";
-		for (let i = 0; i < sections.length; i++) {
-			const isNotLastSection = i < sections.length - 1;
-			currentRoute += sections[i];
-			this.addSection(sections[i], currentRoute, isNotLastSection, breadcrumb);
-			if (isNotLastSection) currentRoute += "/";
-		}
-
-		return breadcrumb;
-	}
-
-	static addSection(
-		text: string,
-		route: string,
-		isNotLastSection: boolean,
-		parent: HTMLElement,
-	) {
-		const sectionLink = uiComponent({
-			type: Html.A,
-			text: PathService.decodeCustomUrl(text),
-			classes: [this.SECTION_CLASS],
-			attributes: {
-				href: PathService.getWikiViewRoute(route),
-			},
+		const breadcrumb = uiComponent({ type: "nav", classes: ["papiro-breadcrumb"] });
+		sections.forEach((section, i) => {
+			const sectionRoute = sections.slice(0, i + 1).join("/");
+			if (i == sections.length - 1) {
+				breadcrumb.appendChild(uiComponent({ type: "span", classes: ["current"], text: pageName(section) }));
+				return;
+			}
+			breadcrumb.appendChild(papiro.link({ view: "page", route: sectionRoute }, pageName(section)));
+			breadcrumb.appendChild(uiComponent({ type: "span", classes: ["separator"], text: icon("next", 14) }));
 		});
-		parent.appendChild(sectionLink);
-
-		if (isNotLastSection) {
-			const icon = getIcon(IconBundle.Material, MaterialIcons.Next);
-			icon.classList.add(
-				BubbleUI.BoxColumn,
-				BubbleUI.BoxCenter,
-				this.SECTION_NEXT_ICON_CLASS,
-			);
-			parent.appendChild(icon);
-		} else {
-			sectionLink.classList.add(this.CURRENT_SECTION_CLASS);
-		}
+		return breadcrumb;
 	}
 }

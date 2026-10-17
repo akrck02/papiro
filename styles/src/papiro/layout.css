@@ -1,0 +1,225 @@
+/* shell: bar on top (at the bottom on narrow places), menu and main below */
+.papiro .papiro-shell {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.papiro .papiro-body {
+	position: relative;
+	display: flex;
+	flex: 1;
+	min-height: 0;
+}
+
+/* the reading area is a container too: the side column depends on its width */
+.papiro .papiro-main {
+	container: papiro-main / inline-size;
+	position: relative;
+	flex: 1;
+	min-width: 0;
+	overflow: auto;
+}
+
+.papiro .papiro-view {
+	min-height: 100%;
+	animation: papiro-appear var(--speed) ease;
+}
+
+@keyframes papiro-appear {
+	from {
+		opacity: 0;
+	}
+}
+
+/* ---------- bar ---------- */
+.papiro .papiro-bar {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	flex: none;
+	height: var(--bar-height);
+	padding: 0 1.25rem;
+	border-bottom: 1px solid var(--line);
+	background: var(--background);
+}
+
+.papiro .papiro-title {
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	min-width: 15rem;
+	font-weight: 600;
+	color: var(--text-color);
+}
+
+.papiro .papiro-logo {
+	height: 1.4rem;
+}
+
+.papiro .papiro-search-trigger {
+	display: flex;
+	align-items: center;
+	flex: 0 1 26rem;
+	gap: 0.6rem;
+	height: 2.15rem;
+	margin-right: auto;
+	padding: 0 0.65rem;
+	border: 1px solid var(--line);
+	border-radius: 0.5rem;
+	background: var(--surface-2);
+	color: var(--text-faint);
+	font-size: 0.875rem;
+	text-align: left;
+	transition: border-color var(--speed);
+}
+
+.papiro .papiro-search-trigger:hover {
+	border-color: var(--text-faint);
+}
+
+.papiro .papiro-search-trigger span {
+	flex: 1;
+}
+
+.papiro .papiro-bar-buttons {
+	display: flex;
+	gap: 0.25rem;
+	margin-left: auto;
+}
+
+.papiro .papiro-bar-button {
+	display: grid;
+	place-items: center;
+	width: 2.15rem;
+	height: 2.15rem;
+	border-radius: 0.5rem;
+	color: var(--text-soft);
+	transition: background var(--speed);
+}
+
+.papiro .papiro-bar-button:hover {
+	background: var(--surface-1);
+	color: var(--text-color);
+}
+
+.papiro .papiro-narrow-only {
+	display: none;
+}
+
+/* ---------- menu ---------- */
+.papiro .papiro-menu {
+	flex: none;
+	width: 17.5rem;
+	height: 100%;
+	padding: 1.25rem 0.75rem;
+	overflow-y: auto;
+	background: var(--surface-1);
+	border-right: 1px solid var(--line);
+}
+
+.papiro .papiro-menu-title {
+	margin-bottom: 0.5rem;
+	padding: 0 0.6rem;
+	font-size: 0.7rem;
+	font-weight: 500;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--text-faint);
+}
+
+.papiro .papiro-menu-link {
+	position: relative;
+	display: flex;
+	align-items: center;
+	width: 100%;
+	margin-top: 0.1rem;
+	padding: 0.4rem 0.6rem;
+	border-radius: 0.45rem;
+	font-size: 0.875rem;
+	line-height: 1.4;
+	color: var(--text-soft);
+	text-align: left;
+	transition:
+		background var(--speed),
+		color var(--speed);
+}
+
+.papiro .papiro-menu-link:hover {
+	background: var(--surface-3);
+	color: var(--text-color);
+}
+
+.papiro .papiro-menu-link.selected {
+	background: var(--primary-soft);
+	color: var(--primary-color);
+	font-weight: 500;
+}
+
+.papiro .papiro-menu-link.selected::before {
+	content: "";
+	position: absolute;
+	left: -0.15rem;
+	top: 0.4rem;
+	bottom: 0.4rem;
+	width: 3px;
+	border-radius: 3px;
+	background: var(--primary-color);
+}
+
+.papiro .papiro-menu-folder > .papiro-menu-link span {
+	flex: 1;
+}
+
+.papiro .papiro-menu-folder > .papiro-menu-link svg {
+	color: var(--text-faint);
+	transition: transform var(--speed);
+}
+
+.papiro .papiro-menu-folder.closed > .papiro-menu-link svg {
+	transform: rotate(-90deg);
+}
+
+.papiro .papiro-menu-folder.closed > .papiro-menu-children {
+	display: none;
+}
+
+/* ---------- narrow places: phones, or a small embed ---------- */
+@container papiro (max-width: 899px) {
+	.papiro .papiro-shell {
+		flex-direction: column-reverse;
+	}
+
+	.papiro .papiro-bar {
+		border-bottom: none;
+		border-top: 1px solid var(--line);
+	}
+
+	.papiro .papiro-title {
+		min-width: 0;
+	}
+
+	.papiro .papiro-search-trigger {
+		display: none;
+	}
+
+	.papiro .papiro-narrow-only {
+		display: grid;
+	}
+
+	.papiro .papiro-menu {
+		position: absolute;
+		z-index: 9;
+		left: 0;
+		top: 0;
+		width: 86%;
+		max-width: 20rem;
+		transform: translateX(-100%);
+		transition: transform var(--speed) ease;
+		box-shadow: 0 0 2.5rem rgb(0 0 0 / 0.15);
+	}
+
+	.papiro .papiro-menu.open {
+		transform: none;
+	}
+}

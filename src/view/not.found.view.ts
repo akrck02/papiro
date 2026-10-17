@@ -1,57 +1,13 @@
-import { BubbleUI } from "../lib/bubble.js";
-import { setDomEvents, uiComponent } from "../lib/dom.js";
-import { Html } from "../lib/html.js";
-import { getIcon } from "../lib/icons.js";
-import { IconBundle, MaterialIcons } from "../model/enum/icons.js";
-import PathService from "../service/path.service.js";
+import Papiro from "../core/papiro.js";
+import { icon } from "../core/icons.js";
+import { uiComponent } from "../lib/dom.js";
 
-export default class NotFound {
-	static readonly id = "not-found";
-
-	static async show(params: string[], container: HTMLElement) {
-		const errorView = uiComponent({
-			type: Html.View,
-			id: NotFound.id,
-			classes: [BubbleUI.BoxColumn, BubbleUI.BoxCenter],
-			styles: {
-				height: "100%",
-				width: "100%",
-			},
-		});
-
-		const icon = getIcon(
-			IconBundle.Material,
-			MaterialIcons.Search,
-			"10rem",
-			"var(--surface-3)",
-		);
-		errorView.appendChild(icon);
-
-		const h1 = uiComponent({
-			type: Html.H1,
-			text: "Page not found",
-			styles: {
-				color: "var(--surface-3)",
-			},
-		});
-		errorView.appendChild(h1);
-
-		const homeButton = uiComponent({
-			type: Html.Button,
-			text: "Return home",
-			styles: {
-				marginTop: "1.5rem",
-				color: "var(--on-surface-2)",
-			},
-		});
-		errorView.appendChild(homeButton);
-
-		setDomEvents(homeButton, {
-			click: () => {
-				location.href = `${PathService.getWebUrl()}#`;
-			},
-		});
-
-		container.appendChild(errorView);
+export default class NotFoundView {
+	static show(papiro: Papiro, container: HTMLElement) {
+		const view = uiComponent({ classes: ["papiro-not-found"] });
+		view.appendChild(uiComponent({ text: icon("search", 64) }));
+		view.appendChild(uiComponent({ type: "h1", text: "Page not found" }));
+		view.appendChild(papiro.link({ view: "page", route: "" }, "Go to the first page"));
+		container.appendChild(view);
 	}
 }

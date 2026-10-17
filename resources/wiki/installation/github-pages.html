@@ -17,33 +17,32 @@
 <hr>
 
 <p>Create a <code>publish-docs.yaml</code> file inside the <code>.github/workflows</code> directory with the following configuration:</p>
-
-<pre><code class="language-yaml">name: Publish documents
-on:
-  push:
-    branches: [main]
-permissions:
-  contents: write
-jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v5
-      - uses: akrck02/papiro-deploy@main
-        with:
-          title: &quot;title&quot;              # your project title
-          description: &quot;description&quot;  # your project description
-          logo: &quot;./logo.svg&quot;          # your logo path (only svg for now)
-          path: &quot;./your-docs-path&quot;    # the file with your markdown documents
-          isObsidianProject: false    # if it is an obsidian project
-          showFooter: true            # if the footer of the page must be shown
-          showBreadcrumb: true        # if the breadcrumb of the page must be shown
-          showStartPage: true         # if the start page must be shown
-      - name: Deploy to github actions 🚀
-        uses: JamesIves/github-pages-deploy-action@v4 # please checkout and give a star to this amazing action.
-        with:
-          branch: gh-pages            # The branch the action should deploy to.
-          folder: .                   # The folder the action should deploy.
+<pre><code class="language-yaml"><span class="nt">name</span><span class="p">:</span> <span class="l">Publish documents</span>
+<span class="nt">on</span><span class="p">:</span>
+  <span class="nt">push</span><span class="p">:</span>
+    <span class="nt">branches</span><span class="p">:</span> <span class="p">[</span><span class="l">main]</span>
+<span class="nt">permissions</span><span class="p">:</span>
+  <span class="nt">contents</span><span class="p">:</span> <span class="l">write</span>
+<span class="nt">jobs</span><span class="p">:</span>
+  <span class="nt">build</span><span class="p">:</span>
+    <span class="nt">runs-on</span><span class="p">:</span> <span class="l">ubuntu-latest</span>
+    <span class="nt">steps</span><span class="p">:</span>
+      - <span class="nt">uses</span><span class="p">:</span> <span class="l">actions/checkout@v5</span>
+      - <span class="nt">uses</span><span class="p">:</span> <span class="l">akrck02/papiro-deploy@main</span>
+        <span class="nt">with</span><span class="p">:</span>
+          <span class="nt">title</span><span class="p">:</span> <span class="s2">&#34;title&#34;</span>              <span class="c"># your project title</span>
+          <span class="nt">description</span><span class="p">:</span> <span class="s2">&#34;description&#34;</span>  <span class="c"># your project description</span>
+          <span class="nt">logo</span><span class="p">:</span> <span class="s2">&#34;./logo.svg&#34;</span>          <span class="c"># your logo path (only svg for now)</span>
+          <span class="nt">path</span><span class="p">:</span> <span class="s2">&#34;./your-docs-path&#34;</span>    <span class="c"># the file with your markdown documents</span>
+          <span class="nt">isObsidianProject</span><span class="p">:</span> <span class="kc">false</span>    <span class="c"># if it is an obsidian project</span>
+          <span class="nt">showFooter</span><span class="p">:</span> <span class="kc">true</span>            <span class="c"># if the footer of the page must be shown</span>
+          <span class="nt">showBreadcrumb</span><span class="p">:</span> <span class="kc">true</span>        <span class="c"># if the breadcrumb of the page must be shown</span>
+          <span class="nt">showStartPage</span><span class="p">:</span> <span class="kc">true</span>         <span class="c"># if the start page must be shown</span>
+      - <span class="nt">name</span><span class="p">:</span> <span class="l">Deploy to github actions 🚀</span>
+        <span class="nt">uses</span><span class="p">:</span> <span class="l">JamesIves/github-pages-deploy-action@v4</span> <span class="c"># please checkout and give a star to this amazing action.</span>
+        <span class="nt">with</span><span class="p">:</span>
+          <span class="nt">branch</span><span class="p">:</span> <span class="l">gh-pages           </span> <span class="c"># The branch the action should deploy to.</span>
+          <span class="nt">folder</span><span class="p">:</span> <span class="l">.                  </span> <span class="c"># The folder the action should deploy.</span>
 </code></pre>
 
 <p>This workflow will download the latest version of papiro, convert and index your documents and deploy the website to a branch called gh-pages in your repository.</p>

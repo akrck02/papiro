@@ -1,9 +1,7 @@
+import { WikiColors, WikiGraph } from "../core/data.js";
+import Papiro, { THEME_EVENT } from "../core/papiro.js";
 import { uiComponent } from "../lib/dom.js";
-import { Html } from "../lib/html.js";
-import { connectToSignal } from "../lib/signals.js";
-import PathService from "../service/path.service.js";
-import { THEME_CHANGED_SIGNAL } from "../service/theme.js";
-import { WikiGraph } from "../service/wiki.service.js";
+import { graphName } from "./names.js";
 
 type GraphNode = {
 	route: string;
@@ -33,7 +31,7 @@ type CanvasOptions = {
  * simulation and drawn on a canvas with the theme colours.
  */
 export default class Graph {
-	static readonly LOCAL_CLASS = "local-graph";
+	static readonly LOCAL_CLASS = "papiro-local-graph";
 	static readonly LOCAL_SIZE = 220;
 	static readonly LOCAL_MIN_NODES = 6;
 	static readonly LOCAL_MAX_NODES = 40;
@@ -44,9 +42,10 @@ export default class Graph {
 	 * and their neighbours when there are few
 	 */
 	static createLocal(
+		papiro: Papiro,
 		route: string,
 		graph: WikiGraph,
-		colors: { [route: string]: string } = {},
+		colors: WikiColors = {},
 	): HTMLElement {
 		if (undefined == graph[route]) return undefined;
 
@@ -63,13 +62,11 @@ export default class Graph {
 		const { nodes, edges } = this.layout(routes, graph, true, colors);
 		const container = uiComponent({ classes: [this.LOCAL_CLASS] });
 
-		const header = uiComponent({
-			classes: ["local-graph-header"],
-			text: `<p>Linked pages</p><a href="${PathService.getWebUrl()}#/graph">Open graph</a>`,
-		});
+		const header = uiComponent({ classes: ["papiro-local-graph-header"], text: "<p>Linked pages</p>" });
+		if (papiro.options.graph) header.appendChild(papiro.link({ view: "graph" }, "Open graph"));
 		container.appendChild(header);
 
-		const canvas = this.canvas(nodes, edges, {
+		const canvas = this.canvas(papiro, nodes, edges, {
 			current: nodes[0],
 			labelsUpTo: 5,
 			interactive: false,
@@ -79,7 +76,7 @@ export default class Graph {
 
 		if (1 == nodes.length) {
 			container.appendChild(
-				uiComponent({ type: Html.Span, text: "No links to other pages yet." }),
+				uiComponent({ type: "span", text: "No links to other pages yet." }),
 			);
 		}
 
@@ -90,12 +87,13 @@ export default class Graph {
 	 * Every page of the wiki
 	 */
 	static createGlobal(
+		papiro: Papiro,
 		graph: WikiGraph,
-		colors: { [route: string]: string } = {},
+		colors: WikiColors = {},
 	): HTMLCanvasElement {
 		const routes = Object.keys(graph).sort();
 		const { nodes, edges } = this.layout(routes, graph, false, colors);
-		return this.canvas(nodes, edges, { labelsUpTo: 12, interactive: true });
+		return this.canvas(papiro, nodes, edges, { labelsUpTo: 12, interactive: true });
 	}
 
 	/** Set the drawing size of a graph canvas */
@@ -120,7 +118,7 @@ export default class Graph {
 		routes: string[],
 		graph: WikiGraph,
 		anchorFirst: boolean,
-		colors: { [route: string]: string },
+		colors: WikiColors,
 	): { nodes: GraphNode[]; edges: GraphEdge[] } {
 		// start on a spiral so the result is the same on every visit
 		const nodes: GraphNode[] = routes.map((route, i) => {
@@ -128,7 +126,7 @@ export default class Graph {
 			const radius = anchorFirst && 0 == i ? 0 : 20 * Math.sqrt(i + 1);
 			return {
 				route: route,
-				name: this.pageName(route),
+				name: graphName(route),
 				color: colors[route],
 				links: this.neighbours(route, graph).length,
 				x: radius * Math.cos(angle),
@@ -240,6 +238,7 @@ export default class Graph {
 	}
 
 	private static canvas(
+		papiro: Papiro,
 		nodes: GraphNode[],
 		edges: GraphEdge[],
 		options: CanvasOptions,
@@ -276,7 +275,7 @@ export default class Graph {
 
 		const render = () => {
 			if (0 == width) return;
-			const style = getComputedStyle(document.documentElement);
+			const style = getComputedStyle(papiro.root);
 			const color = (name: string) => style.getPropertyValue(name).trim();
 			const font = color("--font") || "sans-serif";
 			const ratio = window.devicePixelRatio || 1;
@@ -458,23 +457,19 @@ export default class Graph {
 			if (dragged) return;
 			const node = nodeAt(event);
 			if (undefined == node || node == options.current) return;
-			location.href = PathService.getWikiViewRoute(node.route);
+			papiro.navigate({ view: "page", route: node.route });
 		});
 
-		connectToSignal(THEME_CHANGED_SIGNAL, async () => render());
+		// redraw with the colours of the new theme while it is shown
+		const onTheme = () => {
+			if (canvas.isConnected) render();
+			else papiro.root.removeEventListener(THEME_EVENT, onTheme);
+		};
+		papiro.root.addEventListener(THEME_EVENT, onTheme);
 		document.fonts?.ready.then(render);
 		return canvas;
 	}
 
-	/**
-	 * The page name, a readme takes the name of its folder
-	 */
-	private static pageName(route: string): string {
-		const sections = route.split("/");
-		let name = sections.pop();
-		if ("readme" == name && 0 < sections.length) name = sections.pop();
-		return PathService.getPascalCase(PathService.decodeCustomUrl(name));
-	}
 
 	private static shorten(name: string): string {
 		return name.length > 22 ? `${name.substring(0, 21)}…` : name;

@@ -15,8 +15,28 @@ jobs:
       - name: Transpile typescript and minify the js
         run: ./bin/esbuild ./src/start.ts --bundle --minify --tsconfig=tsconfig.json --target=chrome90,firefox90,safari15,edge90 --outfile=./scripts/start.js
 
+      - name: Build the library
+        run: |
+          mkdir -p "$RUNNER_TEMP/lib"
+          ./bin/esbuild ./src/papiro.ts --bundle --format=esm --minify --tsconfig=tsconfig.json --target=chrome90,firefox90,safari15,edge90 --outfile="$RUNNER_TEMP/lib/papiro.js"
+          ./bin/lit -f styles-lib.env
+          cp dist/papiro.css "$RUNNER_TEMP/lib/papiro.css"
+          cp docs/embedding.md "$RUNNER_TEMP/lib/README.md"
+          cp LICENSE "$RUNNER_TEMP/lib/"
+
+      # jsDelivr serves the lib branch: cdn.jsdelivr.net/gh/akrck02/papiro@lib/papiro.js
+      - name: Publish the library branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd "$RUNNER_TEMP/lib"
+          git init -q -b lib
+          git add .
+          git -c user.name="github-actions" -c user.email="github-actions@users.noreply.github.com" commit -qm "Papiro library from ${GITHUB_SHA::7}"
+          git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" lib
+
       - name: Remove innecesary files and directories
-        run: rm -rf docs design resources/readme .gitignore styles/src src bin/lit bin/esbuild bin/install-ts.sh styles.env tsconfig.json .github README.md server-n-cache.py package-lock.json .git
+        run: rm -rf docs design examples dist styles-lib.env resources/readme .gitignore styles/src src bin/lit bin/esbuild bin/install-ts.sh styles.env tsconfig.json .github README.md server-n-cache.py package-lock.json .git
 
       - name: Create directories
         run: mkdir -p styles/src
@@ -41,7 +61,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           gh release delete latest --cleanup-tag --yes || true
-          gh release create latest artefacts/papiro-latest.tar.gz --title "v1.0.0 - beta" --notes "Latest papiro build." --latest
+          gh release create latest artefacts/papiro-latest.tar.gz "$RUNNER_TEMP/lib/papiro.js" "$RUNNER_TEMP/lib/papiro.css" --title "v1.0.0 - beta" --notes "Latest papiro build." --latest
   publish-docs:
     runs-on: ubuntu-latest
     needs: build

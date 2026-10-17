@@ -1,4 +1,3 @@
-import PathService from "./path.service.js";
 
 export default class StringService {
 	static readonly DEFAULT_TOLERANCE = 2;
@@ -64,7 +63,7 @@ export default class StringService {
 		query: string,
 		tolerance: number,
 	): boolean {
-		text = PathService.decodeCustomUrl(
+		text = decodeRoute(
 			StringService.normalized(text.trim().replaceAll(" ", "").toUpperCase()),
 		).toUpperCase();
 		query = StringService.normalized(
@@ -228,4 +227,9 @@ export default class StringService {
 
 		return text;
 	}
+}
+
+/** the words of a route section: dashes are spaces */
+function decodeRoute(text: string): string {
+	return text.replaceAll("-", " ").toLocaleLowerCase();
 }

@@ -1,0 +1,116 @@
+/* the palette covers the papiro element, dimming the rest of it */
+.papiro .papiro-search {
+	position: absolute;
+	inset: 0;
+	z-index: 20;
+	display: flex;
+	justify-content: center;
+	align-items: flex-start;
+	padding-top: 12vh;
+	background: rgb(20 20 18 / 0.35);
+}
+
+.papiro .papiro-search.hidden {
+	display: none;
+}
+
+.papiro .papiro-search-palette {
+	display: flex;
+	flex-direction: column;
+	width: min(37.5rem, 92%);
+	max-height: 70%;
+	border-radius: 0.875rem;
+	border: 1px solid var(--line);
+	background: var(--surface-2);
+	box-shadow: 0 1.5rem 3.75rem rgb(0 0 0 / 0.18);
+	overflow: hidden;
+}
+
+.papiro .papiro-search-toolbar {
+	display: flex;
+	align-items: center;
+	padding-right: 0.5rem;
+	border-bottom: 1px solid var(--line);
+}
+
+.papiro .papiro-search-toolbar input {
+	flex: 1;
+	height: 3.4rem;
+	padding: 0 1.1rem;
+	border: none;
+	background: transparent;
+	color: var(--text-color);
+	font: 1.05rem var(--font);
+	outline: none;
+}
+
+.papiro .papiro-search-toolbar button {
+	padding: 0.4rem;
+	border-radius: 0.5rem;
+	color: var(--text-faint);
+}
+
+.papiro .papiro-search-toolbar button:hover {
+	color: var(--primary-color);
+}
+
+.papiro .papiro-search-results {
+	flex: 1;
+	padding: 0.5rem;
+	overflow-y: auto;
+}
+
+.papiro .papiro-search-results p {
+	padding: 0.75rem;
+	font-size: 0.9rem;
+	color: var(--text-faint);
+}
+
+.papiro .papiro-search-results a {
+	display: block;
+	padding: 0.6rem 0.75rem;
+	border-radius: 0.5rem;
+	color: var(--text-color);
+	outline: none;
+}
+
+.papiro .papiro-search-results a b {
+	display: block;
+	font-weight: 500;
+}
+
+.papiro .papiro-search-results a span {
+	font-size: 0.8rem;
+	color: var(--text-faint);
+}
+
+.papiro .papiro-search-results a.selected {
+	background: var(--primary-soft);
+}
+
+.papiro .papiro-search-hints {
+	display: flex;
+	gap: 0.9rem;
+	padding: 0.6rem 1rem;
+	border-top: 1px solid var(--line);
+	font-size: 0.75rem;
+	color: var(--text-faint);
+}
+
+@container papiro (max-width: 899px) {
+	.papiro .papiro-search {
+		padding-top: 0;
+	}
+
+	.papiro .papiro-search-palette {
+		width: 100%;
+		max-height: 100%;
+		height: 100%;
+		border-radius: 0;
+		border: none;
+	}
+
+	.papiro .papiro-search-hints {
+		display: none;
+	}
+}

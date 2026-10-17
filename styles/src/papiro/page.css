@@ -1,0 +1,193 @@
+.papiro .papiro-page {
+	display: grid;
+	grid-template-columns: minmax(0, 42.5rem) 13.75rem;
+	justify-content: start;
+	gap: 3rem;
+	max-width: 68.75rem;
+	padding: 2.5rem 3rem 3rem 3rem;
+}
+
+.papiro .papiro-page article {
+	min-width: 0;
+}
+
+/* the page layout (help inside an app) has no side column */
+.papiro[data-layout="page"] .papiro-page {
+	grid-template-columns: minmax(0, 1fr);
+	padding: 1.5rem;
+}
+
+.papiro[data-layout="page"] .papiro-side:empty {
+	display: none;
+}
+
+.papiro .papiro-breadcrumb {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.35rem;
+	margin-bottom: 1.1rem;
+	font-size: 0.8rem;
+	color: var(--text-faint);
+}
+
+.papiro .papiro-breadcrumb a {
+	color: var(--text-soft);
+}
+
+.papiro .papiro-breadcrumb a:hover {
+	text-decoration: underline;
+	text-underline-offset: 3px;
+}
+
+.papiro .papiro-breadcrumb .separator {
+	color: var(--text-faint);
+}
+
+.papiro .papiro-page-meta {
+	margin: 0 0 2rem 0 !important;
+	font: 0.8rem var(--font);
+	color: var(--text-faint);
+}
+
+/* ---------- side column: index and local graph ---------- */
+.papiro .papiro-side {
+	position: sticky;
+	top: 2.5rem;
+	align-self: start;
+	font-size: 0.8rem;
+}
+
+.papiro .papiro-toc > p,
+.papiro .papiro-local-graph-header p {
+	font-size: 0.7rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--text-faint);
+}
+
+.papiro .papiro-toc ul {
+	margin-top: 0.5rem;
+	list-style: none;
+	border-left: 1px solid var(--line);
+}
+
+.papiro .papiro-toc a {
+	display: block;
+	margin-left: -1px;
+	padding: 0.25rem 0.75rem;
+	border-left: 2px solid transparent;
+	color: var(--text-soft);
+	line-height: 1.4;
+}
+
+.papiro .papiro-toc a.level-3 {
+	padding-left: 1.5rem;
+}
+
+.papiro .papiro-toc a:hover {
+	color: var(--text-color);
+}
+
+.papiro .papiro-toc a.on {
+	color: var(--primary-color);
+	border-left-color: var(--primary-color);
+}
+
+.papiro .papiro-local-graph {
+	margin-top: 2rem;
+}
+
+.papiro .papiro-toc:empty + .papiro-local-graph,
+.papiro .papiro-side > .papiro-local-graph:first-child {
+	margin-top: 0;
+}
+
+.papiro article .papiro-local-graph {
+	margin-top: 3rem;
+}
+
+.papiro .papiro-local-graph-header {
+	display: flex;
+	align-items: baseline;
+	justify-content: space-between;
+	font-size: 0.7rem;
+}
+
+.papiro .papiro-local-graph canvas {
+	display: block;
+	margin-top: 0.5rem;
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	background: var(--surface-2);
+}
+
+.papiro .papiro-local-graph > span {
+	display: block;
+	margin-top: 0.4rem;
+	font-size: 0.75rem;
+	color: var(--text-faint);
+}
+
+/* ---------- previous / next ---------- */
+.papiro .papiro-pager {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 0.75rem;
+	margin-top: 3.5rem;
+	padding-top: 1.5rem;
+	border-top: 1px solid var(--line);
+}
+
+.papiro .papiro-pager a {
+	padding: 0.85rem 1rem;
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	background: var(--surface-2);
+	color: var(--text-color);
+	transition:
+		border-color var(--speed),
+		transform var(--speed);
+}
+
+.papiro .papiro-pager a:hover {
+	border-color: var(--primary-color);
+	transform: translateY(-1px);
+}
+
+.papiro .papiro-pager a.next {
+	grid-column: 2;
+	text-align: right;
+}
+
+.papiro .papiro-pager small {
+	display: block;
+	margin-bottom: 0.15rem;
+	font-size: 0.75rem;
+	color: var(--text-faint);
+}
+
+.papiro .papiro-footer {
+	margin-top: 3rem;
+	padding-top: 1.25rem;
+	border-top: 1px solid var(--line);
+	font-size: 0.8rem;
+	color: var(--text-faint);
+}
+
+/* no room for the side column next to the text */
+@container papiro-main (max-width: 960px) {
+	.papiro .papiro-page {
+		grid-template-columns: minmax(0, 42.5rem);
+	}
+
+	.papiro .papiro-side {
+		display: none;
+	}
+}
+
+@container papiro-main (max-width: 640px) {
+	.papiro .papiro-page {
+		padding: 1.5rem 1.25rem 2rem 1.25rem;
+	}
+}

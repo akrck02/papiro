@@ -1,0 +1,94 @@
+/* ---------- graph ---------- */
+.papiro .papiro-graph {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	position: absolute;
+	inset: 0;
+	overflow: hidden;
+}
+
+.papiro .papiro-graph-header {
+	padding: 1.5rem 2rem 0.75rem 2rem;
+}
+
+.papiro .papiro-graph-header h1 {
+	font: 600 1.5rem var(--font-title);
+	color: var(--text-color);
+}
+
+.papiro .papiro-graph-header p,
+.papiro .papiro-graph-empty {
+	margin-top: 0.25rem;
+	font-size: 0.8rem;
+	color: var(--text-faint);
+}
+
+.papiro .papiro-graph-empty {
+	padding: 0 2rem;
+}
+
+.papiro .papiro-graph canvas {
+	display: block;
+	cursor: grab;
+}
+
+/* the graph layout is only the drawing */
+.papiro[data-layout="graph"] .papiro-graph-header {
+	display: none;
+}
+
+/* ---------- start page ---------- */
+.papiro .papiro-home {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+	min-height: 100%;
+	padding: 3rem 1.5rem;
+	text-align: center;
+}
+
+.papiro .papiro-home h1 {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	font: 600 clamp(2.5rem, 8cqi, 5rem) / 1.1 var(--font-title);
+}
+
+.papiro .papiro-home h1 img {
+	height: 1em;
+}
+
+.papiro .papiro-home p {
+	font-size: 1.1rem;
+	color: var(--text-soft);
+}
+
+.papiro .papiro-home-start {
+	margin-top: 1.5rem;
+	padding: 0.8rem 1.6rem;
+	border-radius: 99rem;
+	background: var(--primary-soft);
+	color: var(--primary-color);
+	font-weight: 500;
+}
+
+/* ---------- not found ---------- */
+.papiro .papiro-not-found {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 1rem;
+	min-height: 100%;
+	padding: 3rem;
+	color: var(--text-faint);
+	text-align: center;
+}
+
+.papiro .papiro-not-found h1 {
+	font-size: 1.5rem;
+	color: var(--text-soft);
+}
