@@ -139,13 +139,14 @@ export default class WikiView {
    */
   private static async addLocalGraph(aside: HTMLElement, route: string) {
     const graph = await WikiService.loadGraph();
+    const colors = await WikiService.loadGraphColors();
     if ("" == route.trim()) {
       const routes: string[] = [];
       WikiView.collectRoutes(WikiService.index, "", routes);
       route = routes[0] ?? "";
     }
 
-    const localGraph = Graph.createLocal(route.toLowerCase(), graph);
+    const localGraph = Graph.createLocal(route.toLowerCase(), graph, colors);
     if (undefined != localGraph) aside.appendChild(localGraph);
   }
 

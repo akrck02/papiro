@@ -34,7 +34,8 @@ export default class GraphView {
 			return;
 		}
 
-		const canvas = Graph.createGlobal(graph);
+		const colors = await WikiService.loadGraphColors();
+		const canvas = Graph.createGlobal(graph, colors);
 		view.appendChild(canvas);
 
 		// fill the space left under the header

@@ -8,6 +8,8 @@ import { WikiGraph } from "../service/wiki.service.js";
 type GraphNode = {
 	route: string;
 	name: string;
+	/** colour of its obsidian graph group */
+	color?: string;
 	links: number;
 	x: number;
 	y: number;
@@ -41,7 +43,11 @@ export default class Graph {
 	 * The page, the pages it links to or is linked from,
 	 * and their neighbours when there are few
 	 */
-	static createLocal(route: string, graph: WikiGraph): HTMLElement {
+	static createLocal(
+		route: string,
+		graph: WikiGraph,
+		colors: { [route: string]: string } = {},
+	): HTMLElement {
 		if (undefined == graph[route]) return undefined;
 
 		const routes = [route];
@@ -54,7 +60,7 @@ export default class Graph {
 			[...routes].forEach((r) => this.neighbours(r, graph).forEach(add));
 		}
 
-		const { nodes, edges } = this.layout(routes, graph, true);
+		const { nodes, edges } = this.layout(routes, graph, true, colors);
 		const container = uiComponent({ classes: [this.LOCAL_CLASS] });
 
 		const header = uiComponent({
@@ -83,9 +89,12 @@ export default class Graph {
 	/**
 	 * Every page of the wiki
 	 */
-	static createGlobal(graph: WikiGraph): HTMLCanvasElement {
+	static createGlobal(
+		graph: WikiGraph,
+		colors: { [route: string]: string } = {},
+	): HTMLCanvasElement {
 		const routes = Object.keys(graph).sort();
-		const { nodes, edges } = this.layout(routes, graph, false);
+		const { nodes, edges } = this.layout(routes, graph, false, colors);
 		return this.canvas(nodes, edges, { labelsUpTo: 12, interactive: true });
 	}
 
@@ -111,6 +120,7 @@ export default class Graph {
 		routes: string[],
 		graph: WikiGraph,
 		anchorFirst: boolean,
+		colors: { [route: string]: string },
 	): { nodes: GraphNode[]; edges: GraphEdge[] } {
 		// start on a spiral so the result is the same on every visit
 		const nodes: GraphNode[] = routes.map((route, i) => {
@@ -119,6 +129,7 @@ export default class Graph {
 			return {
 				route: route,
 				name: this.pageName(route),
+				color: colors[route],
 				links: this.neighbours(route, graph).length,
 				x: radius * Math.cos(angle),
 				y: radius * Math.sin(angle),
@@ -136,43 +147,72 @@ export default class Graph {
 			}
 		}
 
-		const repulsion = 900;
-		const spring = 0.05;
-		const length = 55;
-		const gravity = 0.01;
-		const damping = 0.85;
+		// the d3-force model: the forces weaken as the "temperature" (alpha)
+		// cools down, so the layout settles into clusters
+		const count = new Map<GraphNode, number>(nodes.map((n) => [n, 0]));
+		for (const edge of edges) {
+			count.set(edge.from, count.get(edge.from) + 1);
+			count.set(edge.to, count.get(edge.to) + 1);
+		}
+
+		// pages without links do not take part, they go around the graph later
+		const orphans = nodes.filter((n) => 0 == count.get(n) && !(anchorFirst && n == nodes[0]));
+		const linked = nodes.filter((n) => !orphans.includes(n));
+
+		const linkDistance = 45;
+		const charge = -110;
+		const minDistance2 = 1;
+		const gravity = 0.06;
+		const velocityDecay = 0.6;
+		const alphaMin = 0.001;
+		const alphaDecay = 1 - Math.pow(alphaMin, 1 / this.STEPS);
+		let alpha = 1;
 
 		for (let step = 0; step < this.STEPS; step++) {
-			for (let i = 0; i < nodes.length; i++) {
-				for (let j = i + 1; j < nodes.length; j++) {
-					const a = nodes[i];
-					const b = nodes[j];
-					const dx = a.x - b.x || 0.01;
-					const dy = a.y - b.y || 0.01;
-					const distance2 = Math.max(dx * dx + dy * dy, 1);
-					const distance = Math.sqrt(distance2);
-					const force = repulsion / distance2;
-					a.vx += (dx / distance) * force;
-					a.vy += (dy / distance) * force;
-					b.vx -= (dx / distance) * force;
-					b.vy -= (dy / distance) * force;
+			alpha += -alpha * alphaDecay;
+
+			// links pull, weaker on pages with many links so hubs do not collapse
+			for (const edge of edges) {
+				const source = edge.from;
+				const target = edge.to;
+				let x = target.x + target.vx - source.x - source.vx || 1e-6;
+				let y = target.y + target.vy - source.y - source.vy || 1e-6;
+				let length = Math.sqrt(x * x + y * y);
+				const strength = 1 / Math.min(count.get(source), count.get(target));
+				length = ((length - linkDistance) / length) * alpha * strength;
+				x *= length;
+				y *= length;
+				const bias =
+					count.get(source) / (count.get(source) + count.get(target));
+				target.vx -= x * bias;
+				target.vy -= y * bias;
+				source.vx += x * (1 - bias);
+				source.vy += y * (1 - bias);
+			}
+
+			// every page pushes the others away
+			for (let i = 0; i < linked.length; i++) {
+				for (let j = i + 1; j < linked.length; j++) {
+					const a = linked[i];
+					const b = linked[j];
+					const x = b.x - a.x || 1e-6;
+					const y = b.y - a.y || 1e-6;
+					let length2 = x * x + y * y;
+					if (length2 < minDistance2) length2 = Math.sqrt(minDistance2 * length2);
+					const weight = (charge * alpha) / length2;
+					a.vx += x * weight;
+					a.vy += y * weight;
+					b.vx -= x * weight;
+					b.vy -= y * weight;
 				}
 			}
 
-			for (const edge of edges) {
-				const dx = edge.to.x - edge.from.x;
-				const dy = edge.to.y - edge.from.y;
-				const distance = Math.max(Math.sqrt(dx * dx + dy * dy), 0.01);
-				const force = (distance - length) * spring;
-				edge.from.vx += (dx / distance) * force;
-				edge.from.vy += (dy / distance) * force;
-				edge.to.vx -= (dx / distance) * force;
-				edge.to.vy -= (dy / distance) * force;
-			}
-
-			for (const node of nodes) {
-				node.vx = (node.vx - node.x * gravity) * damping;
-				node.vy = (node.vy - node.y * gravity) * damping;
+			// a soft pull to the centre keeps the groups together
+			for (const node of linked) {
+				node.vx -= node.x * gravity * alpha;
+				node.vy -= node.y * gravity * alpha;
+				node.vx *= velocityDecay;
+				node.vy *= velocityDecay;
 				node.x += node.vx;
 				node.y += node.vy;
 			}
@@ -181,6 +221,19 @@ export default class Graph {
 				nodes[0].x = 0;
 				nodes[0].y = 0;
 			}
+		}
+
+		// pages without links on a ring just around the graph, as in obsidian
+		if (0 < orphans.length) {
+			// most of the graph, a far small group must not push the ring away
+			const distances = linked.map((n) => Math.hypot(n.x, n.y)).sort((a, b) => a - b);
+			const extent = distances[Math.floor(distances.length * 0.9)] ?? 0;
+			const radius = Math.max(extent + 40, (orphans.length * 18) / (2 * Math.PI));
+			orphans.forEach((node, i) => {
+				const angle = (2 * Math.PI * i) / orphans.length;
+				node.x = radius * Math.cos(angle);
+				node.y = radius * Math.sin(angle);
+			});
 		}
 
 		return { nodes, edges };
@@ -216,8 +269,10 @@ export default class Graph {
 			x: width / 2 + offsetX + n.x * scale(),
 			y: height / 2 + offsetY + n.y * scale(),
 		});
+		// pages grow with their links, and a little with the zoom
 		const radius = (n: GraphNode) =>
-			n == options.current ? 6 : Math.min(2.5 + Math.sqrt(n.links), 7);
+			(n == options.current ? 6 : Math.min(3 + Math.sqrt(n.links) * 1.2, 10)) *
+			Math.min(Math.max(Math.sqrt(zoom), 0.7), 1.8);
 
 		const render = () => {
 			if (0 == width) return;
@@ -238,7 +293,7 @@ export default class Graph {
 				const active =
 					undefined != hovered && (edge.from == hovered || edge.to == hovered);
 				context.globalAlpha = undefined == hovered || active ? 1 : 0.35;
-				context.strokeStyle = active ? color("--primary-color") : color("--line");
+				context.strokeStyle = active ? color("--graph-focus") : color("--graph-line");
 				context.lineWidth = active ? 1.5 : 1;
 				context.beginPath();
 				context.moveTo(from.x, from.y);
@@ -246,26 +301,57 @@ export default class Graph {
 				context.stroke();
 			}
 
-			const showAllLabels = nodes.length <= options.labelsUpTo || zoom >= 1.8;
+			// names fade in while zooming in, as in obsidian
+			const labelsAlpha =
+				nodes.length <= options.labelsUpTo
+					? 1
+					: Math.min(Math.max((zoom - 1.2) / 0.8, 0), 1);
 			for (const node of nodes) {
 				const point = toScreen(node);
+
+				// out of sight: neither the page nor its name
+				const margin = radius(node) + 2;
+				if (
+					point.x < -margin ||
+					point.y < -margin ||
+					point.x > width + margin ||
+					point.y > height + margin
+				)
+					continue;
+
 				const highlighted = node == options.current || node == hovered;
 				context.globalAlpha = isNear(node) ? 1 : 0.3;
-				context.fillStyle = highlighted
-					? color("--primary-color")
-					: color("--text-faint");
+				// a group colour stays, a ring marks the current and hovered page
+				context.fillStyle =
+					node.color ??
+					(highlighted ? color("--graph-focus") : color("--graph-node"));
 				context.beginPath();
 				context.arc(point.x, point.y, radius(node), 0, 2 * Math.PI);
 				context.fill();
+				if (highlighted && undefined != node.color) {
+					context.strokeStyle = color("--graph-focus");
+					context.lineWidth = 2;
+					context.beginPath();
+					context.arc(point.x, point.y, radius(node) + 2.5, 0, 2 * Math.PI);
+					context.stroke();
+				}
 
-				if (showAllLabels || highlighted) {
+				// the hovered page names its neighbours too
+				const named =
+					highlighted || (undefined != hovered && neighbours.get(hovered).has(node));
+				const alpha = named ? 1 : labelsAlpha * (isNear(node) ? 1 : 0.3);
+				if (0 < alpha) {
+					context.globalAlpha = alpha;
 					context.font = `${highlighted ? 600 : 400} 10.5px ${font}`;
-					context.fillStyle =
-						node == hovered ? color("--text-color") : color("--text-soft");
+					context.fillStyle = color("--graph-text");
 					context.textAlign = "center";
 					context.fillText(
 						this.shorten(node.name),
-						Math.min(Math.max(point.x, 40), width - 40),
+						// the small local graph keeps names inside, the big one
+						// lets them leave with their page
+						options.interactive
+							? point.x
+							: Math.min(Math.max(point.x, 40), width - 40),
 						point.y + radius(node) + 12,
 					);
 				}
