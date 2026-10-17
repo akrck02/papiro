@@ -87,6 +87,11 @@ export default class Search {
 		});
 		this.instance.appendChild(this.resultContainer);
 
+		// one selection: the keyboard focus, or the result under the mouse
+		this.resultContainer.addEventListener("focusin", (e) =>
+			Search.select(e.target as HTMLAnchorElement),
+		);
+
 		const hints = uiComponent({
 			id: "search-hints",
 			classes: [BubbleUI.BoxRow, BubbleUI.BoxYCenter],
@@ -216,6 +221,13 @@ export default class Search {
 			},
 		});
 
+		selectable.addEventListener("mouseenter", () => {
+			Search.selectionIndex = Search.results.indexOf(
+				selectable as HTMLAnchorElement,
+			);
+			Search.select(selectable as HTMLAnchorElement);
+		});
+
 		selectable.onclick = () => {
 			Search.selectionIndex = 0;
 			Search.exit();
@@ -333,6 +345,14 @@ export default class Search {
 	 */
 	private static queryMatches(value: string, query: string): boolean {
 		return StringService.search(value, query);
+	}
+
+	/**
+	 * Mark a result as the selected one
+	 */
+	private static select(result: HTMLAnchorElement) {
+		for (const item of this.results)
+			item.classList.toggle("selected", item == result);
 	}
 
 	/**
