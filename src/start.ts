@@ -51,8 +51,9 @@ window.onload = async function () {
 		Theme.setLight();
 	}
 
-	if (getConfiguration("font") == "system") Font.setSystem();
-	else Font.setPapiro();
+	// system-ui unless papiro fonts were chosen
+	if (Font.isPapiroChosen()) Font.setPapiro();
+	else Font.setSystem();
 
 	GlobalShortcuts.set({
 		interaction: KeyInteraction.keyUp,
