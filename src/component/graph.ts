@@ -147,43 +147,70 @@ export default class Graph {
 			}
 		}
 
-		const repulsion = 900;
-		const spring = 0.05;
-		const length = 55;
-		const gravity = 0.01;
-		const damping = 0.85;
+		// the d3-force model: the forces weaken as the "temperature" (alpha)
+		// cools down, so the layout settles into clusters
+		const count = new Map<GraphNode, number>(nodes.map((n) => [n, 0]));
+		for (const edge of edges) {
+			count.set(edge.from, count.get(edge.from) + 1);
+			count.set(edge.to, count.get(edge.to) + 1);
+		}
+
+		const linkDistance = 45;
+		const charge = -110;
+		const minDistance2 = 1;
+		const gravity = 0.06;
+		const velocityDecay = 0.6;
+		const alphaMin = 0.001;
+		const alphaDecay = 1 - Math.pow(alphaMin, 1 / this.STEPS);
+		let alpha = 1;
 
 		for (let step = 0; step < this.STEPS; step++) {
+			alpha += -alpha * alphaDecay;
+
+			// links pull, weaker on pages with many links so hubs do not collapse
+			for (const edge of edges) {
+				const source = edge.from;
+				const target = edge.to;
+				let x = target.x + target.vx - source.x - source.vx || 1e-6;
+				let y = target.y + target.vy - source.y - source.vy || 1e-6;
+				let length = Math.sqrt(x * x + y * y);
+				const strength = 1 / Math.min(count.get(source), count.get(target));
+				length = ((length - linkDistance) / length) * alpha * strength;
+				x *= length;
+				y *= length;
+				const bias =
+					count.get(source) / (count.get(source) + count.get(target));
+				target.vx -= x * bias;
+				target.vy -= y * bias;
+				source.vx += x * (1 - bias);
+				source.vy += y * (1 - bias);
+			}
+
+			// every page pushes the others away
 			for (let i = 0; i < nodes.length; i++) {
 				for (let j = i + 1; j < nodes.length; j++) {
 					const a = nodes[i];
 					const b = nodes[j];
-					const dx = a.x - b.x || 0.01;
-					const dy = a.y - b.y || 0.01;
-					const distance2 = Math.max(dx * dx + dy * dy, 1);
-					const distance = Math.sqrt(distance2);
-					const force = repulsion / distance2;
-					a.vx += (dx / distance) * force;
-					a.vy += (dy / distance) * force;
-					b.vx -= (dx / distance) * force;
-					b.vy -= (dy / distance) * force;
+					const x = b.x - a.x || 1e-6;
+					const y = b.y - a.y || 1e-6;
+					let length2 = x * x + y * y;
+					if (length2 < minDistance2) length2 = Math.sqrt(minDistance2 * length2);
+					const weight = (charge * alpha) / length2;
+					a.vx += x * weight;
+					a.vy += y * weight;
+					b.vx -= x * weight;
+					b.vy -= y * weight;
 				}
 			}
 
-			for (const edge of edges) {
-				const dx = edge.to.x - edge.from.x;
-				const dy = edge.to.y - edge.from.y;
-				const distance = Math.max(Math.sqrt(dx * dx + dy * dy), 0.01);
-				const force = (distance - length) * spring;
-				edge.from.vx += (dx / distance) * force;
-				edge.from.vy += (dy / distance) * force;
-				edge.to.vx -= (dx / distance) * force;
-				edge.to.vy -= (dy / distance) * force;
-			}
-
+			// a soft pull to the centre keeps loose pages close,
+			// a stronger one for pages without links
 			for (const node of nodes) {
-				node.vx = (node.vx - node.x * gravity) * damping;
-				node.vy = (node.vy - node.y * gravity) * damping;
+				const pull = 0 == count.get(node) ? gravity * 3 : gravity;
+				node.vx -= node.x * pull * alpha;
+				node.vy -= node.y * pull * alpha;
+				node.vx *= velocityDecay;
+				node.vy *= velocityDecay;
 				node.x += node.vx;
 				node.y += node.vy;
 			}
@@ -227,8 +254,10 @@ export default class Graph {
 			x: width / 2 + offsetX + n.x * scale(),
 			y: height / 2 + offsetY + n.y * scale(),
 		});
+		// pages grow with their links, and a little with the zoom
 		const radius = (n: GraphNode) =>
-			n == options.current ? 6 : Math.min(2.5 + Math.sqrt(n.links), 7);
+			(n == options.current ? 6 : Math.min(3 + Math.sqrt(n.links) * 1.2, 10)) *
+			Math.min(Math.max(Math.sqrt(zoom), 0.7), 1.8);
 
 		const render = () => {
 			if (0 == width) return;
@@ -257,7 +286,11 @@ export default class Graph {
 				context.stroke();
 			}
 
-			const showAllLabels = nodes.length <= options.labelsUpTo || zoom >= 1.8;
+			// names fade in while zooming in, as in obsidian
+			const labelsAlpha =
+				nodes.length <= options.labelsUpTo
+					? 1
+					: Math.min(Math.max((zoom - 1.2) / 0.8, 0), 1);
 			for (const node of nodes) {
 				const point = toScreen(node);
 				const highlighted = node == options.current || node == hovered;
@@ -277,7 +310,12 @@ export default class Graph {
 					context.stroke();
 				}
 
-				if (showAllLabels || highlighted) {
+				// the hovered page names its neighbours too
+				const named =
+					highlighted || (undefined != hovered && neighbours.get(hovered).has(node));
+				const alpha = named ? 1 : labelsAlpha * (isNear(node) ? 1 : 0.3);
+				if (0 < alpha) {
+					context.globalAlpha = alpha;
 					context.font = `${highlighted ? 600 : 400} 10.5px ${font}`;
 					context.fillStyle = color("--graph-text");
 					context.textAlign = "center";
