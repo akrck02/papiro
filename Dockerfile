@@ -3,7 +3,7 @@
 
 FROM golang:1.24-alpine AS build
 RUN go install github.com/evanw/esbuild/cmd/esbuild@v0.25.8 \
-	&& go install github.com/akrck02/papiro-indexer@latest
+	&& GOPROXY=direct go install github.com/akrck02/papiro-indexer@main
 WORKDIR /papiro
 COPY . .
 RUN esbuild src/start.ts --bundle --minify --tsconfig=tsconfig.json --outfile=scripts/start.js
