@@ -16,7 +16,7 @@ jobs:
         run: ./bin/esbuild ./src/start.ts --bundle --minify --tsconfig=tsconfig.json --target=chrome90,firefox90,safari15,edge90 --outfile=./scripts/start.js
 
       - name: Remove innecesary files and directories
-        run: rm -rf docs design .gitignore styles/src src bin/lit bin/esbuild bin/install-ts.sh styles.env tsconfig.json .github README.md server-n-cache.py package-lock.json .git
+        run: rm -rf docs design resources/readme .gitignore styles/src src bin/lit bin/esbuild bin/install-ts.sh styles.env tsconfig.json .github README.md server-n-cache.py package-lock.json .git
 
       - name: Create directories
         run: mkdir -p styles/src
