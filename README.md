@@ -106,6 +106,17 @@ docs/*.md ──► papiro-indexer ──► resources/wiki/*.html + index.json 
 3. Papiro, a small TypeScript app built on GTD, loads that index and shows each page. Routing uses
    the URL hash, so any static host works.
 
+## 👀 Preview your documents
+
+Try papiro on a folder of Markdown or an Obsidian vault on your machine, nothing to install but
+python3 (and go outside linux x86-64):
+
+```bash
+./bin/preview.sh ~/notes/my-vault    # http://127.0.0.1:8000, Obsidian vaults are detected
+```
+
+Run it again after changing your documents.
+
 ## 🛠️ Developing
 
 Papiro needs no node to build: the binaries are in `bin`.
