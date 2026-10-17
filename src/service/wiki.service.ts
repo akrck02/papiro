@@ -9,8 +9,12 @@ import {
 import { IndexItem } from "../model/index.item.js";
 import PathService from "./path.service.js";
 
+/** Links between pages: wiki route -> linked wiki routes */
+export type WikiGraph = { [route: string]: string[] };
+
 export default class WikiService {
 	static index: IndexItem;
+	static graph: WikiGraph;
 
 	static render(markdown: string): string {
 		return Marked.parse(markdown);
@@ -24,6 +28,26 @@ export default class WikiService {
 		});
 		this.index = await response.json();
 		return this.index;
+	}
+
+	/**
+	 * Load the links between pages, an empty graph if the
+	 * wiki was indexed without them
+	 */
+	static async loadGraph(): Promise<WikiGraph> {
+		if (undefined != this.graph) return this.graph;
+
+		try {
+			const response = await httpGet({
+				url: PathService.getFullWikiResourcePath("graph.json"),
+				parameters: {},
+			});
+			this.graph = response.ok ? await response.json() : {};
+		} catch {
+			this.graph = {};
+		}
+
+		return this.graph;
 	}
 
 	static async getDocumentHTML(path: string): Promise<string> {
