@@ -1,5 +1,6 @@
 import Breadcrumb from "../component/breadcrumb.js";
 import Footer from "../component/footer.js";
+import LocalGraph from "../component/graph.js";
 import MarkdownCanvas from "../component/markdown.js";
 import IndexMenu from "../component/menu.js";
 import { BubbleUI } from "../lib/bubble.js";
@@ -36,7 +37,7 @@ export default class WikiView {
 
     const page = uiComponent({ classes: ["page"] });
     const article = uiComponent({ type: Html.Article });
-    const toc = uiComponent({ type: Html.Aside, classes: ["toc", "empty"] });
+    const toc = uiComponent({ type: Html.Aside, classes: ["toc"] });
     page.appendChild(article);
     page.appendChild(toc);
     view.appendChild(page);
@@ -52,6 +53,7 @@ export default class WikiView {
 
       WikiView.addPageMeta(canvas);
       WikiView.fillTableOfContents(toc, canvas, view);
+      WikiView.addLocalGraph(toc, route);
 
       const pager = WikiView.createPager(route);
       if (null != pager) article.appendChild(pager);
@@ -95,7 +97,6 @@ export default class WikiView {
     const headings = [...canvas.querySelectorAll("h2, h3")] as HTMLElement[];
     if (2 > headings.length) return;
 
-    toc.classList.remove("empty");
     toc.appendChild(uiComponent({ type: Html.P, text: "On this page" }));
     const list = uiComponent({ type: Html.Ul });
     toc.appendChild(list);
@@ -128,6 +129,21 @@ export default class WikiView {
     );
     headings.forEach((heading) => observer.observe(heading));
     links[0].classList.add("on");
+  }
+
+  /**
+   * Show the pages linked to and from this one
+   */
+  private static async addLocalGraph(aside: HTMLElement, route: string) {
+    const graph = await WikiService.loadGraph();
+    if ("" == route.trim()) {
+      const routes: string[] = [];
+      WikiView.collectRoutes(WikiService.index, "", routes);
+      route = routes[0] ?? "";
+    }
+
+    const localGraph = LocalGraph.create(route.toLowerCase(), graph);
+    if (undefined != localGraph) aside.appendChild(localGraph);
   }
 
   /**

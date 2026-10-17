@@ -81,10 +81,6 @@ view#wiki aside.toc {
 	display: none;
 }
 
-view#wiki aside.toc.empty {
-	visibility: hidden;
-}
-
 view#wiki aside.toc p {
 	font-size: 0.7rem;
 	letter-spacing: 0.08em;
@@ -117,4 +113,17 @@ view#wiki aside.toc a:hover {
 view#wiki aside.toc a.on {
 	color: var(--primary-color);
 	border-left-color: var(--primary-color);
+}
+
+/* local graph */
+view#wiki div.local-graph {
+	margin-top: 2rem;
+}
+
+view#wiki div.local-graph canvas {
+	display: block;
+	margin-top: 0.5rem;
+	border: 1px solid var(--line);
+	border-radius: var(--radius);
+	background: var(--surface-2);
 }
