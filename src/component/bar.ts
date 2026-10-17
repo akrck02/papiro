@@ -109,6 +109,14 @@ export default class TopBar {
 		});
 		iconBar.insertBefore(fontIconButton, themeIconButton);
 
+		const graphLink = uiComponent({
+			type: Html.A,
+			id: "graph-icon",
+			text: barIcon(MaterialIcons.Hub).outerHTML,
+			attributes: { href: `${PathService.getWebUrl()}#/graph`, title: "Graph" },
+		});
+		iconBar.insertBefore(graphLink, fontIconButton);
+
 		const showMenuIcon = barIcon(MaterialIcons.MenuOpen);
 		showMenuIcon.id = TopBar.MENU_ICON_ID;
 		iconBar.appendChild(showMenuIcon);

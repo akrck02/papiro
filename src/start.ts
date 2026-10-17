@@ -25,6 +25,7 @@ import WikiService from "./service/wiki.service.js";
 import HomeView from "./view/home.view.js";
 import NotFound from "./view/not.found.view.js";
 import WikiView from "./view/wiki.view.js";
+import GraphView from "./view/graph.view.js";
 
 let documentContainer: HTMLElement;
 
@@ -125,6 +126,8 @@ function setRoutes(parent: HTMLElement) {
 
 	setNotFoundRoute(NotFound.show);
 	setRoute("/wiki", WikiView.show);
+	// anchored: the router matches anywhere, a page could be called "graph"
+	setRoute("^/graph$", GraphView.show);
 	showRoute(window.location.hash.slice(1).toLowerCase(), parent);
 }
 

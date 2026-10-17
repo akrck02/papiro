@@ -1,0 +1,33 @@
+view#graph {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+}
+
+view#graph div.graph-header {
+	padding: 1.5rem 2rem 0.75rem 2rem;
+}
+
+view#graph div.graph-header h1 {
+	margin: 0;
+	font: 600 1.5rem var(--font-title);
+	color: var(--text-color);
+}
+
+view#graph div.graph-header p,
+view#graph p.graph-empty {
+	margin: 0.25rem 0 0 0;
+	font-size: 0.8rem;
+	color: var(--text-faint);
+}
+
+view#graph p.graph-empty {
+	padding: 0 2rem;
+}
+
+view#graph canvas {
+	display: block;
+	cursor: grab;
+}
