@@ -15,6 +15,17 @@
 
 <p><code>papiro.js</code> is an ES module with no dependencies.</p>
 
+<h3 id="from-typescript">From TypeScript</h3>
+
+<p><code>papiro-lib.tar.gz</code> in the release (or the <code>lib</code> branch) has <code>papiro.js</code>, <code>papiro.css</code> and the type declarations (<code>papiro.d.ts</code> and its folders). Copy them into your project, for example in <code>src/lib/papiro/</code>, and import them as any module:</p>
+<pre><code class="language-ts"><span class="kr">import</span> <span class="p">{</span> <span class="nx">createPapiro</span><span class="p">,</span> <span class="kr">type</span> <span class="nx">Papiro</span><span class="p">,</span> <span class="kr">type</span> <span class="nx">PapiroOptions</span> <span class="p">}</span> <span class="kr">from</span> <span class="s2">&#34;./lib/papiro/papiro.js&#34;</span><span class="p">;</span>
+
+<span class="kr">const</span> <span class="nx">options</span>: <span class="kt">PapiroOptions</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">source</span><span class="o">:</span> <span class="s2">&#34;/wiki&#34;</span><span class="p">,</span> <span class="nx">layout</span><span class="o">:</span> <span class="s2">&#34;page&#34;</span><span class="p">,</span> <span class="nx">route</span><span class="o">:</span> <span class="s2">&#34;guides/settings&#34;</span> <span class="p">};</span>
+<span class="kr">const</span> <span class="nx">help</span>: <span class="kt">Papiro</span> <span class="o">=</span> <span class="k">await</span> <span class="nx">createPapiro</span><span class="p">(</span><span class="s2">&#34;#help&#34;</span><span class="p">,</span> <span class="nx">options</span><span class="p">);</span>
+</code></pre>
+
+<p>Options, layouts, themes and targets are typed, so a wrong value is a compile error.</p>
+
 <h2 id="show-a-wiki">Show a wiki</h2>
 
 <p>The wiki is the folder written by the papiro indexer (<code>index.json</code>, the pages and their files). Give its url as <code>source</code>; the instance takes the whole element, so give the element a size.</p>
