@@ -8,26 +8,42 @@ import { uiComponent } from "../lib/dom.js";
  */
 export default class Content {
 	static create(papiro: Papiro, html: string): HTMLElement {
-		const content = uiComponent({ classes: ["papiro-content"], text: html });
-
-		content.querySelectorAll("a[href]").forEach((link) => Content.prepareLink(papiro, content, link as HTMLAnchorElement));
-		content.querySelectorAll("img[src]").forEach((image) => Content.prepareImage(papiro, image as HTMLImageElement));
-		content.querySelectorAll("blockquote").forEach((quote) => Content.prepareCallout(quote));
-		content.querySelectorAll("pre > code").forEach((code) => Content.prepareCode(code as HTMLElement));
-
+		// a template does not load anything: images are only requested once their
+		// address points to the wiki folder (WebKit loaded "./images/…" right away)
+		const template = document.createElement("template");
+		template.innerHTML = html;
+		const content = uiComponent({ classes: ["papiro-content"] });
+		Content.prepare(papiro, template.content);
+		content.appendChild(template.content);
+		Content.prepareSections(content);
 		return content;
 	}
 
+	private static prepare(papiro: Papiro, content: DocumentFragment) {
+
+		content.querySelectorAll("a[href]").forEach((link) => Content.prepareLink(papiro, link as HTMLAnchorElement));
+		content.querySelectorAll("img[src]").forEach((image) => Content.prepareImage(papiro, image as HTMLImageElement));
+		content.querySelectorAll("blockquote").forEach((quote) => Content.prepareCallout(quote));
+		content.querySelectorAll("pre > code").forEach((code) => Content.prepareCode(code as HTMLElement));
+	}
+
+	/** "#id" links scroll to their section inside the page */
+	private static prepareSections(content: HTMLElement) {
+		content.querySelectorAll("a[data-papiro-section]").forEach((link) => {
+			link.addEventListener("click", (event) => {
+				event.preventDefault();
+				const id = decodeURIComponent(link.getAttribute("href").substring(1));
+				content.querySelector(`[id="${CSS.escape(id)}"]`)?.scrollIntoView({ behavior: "smooth", block: "start" });
+			});
+		});
+	}
+
 	/** "./route" is a page, "./file.pdf" a file of the wiki, "#id" a section */
-	private static prepareLink(papiro: Papiro, content: HTMLElement, link: HTMLAnchorElement) {
+	private static prepareLink(papiro: Papiro, link: HTMLAnchorElement) {
 		const href = link.getAttribute("href");
 
 		if (href.startsWith("#") && !href.startsWith("#/")) {
-			link.addEventListener("click", (event) => {
-				event.preventDefault();
-				content.querySelector(`[id="${CSS.escape(decodeURIComponent(href.substring(1)))}"]`)
-					?.scrollIntoView({ behavior: "smooth", block: "start" });
-			});
+			link.setAttribute("data-papiro-section", "");
 			return;
 		}
 
