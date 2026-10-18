@@ -1,6 +1,8 @@
 <div align="center">
 
-# 📜 Papiro
+<img alt="" src="docs/images/logo.svg" width="120">
+
+# Papiro
 
 **Markdown documents as a quiet, readable web wiki.**
 Point it at a folder of Markdown (or an Obsidian vault) and it becomes a website with a menu,

@@ -15,8 +15,9 @@
 	--text-faint: #9a958a;
 	--line: #e4e0d6;
 
-	--primary-color: #23798c;
-	--primary-soft: #e2eff1;
+	/* papiro's ochre, from its logo: darker on paper so text reads (4.6:1 or more) */
+	--primary-color: #8f6212;
+	--primary-soft: #f8ecd2;
 	--warning-color: #c58a1c;
 	--mark-color: #fbeeb8;
 
@@ -50,8 +51,8 @@
 	--text-faint: #75716a;
 	--line: #2e2d2a;
 
-	--primary-color: #7fc3d2;
-	--primary-soft: #1f3338;
+	--primary-color: #e9b44c;
+	--primary-soft: #3a2f17;
 	--warning-color: #e0b04f;
 	--mark-color: #5a4d1c;
 

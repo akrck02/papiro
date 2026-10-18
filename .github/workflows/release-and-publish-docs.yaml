@@ -74,6 +74,7 @@ jobs:
       - uses: akrck02/papiro-deploy@main
         with:
           title: "Papiro"
+          logo: "./docs/images/logo.svg"
           description: "The simple markdown wiki."
           path: "docs"
           isObsidianProject: false
