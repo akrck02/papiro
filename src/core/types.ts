@@ -1,7 +1,7 @@
 /** Where a papiro instance is: its start page, a page of the wiki or the graph */
 export type PapiroTarget =
 	| { view: "home" }
-	| { view: "page"; route: string }
+	| { view: "page"; route: string; section?: string }
 	| { view: "graph" }
 	| { view: "not-found" };
 

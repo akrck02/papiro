@@ -4,6 +4,10 @@ import { IndexItem, ItemType, orderedKeys } from "../model/index.item.js";
 export type WikiGraph = { [route: string]: string[] };
 export type WikiColors = { [route: string]: string };
 
+/** What search.json holds for a page: its title, sections and text */
+export type SearchPage = { title: string; sections: { id: string; text: string }[]; text: string };
+export type SearchIndex = { [route: string]: SearchPage };
+
 /** A page found in the index */
 export type WikiEntry = { route: string; item: IndexItem; directory: boolean };
 
@@ -43,6 +47,11 @@ export class WikiData {
 
 	colors(): Promise<WikiColors> {
 		return this.optionalJson<WikiColors>("graph-colors.json");
+	}
+
+	/** the text of every page, empty for wikis indexed without it */
+	search(): Promise<SearchIndex> {
+		return this.optionalJson<SearchIndex>("search.json");
 	}
 
 	/** the page or folder of a route, "" is the first page */

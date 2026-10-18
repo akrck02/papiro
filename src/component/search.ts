@@ -2,7 +2,32 @@ import Papiro from "../core/papiro.js";
 import { icon } from "../core/icons.js";
 import { uiComponent } from "../lib/dom.js";
 import StringService from "../service/string.service.js";
+import { SearchIndex } from "../core/data.js";
 import { pageName } from "./names.js";
+
+type Result = {
+	route: string;
+	title: string;
+	score: number;
+	order?: number;
+	section?: { id: string; text: string };
+	snippet?: string;
+};
+
+/** lower case and without accents, to compare text */
+function normalise(text: string): string {
+	return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+/** some words around a match, the match marked */
+function snippetOf(text: string, at: number, length: number): string {
+	const start = Math.max(0, text.lastIndexOf(" ", Math.max(0, at - 50)));
+	const end = Math.min(text.length, at + length + 70);
+	const before = StringService.escape(text.substring(start, at)).trimStart();
+	const match = StringService.escape(text.substring(at, at + length));
+	const after = StringService.escape(text.substring(at + length, end));
+	return `${0 < start ? "…" : ""}${before}<mark>${match}</mark>${after}${end < text.length ? "…" : ""}`;
+}
 
 /**
  * Search palette: pages by name, arrows to move, Enter to open, Esc to close
@@ -13,6 +38,8 @@ export default class Search {
 	private readonly results: HTMLElement;
 	private items: { route: string; link: HTMLAnchorElement }[] = [];
 	private selected = 0;
+	private index: SearchIndex | undefined;
+	private loading = false;
 
 	constructor(private readonly papiro: Papiro) {
 		this.element = uiComponent({ classes: ["papiro-search", "hidden"] });
@@ -25,7 +52,7 @@ export default class Search {
 		const toolbar = uiComponent({ classes: ["papiro-search-toolbar"] });
 		this.input = uiComponent({
 			type: "input",
-			attributes: { placeholder: "Search pages…", "aria-label": "Search pages" },
+			attributes: { placeholder: "Search the docs…", "aria-label": "Search the docs" },
 		}) as HTMLInputElement;
 		toolbar.appendChild(this.input);
 
@@ -57,6 +84,14 @@ export default class Search {
 	}
 
 	open() {
+		if (undefined === this.index && !this.loading) {
+			this.loading = true;
+			this.papiro.data.search().then((index) => {
+				this.index = index;
+				// search again with what was typed meanwhile
+				if (!this.element.classList.contains("hidden")) this.search(this.input.value);
+			});
+		}
 		this.element.classList.remove("hidden");
 		this.input.value = "";
 		this.search("");
@@ -96,33 +131,71 @@ export default class Search {
 		this.results.replaceChildren();
 		this.items = [];
 
-		const routes = this.papiro.data.routes.filter(
-			(route) => "" == query.trim() || StringService.search(pageName(route), query),
-		);
-
-		if (0 == routes.length) {
+		const results = "" == query.trim() ? this.allPages() : this.find(query);
+		if (0 == results.length) {
 			this.results.appendChild(
-				uiComponent({
-					type: "p",
-					text: `No results for “${StringService.escape(query)}”.`,
-				}),
+				uiComponent({ type: "p", text: `No results for “${StringService.escape(query)}”.` }),
 			);
 			return;
 		}
 
-		for (const route of routes) {
-			const folders = route.split("/").slice(0, -1).map(pageName).join(" / ") || "Home";
+		for (const result of results.slice(0, Search.MAX_RESULTS)) {
+			const folders = result.route.split("/").slice(0, -1).map(pageName).join(" / ") || "Home";
+			const title = StringService.escape(result.title) + (result.section ? ` <i>› ${StringService.escape(result.section.text)}</i>` : "");
+			const snippet = result.snippet ? `<small>${result.snippet}</small>` : "";
 			const link = this.papiro.link(
-				{ view: "page", route: route },
-				`<b>${pageName(route)}</b><span>${folders}</span>`,
+				{ view: "page", route: result.route, section: result.section?.id },
+				`<b>${title}</b><span>${folders}</span>${snippet}`,
 			);
 			link.addEventListener("mouseenter", () => this.select(this.items.findIndex((i) => i.link == link)));
 			link.addEventListener("click", () => this.close());
-			this.items.push({ route, link });
+			this.items.push({ route: result.route, link });
 			this.results.appendChild(link);
 		}
 
 		this.select(0);
+	}
+
+	static readonly MAX_RESULTS = 40;
+
+	private allPages(): Result[] {
+		return this.papiro.data.routes.map((route) => ({ route, title: this.titleOf(route), score: 0 }));
+	}
+
+	/**
+	 * Pages whose name, title, sections or text have the query, best first:
+	 * the name, then the title, a section, and the text with a snippet
+	 */
+	private find(query: string): Result[] {
+		const needle = normalise(query.trim());
+		const results: Result[] = [];
+
+		this.papiro.data.routes.forEach((route, order) => {
+			const page = this.index?.[route];
+			const title = this.titleOf(route);
+
+			if (StringService.search(pageName(route), query)) {
+				results.push({ route, title, score: 400, order });
+				return;
+			}
+			if (normalise(title).includes(needle)) {
+				results.push({ route, title, score: 300, order });
+				return;
+			}
+
+			const sections = (page?.sections ?? []).filter((s) => normalise(s.text).includes(needle)).slice(0, 2);
+			sections.forEach((section) => results.push({ route, title, section, score: 200, order }));
+			if (0 < sections.length) return;
+
+			const at = page ? normalise(page.text).indexOf(needle) : -1;
+			if (-1 != at) results.push({ route, title, score: 100, order, snippet: snippetOf(page.text, at, needle.length) });
+		});
+
+		return results.sort((a, b) => b.score - a.score || a.order - b.order);
+	}
+
+	private titleOf(route: string): string {
+		return this.index?.[route]?.title || pageName(route);
 	}
 
 	/** one selection, shared by the keyboard and the mouse */
