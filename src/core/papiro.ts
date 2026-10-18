@@ -38,6 +38,7 @@ export default class Papiro {
 	private themeMode: PapiroTheme;
 	private cleanups: (() => void)[] = [];
 	private renderId = 0;
+	private pendingSection: { route: string; id: string } | null = null;
 
 	private constructor(element: HTMLElement, options: PapiroOptions) {
 		this.options = Papiro.resolve(options);
@@ -131,9 +132,12 @@ export default class Papiro {
 			const link = (event.target as HTMLElement).closest?.("a[data-papiro-target]");
 			if (null == link || !this.root.contains(link)) return;
 			if (event.ctrlKey || event.metaKey || event.shiftKey || 0 != event.button) return;
-			if (!this.router.intercepts) return;
+			const target: PapiroTarget = JSON.parse(link.getAttribute("data-papiro-target"));
+			// a section is not in the address, so papiro follows those links itself
+			const toSection = "page" == target.view && undefined != target.section;
+			if (!this.router.intercepts && !toSection) return;
 			event.preventDefault();
-			this.navigate(JSON.parse(link.getAttribute("data-papiro-target")));
+			this.navigate(target);
 		};
 		this.root.addEventListener("click", onClick);
 
@@ -147,6 +151,10 @@ export default class Papiro {
 	/** Go to a page ("" is the first one), the graph or the start page */
 	navigate(target: PapiroTarget | string) {
 		if ("string" == typeof target) target = { view: "page", route: target };
+
+		// the router keeps the page, papiro keeps the section until the page is shown
+		this.pendingSection =
+			"page" == target.view && target.section ? { route: target.route, id: target.section } : null;
 
 		// the graph layout only tells, the host app decides what to open
 		if ("graph" == this.options.layout && "page" == target.view) {
@@ -279,6 +287,13 @@ export default class Papiro {
 		if (id != this.renderId) return;
 		this.main.replaceChildren(container);
 		this.main.scrollTop = 0;
+		// a search result can open a page at one of its sections
+		const section =
+			"page" == target.view
+				? (target.section ?? (this.pendingSection?.route == target.route ? this.pendingSection.id : undefined))
+				: undefined;
+		this.pendingSection = null;
+		if (section) container.querySelector(`[id="${CSS.escape(section)}"]`)?.scrollIntoView({ block: "start" });
 		this.menu?.select("page" == target.view ? this.data.entry(target.route)?.route : null);
 		this.options.onNavigate?.(target);
 	}

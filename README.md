@@ -58,7 +58,7 @@ Commits made with AI carry a `Co-Authored-By: Claude` line.
 - A light and a dark theme, and a switch between the system font (the default) and papiro's serif reading fonts.
 - A menu that follows your folders, with the current page marked. Start a file or folder name with
   a number (`1-intro.md`, `2-guides/`) to choose its place; the number is not shown.
-- Search by page name from anywhere with `Ctrl K` (`Cmd K` on a Mac).
+- Search inside the pages from anywhere with `Ctrl K` (`Cmd K` on a Mac): titles, sections and text, with the words around each match; a section opens the page right there.
 - An "On this page" index, the reading time, and links to the previous and next page.
 - Code blocks with their language and a copy button, quotes and Obsidian callouts, images that
   zoom when clicked.

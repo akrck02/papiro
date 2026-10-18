@@ -85,6 +85,32 @@
 	color: var(--text-faint);
 }
 
+.papiro .papiro-search-results a b i {
+	font-style: normal;
+	font-weight: 400;
+	color: var(--text-soft);
+}
+
+/* the words around a match inside the page */
+.papiro .papiro-search-results a small {
+	display: block;
+	margin-top: 0.2rem;
+	font-size: 0.8rem;
+	line-height: 1.4;
+	color: var(--text-soft);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	display: -webkit-box;
+	-webkit-line-clamp: 2;
+	-webkit-box-orient: vertical;
+}
+
+.papiro .papiro-search-results a small mark {
+	background: var(--mark-color);
+	color: inherit;
+	border-radius: 0.2rem;
+}
+
 .papiro .papiro-search-results a.selected {
 	background: var(--primary-soft);
 }
