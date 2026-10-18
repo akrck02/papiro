@@ -36,7 +36,7 @@ export default class PageView {
 		try {
 			content = entry.directory
 				? PageView.folder(papiro, entry)
-				: Content.create(papiro, await papiro.data.html(entry));
+				: Content.create(papiro, await papiro.data.html(entry), entry.route.substring(0, entry.route.lastIndexOf("/")));
 		} catch {
 			NotFoundView.show(papiro, container);
 			page.remove();
