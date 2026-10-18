@@ -7,22 +7,27 @@ import { uiComponent } from "../lib/dom.js";
  * the instance router, images and files come from the wiki folder
  */
 export default class Content {
-	static create(papiro: Papiro, html: string): HTMLElement {
+	/**
+	 * @param folder the folder of the page in the wiki, relative addresses
+	 * that papiro-indexer did not resolve are taken from it
+	 */
+	static create(papiro: Papiro, html: string, folder: string = ""): HTMLElement {
 		// a template does not load anything: images are only requested once their
 		// address points to the wiki folder (WebKit loaded "./images/…" right away)
 		const template = document.createElement("template");
 		template.innerHTML = html;
 		const content = uiComponent({ classes: ["papiro-content"] });
-		Content.prepare(papiro, template.content);
+		Content.prepare(papiro, template.content, folder);
 		content.appendChild(template.content);
 		Content.prepareSections(content);
 		return content;
 	}
 
-	private static prepare(papiro: Papiro, content: DocumentFragment) {
+	private static prepare(papiro: Papiro, content: DocumentFragment, folder: string) {
 
 		content.querySelectorAll("a[href]").forEach((link) => Content.prepareLink(papiro, link as HTMLAnchorElement));
-		content.querySelectorAll("img[src]").forEach((image) => Content.prepareImage(papiro, image as HTMLImageElement));
+		content.querySelectorAll("img[src]").forEach((image) => Content.prepareImage(papiro, image as HTMLImageElement, folder));
+		content.querySelectorAll("source[srcset], img[srcset]").forEach((source) => Content.prepareSrcset(papiro, source, folder));
 		content.querySelectorAll("blockquote").forEach((quote) => Content.prepareCallout(quote));
 		content.querySelectorAll("pre > code").forEach((code) => Content.prepareCode(code as HTMLElement));
 	}
@@ -61,9 +66,30 @@ export default class Content {
 		link.removeAttribute("target");
 	}
 
-	private static prepareImage(papiro: Papiro, image: HTMLImageElement) {
-		const src = image.getAttribute("src");
-		if (src.startsWith("./")) image.src = papiro.data.url(src.substring(2));
+	/**
+	 * The address of a file of the wiki: "./x" comes from the root (papiro-indexer
+	 * resolved it), other relative addresses from the folder of the page.
+	 * Absolute addresses, data: and blob: urls are kept.
+	 */
+	private static fileUrl(papiro: Papiro, address: string, folder: string): string {
+		if (address.startsWith("./")) return papiro.data.url(address.substring(2));
+		if ("" == address || /^([a-z][a-z0-9+.-]*:|\/|#)/i.test(address)) return address;
+		return papiro.data.url("" == folder ? address : `${folder}/${address}`);
+	}
+
+	private static prepareSrcset(papiro: Papiro, element: Element, folder: string) {
+		const srcset = element.getAttribute("srcset")
+			.split(",")
+			.map((candidate) => {
+				const [address, ...descriptor] = candidate.trim().split(/\s+/);
+				return [Content.fileUrl(papiro, address, folder), ...descriptor].join(" ");
+			})
+			.join(", ");
+		element.setAttribute("srcset", srcset);
+	}
+
+	private static prepareImage(papiro: Papiro, image: HTMLImageElement, folder: string) {
+		image.src = Content.fileUrl(papiro, image.getAttribute("src"), folder);
 		image.loading = "lazy";
 		image.addEventListener("click", () => image.classList.toggle("zoomed"));
 	}
