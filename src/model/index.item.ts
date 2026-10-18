@@ -2,7 +2,7 @@ export class IndexItem {
 	type: number;
 	files: { [key: string]: IndexItem };
 	path: string;
-	/** position in its folder ("01-" prefix of its file), 0 when it has none */
+	/** position in its folder ("1-" prefix of its file), missing when it has none */
 	order?: number;
 }
 
@@ -11,7 +11,8 @@ export class IndexItem {
  * the numbered ones by their number, then the rest alphabetically
  */
 export function orderedKeys(item: IndexItem): string[] {
-	const position = (key: string) => item.files[key].order || Number.MAX_SAFE_INTEGER;
+	// 0 is a position (the first page), only a missing order goes last
+	const position = (key: string) => item.files[key].order ?? Number.MAX_SAFE_INTEGER;
 	return Object.keys(item.files ?? {}).sort(
 		(a, b) => position(a) - position(b) || a.localeCompare(b),
 	);
