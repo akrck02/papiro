@@ -19,6 +19,8 @@
 	flex: 1;
 	min-width: 0;
 	overflow: auto;
+	/* the end of the page does not scroll what is around papiro */
+	overscroll-behavior: contain;
 }
 
 .papiro .papiro-view {
@@ -114,6 +116,7 @@
 	height: 100%;
 	padding: 1.25rem 0.75rem;
 	overflow-y: auto;
+	overscroll-behavior: contain;
 	background: var(--surface-1);
 	border-right: 1px solid var(--line);
 }

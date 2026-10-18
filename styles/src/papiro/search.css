@@ -58,6 +58,7 @@
 	flex: 1;
 	padding: 0.5rem;
 	overflow-y: auto;
+	overscroll-behavior: contain;
 }
 
 .papiro .papiro-search-results p {
