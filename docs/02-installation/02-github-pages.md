@@ -52,3 +52,21 @@ jobs:
 ---
 
 > Congratulations 🎉🎉 <br> --- your wiki is now ready to visit in yourusername.github.io/your-project or your custom github domain ---
+
+## Publishing again with a new papiro
+---
+
+The workflow downloads the latest papiro each time it runs, so a wiki only gets a new papiro when it is published again. Add `workflow_dispatch:` under `on:` so it can be run without a push:
+
+```yaml
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+```
+
+Then any of these publishes the wikis again:
+
+- **By hand**, one wiki: *Actions → your docs workflow → Run workflow*.
+- **By hand**, every wiki of an owner: `./bin/republish-docs.sh <owner>` from papiro's repository, with `gh` logged in (`DRY_RUN=1` only lists them).
+- **On every papiro release**: papiro's release runs that script when it has a `DOCS_REPUBLISH_TOKEN` secret, a fine-grained token with *Actions: write* on the repositories of the wikis.

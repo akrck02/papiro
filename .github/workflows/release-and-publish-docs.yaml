@@ -40,7 +40,7 @@ jobs:
           git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" lib
 
       - name: Remove innecesary files and directories
-        run: rm -rf docs design examples dist styles-lib.env tsconfig.types.json resources/readme .gitignore styles/src src bin/lit bin/esbuild bin/install-ts.sh styles.env tsconfig.json .github README.md server-n-cache.py package-lock.json .git
+        run: rm -rf docs design examples dist styles-lib.env tsconfig.types.json resources/readme .gitignore styles/src src bin/lit bin/esbuild bin/install-ts.sh bin/republish-docs.sh styles.env tsconfig.json .github README.md server-n-cache.py package-lock.json .git
 
       - name: Create directories
         run: mkdir -p styles/src
@@ -86,3 +86,19 @@ jobs:
         with:
           branch: gh-pages # The branch the action should deploy to.
           folder: . # The folder the action should deploy.
+  # every wiki made with papiro-deploy is published again with this release
+  republish-docs:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - uses: actions/checkout@v5
+      - name: Publish again the wikis made with papiro
+        env:
+          GH_TOKEN: ${{ secrets.DOCS_REPUBLISH_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::notice::Add a DOCS_REPUBLISH_TOKEN secret (a fine-grained token with Actions: write on the repositories) to publish every wiki again after each release."
+            exit 0
+          fi
+          ./bin/republish-docs.sh "${{ github.repository_owner }}"
+
