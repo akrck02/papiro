@@ -81,6 +81,7 @@ await createPapiro("#map", {
 | `route` | `""` | first page with memory routing, `""` is the first page |
 | `title`, `description`, `logo` | | the wiki name, its description and an svg logo url |
 | `theme` | `auto` | `auto` follows the system, or `light`, `dark` |
+| `accent` | papiro's ochre | the project's colour (`"#2BB3A3"`), adjusted for each theme so text reads well |
 | `font` | `system` | `system`, or `papiro` for its reading fonts |
 | `bar`, `menu`, `search`, `graph`, `breadcrumb` | by layout | show or hide each part |
 | `startPage` | `false` | a start page with the title and description |
@@ -99,6 +100,8 @@ docs.destroy();                    // removes it and stops listening
 ```
 
 ## Colours and fonts
+
+The simplest way to give papiro the colour of a project is the `accent` option: one colour, and papiro works out a variant that reads at 4.5:1 or more on the light and the dark theme, and the soft tint of highlights.
 
 Every style lives under the `.papiro` class, and it uses css variables that the app can change, for each theme:
 

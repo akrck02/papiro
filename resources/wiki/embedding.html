@@ -144,6 +144,12 @@
 </tr>
 
 <tr>
+<td><code>accent</code></td>
+<td>papiro&rsquo;s ochre</td>
+<td>the project&rsquo;s colour (<code>&quot;#2BB3A3&quot;</code>), adjusted for each theme so text reads well</td>
+</tr>
+
+<tr>
 <td><code>font</code></td>
 <td><code>system</code></td>
 <td><code>system</code>, or <code>papiro</code> for its reading fonts</td>
@@ -190,6 +196,8 @@
 </span></code></pre>
 
 <h2 id="colours-and-fonts">Colours and fonts</h2>
+
+<p>The simplest way to give papiro the colour of a project is the <code>accent</code> option: one colour, and papiro works out a variant that reads at 4.5:1 or more on the light and the dark theme, and the soft tint of highlights.</p>
 
 <p>Every style lives under the <code>.papiro</code> class, and it uses css variables that the app can change, for each theme:</p>
 <pre><code class="language-css"><span class="p">.</span><span class="nc">papiro</span><span class="o">[</span><span class="nt">data-theme</span><span class="o">=</span><span class="s2">&#34;light&#34;</span><span class="o">]</span> <span class="p">{</span> <span class="nv">--primary-color</span><span class="p">:</span> <span class="mh">#2f6fd6</span><span class="p">;</span> <span class="p">}</span>
