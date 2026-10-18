@@ -36,6 +36,7 @@ window.addEventListener("load", async () => {
 		breadcrumb: false != config.show_breadcrumb,
 		footer: true == config.show_footer,
 		theme: saved.theme ?? "auto",
+		accent: config.accent ?? "",
 		font: saved.font ?? "system",
 		shortcuts: true,
 		onThemeChange: (theme) => remember({ theme }),

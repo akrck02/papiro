@@ -34,6 +34,11 @@ export interface PapiroOptions {
 	/** url of an svg logo */
 	logo?: string;
 	theme?: PapiroTheme;
+	/**
+	 * the project's colour as hex ("#2BB3A3"): links, the marked page and
+	 * highlights, adjusted for each theme so text reads well; papiro's ochre by default
+	 */
+	accent?: string;
 	font?: PapiroFont;
 
 	bar?: boolean;

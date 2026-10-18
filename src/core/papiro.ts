@@ -6,6 +6,7 @@ import GraphView from "../view/graph.view.js";
 import HomeView from "../view/home.view.js";
 import NotFoundView from "../view/not.found.view.js";
 import PageView from "../view/page.view.js";
+import { accentFor } from "./colors.js";
 import { WikiData } from "./data.js";
 import { HashRouter, MemoryRouter, Router } from "./router.js";
 import {
@@ -74,6 +75,7 @@ export default class Papiro {
 			description: options.description ?? "",
 			logo: options.logo ?? "",
 			theme: options.theme ?? "auto",
+			accent: options.accent ?? "",
 			font: options.font ?? "system",
 			bar: options.bar ?? wiki,
 			menu: options.menu ?? wiki,
@@ -205,8 +207,17 @@ export default class Papiro {
 			"dark" == theme ||
 			("auto" == theme && matchMedia("(prefers-color-scheme: dark)").matches);
 		this.root.dataset.theme = dark ? "dark" : "light";
+		this.applyAccent(dark);
 		this.root.dispatchEvent(new CustomEvent(THEME_EVENT));
 		if (notify) this.options.onThemeChange?.(theme);
+	}
+
+	/** the project's accent, in the variant of the theme */
+	private applyAccent(dark: boolean) {
+		const colours = "" == this.options.accent ? null : accentFor(this.options.accent, dark);
+		if (null == colours) return;
+		this.root.style.setProperty("--primary-color", colours.primary);
+		this.root.style.setProperty("--primary-soft", colours.soft);
 	}
 
 	toggleTheme() {
