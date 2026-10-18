@@ -28,7 +28,7 @@ Commits made with AI carry a `Co-Authored-By: Claude` line.
 <p align="center">
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="resources/readme/hero-dark.png">
-  <img alt="A papiro wiki: the menu on the left with the current page marked, a lesson in a serif reading column, and the sections of the page on the right" src="resources/readme/hero-light.png" width="720">
+  <img alt="Papiro's own docs: the menu on the left with the current page marked, the embedding guide in the reading column, its sections and its linked pages on the right" src="resources/readme/hero-light.png" width="720">
 </picture>
 </p>
 
@@ -43,13 +43,13 @@ Commits made with AI carry a `Co-Authored-By: Claude` line.
 <td>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="resources/readme/search-dark.png">
-  <img alt="The search palette open over a page, with matching pages and the folder of each" src="resources/readme/search-light.png">
+  <img alt="The search palette open over a page, with the matching pages of papiro's docs and the folder of each" src="resources/readme/search-light.png">
 </picture>
 </td>
 <td>
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="resources/readme/mobile-dark.png">
-  <img alt="A page on a phone, with the bar at the bottom" src="resources/readme/mobile-light.png">
+  <img alt="Papiro's local testing guide on a phone, with the bar at the bottom" src="resources/readme/mobile-light.png">
 </picture>
 </td>
 </tr>
