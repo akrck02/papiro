@@ -1,11 +1,5 @@
-/* The papiro website: the library over the whole page */
 @import url("./papiro.css");
 
-/*
- * The page itself never scrolls, only papiro's areas do. On iOS a scroll
- * that reached the end of an area went on to the page and moved the whole
- * wiki up, hiding the bar and leaving an empty band at the bottom.
- */
 html,
 body {
 	height: 100%;
@@ -15,7 +9,6 @@ body {
 }
 
 body {
-	/* the visible height on phones and tablets, whose browser bars come and go */
 	height: 100dvh;
 	background: #f7f5f0;
 }
