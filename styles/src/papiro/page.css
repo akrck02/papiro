@@ -4,6 +4,8 @@
 	justify-content: start;
 	gap: 3rem;
 	max-width: 68.75rem;
+	/* centred in the reading area, so wide screens do not leave it at the left */
+	margin: 0 auto;
 	padding: 2.5rem 3rem 3rem 3rem;
 }
 
