@@ -100,5 +100,16 @@ jobs:
             echo "::notice::Add a DOCS_REPUBLISH_TOKEN secret (a fine-grained token with Actions: write on the repositories) to publish every wiki again after each release."
             exit 0
           fi
+          # the wikis download papiro from the public address of the latest release,
+          # which can serve the previous one for a while after it is created again:
+          # wait until it gives the release this run published
+          gh release download latest -R "${{ github.repository }}" -p papiro-latest.tar.gz -O published.tar.gz
+          url="https://github.com/${{ github.repository }}/releases/download/latest/papiro-latest.tar.gz"
+          for attempt in $(seq 1 30); do
+            curl -sSfL -o public.tar.gz "$url" && cmp -s public.tar.gz published.tar.gz && break
+            echo "the public address still serves the previous release, waiting ($attempt)"
+            sleep 20
+          done
+          cmp -s public.tar.gz published.tar.gz || { echo "::warning::the latest release was not served after 10 minutes, the wikis were not published again"; exit 0; }
           ./bin/republish-docs.sh "${{ github.repository_owner }}"
 
