@@ -14,6 +14,7 @@ export type {
 	PapiroOptions,
 	PapiroTarget,
 	PapiroTheme,
+	PapiroWidth,
 } from "./core/types.js";
 
 /**

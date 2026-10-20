@@ -1,4 +1,4 @@
-import Papiro, { THEME_EVENT } from "../core/papiro.js";
+import Papiro, { THEME_EVENT, WIDTH_EVENT } from "../core/papiro.js";
 import { icon } from "../core/icons.js";
 import { uiComponent } from "../lib/dom.js";
 
@@ -33,6 +33,19 @@ export default class Bar {
 			graph.title = "Graph";
 			buttons.appendChild(graph);
 		}
+
+		// wide or short pages, only where there is room for both
+		const width = Bar.button("", "", () => papiro.toggleWidth());
+		width.classList.add("papiro-wide-only");
+		const updateWidth = () => {
+			const wide = "wide" == papiro.width;
+			width.innerHTML = icon(wide ? "width_normal" : "width_wide");
+			width.title = wide ? "Short pages" : "Wide pages";
+			width.setAttribute("aria-label", width.title);
+		};
+		updateWidth();
+		papiro.root.addEventListener(WIDTH_EVENT, updateWidth);
+		buttons.appendChild(width);
 
 		const font = Bar.button(icon("text_fields"), "Switch font", () => papiro.toggleFont());
 		buttons.appendChild(font);

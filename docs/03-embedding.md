@@ -83,6 +83,7 @@ await createPapiro("#map", {
 | `theme` | `auto` | `auto` follows the system, or `light`, `dark` |
 | `accent` | papiro's ochre | the project's colour (`"#2BB3A3"`), adjusted for each theme so text reads well |
 | `font` | `system` | `system`, or `papiro` for its reading fonts |
+| `width` | `normal` | `normal` keeps a reading column, `wide` lets the pages take the whole width; readers switch it from the bar |
 | `bar`, `menu`, `search`, `graph`, `breadcrumb` | by layout | show or hide each part |
 | `startPage` | `false` | a start page with the title and description |
 | `footer` | `false` | `true` for the papiro credits, or html |

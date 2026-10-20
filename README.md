@@ -56,6 +56,7 @@ Commits made with AI carry a `Co-Authored-By: Claude` line.
 </table>
 
 - A light and a dark theme, and a switch between the system font (the default) and papiro's serif reading fonts.
+- Short pages with a reading column, or wide pages that take the whole screen, switched from the bar.
 - A menu that follows your folders, with the current page marked. Start a file or folder name with
   a number (`1-intro.md`, `2-guides/`) to choose its place; the number is not shown.
 - Search inside the pages from anywhere with `Ctrl K` (`Cmd K` on a Mac): titles, sections and text, with the words around each match; a section opens the page right there.
