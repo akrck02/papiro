@@ -7,6 +7,8 @@ export type PapiroTarget =
 
 export type PapiroTheme = "auto" | "light" | "dark";
 export type PapiroFont = "system" | "papiro";
+/** normal keeps a reading column, wide lets the pages take the whole width */
+export type PapiroWidth = "normal" | "wide";
 
 /**
  * What an instance shows:
@@ -40,6 +42,7 @@ export interface PapiroOptions {
 	 */
 	accent?: string;
 	font?: PapiroFont;
+	width?: PapiroWidth;
 
 	bar?: boolean;
 	menu?: boolean;
@@ -55,9 +58,10 @@ export interface PapiroOptions {
 	onNavigate?: (target: PapiroTarget) => void;
 	onThemeChange?: (theme: PapiroTheme) => void;
 	onFontChange?: (font: PapiroFont) => void;
+	onWidthChange?: (width: PapiroWidth) => void;
 }
 
 export type ResolvedOptions = Required<
-	Omit<PapiroOptions, "onNavigate" | "onThemeChange" | "onFontChange">
+	Omit<PapiroOptions, "onNavigate" | "onThemeChange" | "onFontChange" | "onWidthChange">
 > &
-	Pick<PapiroOptions, "onNavigate" | "onThemeChange" | "onFontChange">;
+	Pick<PapiroOptions, "onNavigate" | "onThemeChange" | "onFontChange" | "onWidthChange">;

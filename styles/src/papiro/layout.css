@@ -210,6 +210,11 @@
 		display: grid;
 	}
 
+	/* phones have no room for two widths */
+	.papiro .papiro-wide-only {
+		display: none;
+	}
+
 	.papiro .papiro-menu {
 		position: absolute;
 		z-index: 9;

@@ -13,6 +13,12 @@
 	min-width: 0;
 }
 
+/* wide mode: the text takes the whole reading area, next to the side column */
+.papiro[data-width="wide"] .papiro-page {
+	grid-template-columns: minmax(0, 1fr) 13.75rem;
+	max-width: none;
+}
+
 /* the page layout (help inside an app) has no side column */
 .papiro[data-layout="page"] .papiro-page {
 	grid-template-columns: minmax(0, 1fr);
@@ -179,7 +185,8 @@
 
 /* no room for the side column next to the text */
 @container papiro-main (max-width: 960px) {
-	.papiro .papiro-page {
+	.papiro .papiro-page,
+	.papiro[data-width="wide"] .papiro-page {
 		grid-template-columns: minmax(0, 42.5rem);
 	}
 

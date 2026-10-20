@@ -14,12 +14,14 @@ import {
 	PapiroOptions,
 	PapiroTarget,
 	PapiroTheme,
+	PapiroWidth,
 	ResolvedOptions,
 } from "./types.js";
 
 /** Width of the reading area under which the side column is hidden, as the css */
 const SIDE_COLUMN_WIDTH = 960;
 export const THEME_EVENT = "papiro-theme";
+export const WIDTH_EVENT = "papiro-width";
 
 /**
  * A papiro wiki inside an element of the page.
@@ -78,6 +80,7 @@ export default class Papiro {
 			theme: options.theme ?? "auto",
 			accent: options.accent ?? "",
 			font: options.font ?? "system",
+			width: options.width ?? "normal",
 			bar: options.bar ?? wiki,
 			menu: options.menu ?? wiki,
 			search: options.search ?? wiki,
@@ -89,6 +92,7 @@ export default class Papiro {
 			onNavigate: options.onNavigate,
 			onThemeChange: options.onThemeChange,
 			onFontChange: options.onFontChange,
+			onWidthChange: options.onWidthChange,
 		};
 	}
 
@@ -103,6 +107,7 @@ export default class Papiro {
 		this.root.dataset.layout = this.options.layout;
 		this.setTheme(this.options.theme, false);
 		this.setFont(this.options.font, false);
+		this.setWidth(this.options.width, false);
 
 		const shell = uiComponent({ classes: ["papiro-shell"] });
 		this.root.appendChild(shell);
@@ -240,6 +245,21 @@ export default class Papiro {
 
 	toggleFont() {
 		this.setFont("system" == this.font ? "papiro" : "system");
+	}
+
+	get width(): PapiroWidth {
+		return this.root.dataset.width as PapiroWidth;
+	}
+
+	/** normal keeps a reading column, wide lets the pages take the whole width */
+	setWidth(width: PapiroWidth, notify: boolean = true) {
+		this.root.dataset.width = width;
+		this.root.dispatchEvent(new CustomEvent(WIDTH_EVENT));
+		if (notify) this.options.onWidthChange?.(width);
+	}
+
+	toggleWidth() {
+		this.setWidth("wide" == this.width ? "normal" : "wide");
 	}
 
 	/** papiro's reading fonts, loaded once and only when chosen */

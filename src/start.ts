@@ -3,11 +3,11 @@
  * gtdf.config.json (written by papiro-deploy) and remembering the
  * theme and the font of the reader.
  */
-import { createPapiro, PapiroFont, PapiroTheme } from "./papiro.js";
+import { createPapiro, PapiroFont, PapiroTheme, PapiroWidth } from "./papiro.js";
 
 const PREFERENCES = "papiro-preferences";
 
-type Preferences = { theme?: PapiroTheme; font?: PapiroFont };
+type Preferences = { theme?: PapiroTheme; font?: PapiroFont; width?: PapiroWidth };
 
 function preferences(): Preferences {
 	try {
@@ -38,8 +38,10 @@ window.addEventListener("load", async () => {
 		theme: saved.theme ?? "auto",
 		accent: config.accent ?? "",
 		font: saved.font ?? "system",
+		width: saved.width ?? config.width ?? "normal",
 		shortcuts: true,
 		onThemeChange: (theme) => remember({ theme }),
 		onFontChange: (font) => remember({ font }),
+		onWidthChange: (width) => remember({ width }),
 	});
 });
